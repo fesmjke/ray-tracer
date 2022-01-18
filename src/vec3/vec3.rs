@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Debug)]
+#[derive(Debug,Copy,Clone)]
 pub struct Vec3{
     e : [f32;3]
 }
@@ -31,6 +31,10 @@ impl Vec3 {
         self.e[2]
     }
 
+    pub fn r(self) -> f32 {self.e[0]}
+    pub fn g(self) -> f32 {self.e[1]}
+    pub fn b(self) -> f32 {self.e[2]}
+
     pub fn dot(vec_f : &Vec3,vec_s : &Vec3) -> f32 {
         vec_f.e[0] * vec_s.e[0] + vec_f.e[1] * vec_s.e[1] + vec_f.e[2] * vec_s.e[2]
     }
@@ -45,6 +49,10 @@ impl Vec3 {
 
     pub fn length(self) -> f32 {
         (self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]).sqrt()
+    }
+
+    pub fn unit_vector(v : &Vec3) -> Vec3{
+        *v / v.length()
     }
 }
 
@@ -211,5 +219,13 @@ mod tests {
         let cross = Vec3::cross_product(&v1,&v2);
 
         assert_eq!(cross,Vec3{e : [-43f32,13f32,1f32]});
+    }
+    #[test]
+    fn unit_vec(){
+        let v1 = Vec3{e : [1f32,3f32,4f32]};
+
+        let unit = Vec3::unit_vector(&v1);
+
+        assert_eq!(unit,Vec3{e : [0.19611613, 0.5883484, 0.78446454]});
     }
 }
