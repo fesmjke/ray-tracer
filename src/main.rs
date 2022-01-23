@@ -23,7 +23,7 @@ fn main() {
             let ig = (255.999 * g) as i32;
             let ib = (255.999 * b) as i32;
 
-            let pixel_color = vec3::vec3::Vec3::new(ir as f32,ig as f32,ib as f32);
+            let pixel_color = vec3::vec3::Color::new(ir as f32,ig as f32,ib as f32);
 
             color::write_color(&mut out,pixel_color);
         }
