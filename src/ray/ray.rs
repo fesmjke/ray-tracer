@@ -1,7 +1,7 @@
 use crate::vec3::vec3::{Point3,Vec3};
 
 #[derive(PartialEq,Debug)]
-struct Ray{
+pub struct Ray{
     origin : Point3,
     direction : Vec3
 }
