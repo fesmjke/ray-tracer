@@ -4,8 +4,11 @@ mod vec3;
 mod color;
 
 fn main() {
-    let image_width = 256;
-    let image_height = 256;
+
+    // Image settings
+    let aspect_ratio = 16.0 / 9.0;
+    let image_width = 400;
+    let image_height = (image_width/aspect_ratio) as i32;
 
     println!("P3\n {} {}\n255\n",image_width,image_height);
 
