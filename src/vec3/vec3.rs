@@ -1,4 +1,5 @@
 use std::ops;
+use std::process::Output;
 
 #[derive(Debug,Copy,Clone)]
 pub struct Vec3{
@@ -115,6 +116,16 @@ impl ops::Mul<f32> for Vec3{
             e : [self.e[0] * _rhs,
                  self.e[1] * _rhs,
                  self.e[2] * _rhs]
+        }
+    }
+}
+
+impl ops::Mul<Vec3> for f32{
+    type Output = Vec3;
+
+    fn mul(self, _rhs: Vec3) -> Self::Output {
+        Vec3 {
+            e : [_rhs.e[0] * self,_rhs.e[1] * self,_rhs.e[2] * self]
         }
     }
 }
