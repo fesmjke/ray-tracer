@@ -1,5 +1,4 @@
 use std::ops;
-use std::process::Output;
 
 #[derive(Debug,Copy,Clone)]
 pub struct Vec3{
