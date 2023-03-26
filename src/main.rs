@@ -52,6 +52,6 @@ fn main() {
 
             color::write_color(&mut out, pixel_color);
         }
-        io::stderr().write(b"\nDone.\n");
     }
+    io::stderr().write(b"\nDone.\n");
 }
