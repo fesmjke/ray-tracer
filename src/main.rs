@@ -6,6 +6,8 @@ use std::io::{self, Write};
 mod color;
 mod ray;
 mod vec3;
+mod hit;
+mod objects;
 
 fn main() {
     // Image settings
