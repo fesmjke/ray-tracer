@@ -1,6 +1,6 @@
 use crate::color::ray_color;
-use crate::ray::ray::Ray;
-use crate::vec3::vec3::{Color, Point3, Vec3};
+use crate::ray::Ray;
+use crate::vec3::{Color, Point3, Vec3};
 use std::io::{self, Write};
 
 mod color;
@@ -15,7 +15,7 @@ fn main() {
 
     // Camera settings
 
-    let viewport_height = 2.0 as f32;
+    let viewport_height = 2.0f32;
     let viewport_width = aspect_ratio * viewport_height;
     let focal_length = 1.0;
 
@@ -27,12 +27,14 @@ fn main() {
 
     println!("P3\n {} {}\n255\n", image_width, image_height);
 
-    let mut out = io::stdout();
+    // different streams
+    let mut out = io::stdout(); // write a image data
+    let mut outerr = io::stderr(); // write a indicator of execution
 
     for j in (0..image_height).rev() {
         let indicator = format!("\rScan lines remaining: {} ", j);
-        io::stderr().write(indicator.as_bytes());
-        out.flush();
+        outerr.write(indicator.as_bytes()).expect("Unable to write indicator data to stderr");
+        out.flush().expect("Unable to flush stdout");
         for i in 0..image_width {
             let u = i as f32 / (image_width) as f32;
             let v = j as f32 / (image_height) as f32;
@@ -53,5 +55,5 @@ fn main() {
             color::write_color(&mut out, pixel_color);
         }
     }
-    io::stderr().write(b"\nDone.\n");
+    outerr.write(b"\nDone.\n").expect("Unable to write to stderr");
 }
