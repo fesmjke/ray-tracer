@@ -1,7 +1,7 @@
 use std::io::{Stdout, Write};
 
-use crate::ray::ray::Ray;
-use crate::vec3::vec3::{Color, Point3, Vec3};
+use crate::ray::Ray;
+use crate::vec3::{Color, Point3, Vec3};
 
 pub fn hit_sphere(center: &Point3, radius: f32, ray: &Ray) -> f32 {
     let oc: Vec3 = ray.origin() - *center;
@@ -25,7 +25,7 @@ pub fn write_color(out: &mut Stdout, pixel_color: Color) {
         pixel_color.b()
     );
 
-    out.write(buf.as_bytes());
+    out.write(buf.as_bytes()).expect("Unable to write color data!");
 }
 
 pub fn ray_color(ray: &Ray) -> Color {
