@@ -28,7 +28,7 @@ impl Ray {
 }
 
 #[cfg(test)]
-mod tests {
+mod ray_tests {
     use super::*;
 
     #[test]

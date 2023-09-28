@@ -155,8 +155,9 @@ pub type Color = Vec3;
 pub type Point3 = Vec3;
 
 #[cfg(test)]
-mod tests {
+mod vector_tests {
     use super::*;
+
     #[test]
     fn eq_two_vectors() {
         let v1 = Vec3 {
@@ -168,6 +169,7 @@ mod tests {
 
         assert_eq!(v1, v2, "testing that two vec3 are equal");
     }
+
     #[test]
     fn add_two_vectors() {
         let v1 = Vec3 {
@@ -187,6 +189,7 @@ mod tests {
             "testing addition of two vectors"
         );
     }
+
     #[test]
     fn sub_two_vectors() {
         let v1 = Vec3 {
@@ -205,6 +208,7 @@ mod tests {
             }
         );
     }
+
     #[test]
     fn mul_two_vectors() {
         let v1 = Vec3 {
@@ -223,6 +227,7 @@ mod tests {
             }
         );
     }
+
     #[test]
     fn mul_vector_by_value() {
         let v1 = Vec3 {
@@ -238,6 +243,7 @@ mod tests {
             }
         );
     }
+
     #[test]
     fn div_vector_by_value() {
         let v1 = Vec3 {
@@ -253,6 +259,7 @@ mod tests {
             }
         )
     }
+
     #[test]
     fn empty_vector() {
         let v1 = Vec3::empty_new();
@@ -264,6 +271,7 @@ mod tests {
             }
         );
     }
+
     #[test]
     fn negative_vec() {
         let v1 = Vec3::new(1f32, 2f32, 3f32);
@@ -274,6 +282,7 @@ mod tests {
             }
         )
     }
+
     #[test]
     fn vector_dot() {
         let v1 = Vec3 {
@@ -287,6 +296,7 @@ mod tests {
 
         assert_eq!(dot, 44f32);
     }
+
     #[test]
     fn vector_length() {
         let v1 = Vec3 {
@@ -297,6 +307,7 @@ mod tests {
 
         assert_eq!(length, 5.0)
     }
+
     #[test]
     fn cross_product_of_two_vectors() {
         let v1 = Vec3 {
@@ -315,6 +326,7 @@ mod tests {
             }
         );
     }
+
     #[test]
     fn unit_vec() {
         let v1 = Vec3 {
