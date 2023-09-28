@@ -1,4 +1,4 @@
-use crate::vec3::vec3::{Point3, Vec3};
+use crate::vec3::{Point3, Vec3};
 
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub struct Ray {
