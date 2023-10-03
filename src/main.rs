@@ -1,18 +1,20 @@
-use crate::color::ray_color;
+use crate::color::world_color;
+use crate::hit::HittableList;
+use crate::objects::sphere::Sphere;
 use crate::ray::Ray;
 use crate::vec3::{Color, Point3, Vec3};
 use std::io::{self, Write};
 
 mod color;
-mod ray;
-mod vec3;
 mod hit;
 mod objects;
+mod ray;
+mod vec3;
 
 fn main() {
     // Image settings
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
+    let image_width = 512;
     let image_height = (image_width as f32 / aspect_ratio) as i32;
 
     // Camera settings
@@ -27,6 +29,13 @@ fn main() {
     let lower_left_corner =
         origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0f32, 0f32, focal_length);
 
+    let mut world = HittableList::new();
+    let first_sphere = Box::new(Sphere::from(Vec3::new(0f32, 0f32, -1f32), 0.5));
+    let second_sphere = Box::new(Sphere::from(Vec3::new(0f32, -100.5f32, -1f32), 100.0));
+
+    world.attach(first_sphere);
+    world.attach(second_sphere);
+
     println!("P3\n {} {}\n255\n", image_width, image_height);
 
     // different streams
@@ -35,7 +44,9 @@ fn main() {
 
     for j in (0..image_height).rev() {
         let indicator = format!("\rScan lines remaining: {} ", j);
-        outerr.write(indicator.as_bytes()).expect("Unable to write indicator data to stderr");
+        outerr
+            .write(indicator.as_bytes())
+            .expect("Unable to write indicator data to stderr");
         out.flush().expect("Unable to flush stdout");
         for i in 0..image_width {
             let u = i as f32 / (image_width) as f32;
@@ -45,8 +56,7 @@ fn main() {
                 origin,
                 lower_left_corner + u * horizontal + v * vertical - origin,
             );
-
-            let fallen_color = ray_color(&ray);
+            let fallen_color = world_color(&ray, &world);
 
             let ir = (255.999 * fallen_color.r()) as i32;
             let ig = (255.999 * fallen_color.g()) as i32;
@@ -57,5 +67,7 @@ fn main() {
             color::write_color(&mut out, pixel_color);
         }
     }
-    outerr.write(b"\nDone.\n").expect("Unable to write to stderr");
+    outerr
+        .write(b"\nDone.\n")
+        .expect("Unable to write to stderr");
 }
