@@ -27,19 +27,19 @@ impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit: &mut Hit) -> bool {
         let oc: Vec3 = ray.origin() - self.center;
         let a = Vec3::dot(&ray.direction(), &ray.direction());
-        let b = 2.0 * Vec3::dot(&oc, &ray.direction());
+        let b = Vec3::dot(&oc, &ray.direction());
         let c = Vec3::dot(&oc, &oc) - (self.radius * self.radius);
-        let discriminant = b * b - 4.0 * a * c;
+        let discriminant = b * b - a * c;
 
         if discriminant > 0.0 {
-            let mut temp = (-b - (b*b - a*c).sqrt()) / a;
+            let mut temp = (-b - discriminant.sqrt()) / a;
             if temp < t_max && temp > t_min {
                 hit.t = temp;
                 hit.p = ray.at(hit.t);
                 hit.normal = (hit.p - self.center) / self.radius;
                 return true;
             }
-            temp = (-b + (b*b - a*c).sqrt()) / a;
+            temp = (-b + discriminant.sqrt()) / a;
             if temp < t_max && temp > t_min {
                 hit.t = temp;
                 hit.p = ray.at(hit.t);
