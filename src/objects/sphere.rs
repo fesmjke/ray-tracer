@@ -45,7 +45,8 @@ impl Hittable for Sphere {
 
         hit.t = root;
         hit.p = ray.at(hit.t);
-        hit.normal = (hit.p - self.center) / self.radius;
+        let outward_normal = (hit.p - self.center) / self.radius;
+        hit.set_front_face(ray, &outward_normal);
 
         true
     }
