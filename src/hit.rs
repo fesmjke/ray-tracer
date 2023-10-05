@@ -10,6 +10,7 @@ pub struct Hit {
     pub t: f32,
     pub p: Vec3,
     pub normal: Vec3,
+    pub front_face: bool,
 }
 
 impl Hit {
@@ -18,6 +19,7 @@ impl Hit {
             t: 0.0,
             p: Vec3::empty_new(),
             normal: Vec3::empty_new(),
+            front_face: false,
         }
     }
 
@@ -25,6 +27,21 @@ impl Hit {
         self.p = hit.p;
         self.normal = hit.normal;
         self.t = hit.t;
+        self.front_face = hit.front_face;
+    }
+
+    pub fn set_front_face(&mut self, ray: &Ray, outward_normal: &Vec3) {
+        self.front_face = if Vec3::dot(&ray.direction(), outward_normal) < 0.0 {
+            true
+        } else {
+            false
+        };
+
+        self.normal = if self.front_face {
+            outward_normal.clone()
+        } else {
+            -outward_normal.clone()
+        }
     }
 }
 
