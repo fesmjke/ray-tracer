@@ -4,22 +4,19 @@ use crate::vec3::Vec3;
 
 pub struct Sphere {
     center: Vec3,
-    radius: f32
+    radius: f32,
 }
 
 impl Sphere {
     pub fn new() -> Self {
         Self {
             center: Vec3::empty_new(),
-            radius: 0.0f32
+            radius: 0.0f32,
         }
     }
 
-    pub fn from(center : Vec3, radius: f32) -> Self {
-        Self {
-            center,
-            radius
-        }
+    pub fn from(center: Vec3, radius: f32) -> Self {
+        Self { center, radius }
     }
 }
 
@@ -31,23 +28,25 @@ impl Hittable for Sphere {
         let c = Vec3::dot(&oc, &oc) - (self.radius * self.radius);
         let discriminant = b * b - a * c;
 
-        if discriminant > 0.0 {
-            let mut temp = (-b - discriminant.sqrt()) / a;
-            if temp < t_max && temp > t_min {
-                hit.t = temp;
-                hit.p = ray.at(hit.t);
-                hit.normal = (hit.p - self.center) / self.radius;
-                return true;
-            }
-            temp = (-b + discriminant.sqrt()) / a;
-            if temp < t_max && temp > t_min {
-                hit.t = temp;
-                hit.p = ray.at(hit.t);
-                hit.normal = (hit.p - self.center) / self.radius;
-                return true;
+        if discriminant < 0.0 {
+            return false;
+        }
+
+        let sqrt_discriminant = discriminant.sqrt();
+
+        let mut root = (-b - sqrt_discriminant) / a;
+
+        if root <= t_min || t_max <= root {
+            root = (-b + sqrt_discriminant) / a;
+            if root <= t_min || t_max <= root {
+                return false;
             }
         }
 
-        false
+        hit.t = root;
+        hit.p = ray.at(hit.t);
+        hit.normal = (hit.p - self.center) / self.radius;
+
+        true
     }
 }
