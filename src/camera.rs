@@ -3,6 +3,7 @@ use crate::hit::{Hit, Hittable, HittableList};
 use crate::vec3::{Color, Point3, Vec3};
 
 use crate::ray::Ray;
+use rand::Rng;
 use std::io::{self, Write};
 
 pub struct Camera {
@@ -10,6 +11,9 @@ pub struct Camera {
     aspect_ratio: f32,
     image_width: i32,
     image_height: i32,
+
+    // Antialiasing
+    samples_per_pixel: i32,
 
     // Camera settings
     viewport_height: f32,
@@ -33,6 +37,9 @@ impl Camera {
         let viewport_width = aspect_ratio * viewport_height;
         let focal_length = 1.0;
 
+        // Antialiasing
+        let samples_per_pixel = 10;
+
         let origin = Point3::new(0f32, 0f32, 0f32);
         let horizontal = Vec3::new(viewport_width, 0f32, 0f32);
         let vertical = Vec3::new(0f32, viewport_height, 0f32);
@@ -46,6 +53,7 @@ impl Camera {
             viewport_height,
             viewport_width,
             focal_length,
+            samples_per_pixel,
             origin,
             horizontal,
             vertical,
@@ -60,6 +68,8 @@ impl Camera {
         let mut out = io::stdout(); // write a image data
         let mut outerr = io::stderr(); // write a indicator of execution
 
+        let mut generator = rand::thread_rng();
+
         for j in (0..self.image_height).rev() {
             let indicator = format!("\rScan lines remaining: {} ", j);
             outerr
@@ -67,14 +77,18 @@ impl Camera {
                 .expect("Unable to write indicator data to stderr");
             out.flush().expect("Unable to flush stdout");
             for i in 0..self.image_width {
-                let u = i as f32 / (self.image_width) as f32;
-                let v = j as f32 / (self.image_height) as f32;
+                let mut fallen_color = Vec3::empty_new();
 
-                let ray = Ray::ray(
-                    self.origin,
-                    self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
-                );
-                let fallen_color = self.world_color(&ray, &world);
+                for _ in 0..self.samples_per_pixel {
+                    let u = (i as f32 + generator.gen::<f32>()) / (self.image_width) as f32;
+                    let v = (j as f32 + generator.gen::<f32>()) / (self.image_height) as f32;
+
+                    let ray = self.get_ray(u, v);
+
+                    fallen_color = fallen_color + self.world_color(&ray, &world);
+                }
+
+                fallen_color = fallen_color / self.samples_per_pixel as f32;
 
                 let ir = (255.999 * fallen_color.r()) as i32;
                 let ig = (255.999 * fallen_color.g()) as i32;
@@ -88,6 +102,13 @@ impl Camera {
         outerr
             .write(b"\nDone.\n")
             .expect("Unable to write to stderr");
+    }
+
+    fn get_ray(&self, u: f32, v: f32) -> Ray {
+        Ray::ray(
+            self.origin,
+            self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
+        )
     }
 
     fn world_color(&self, ray: &Ray, world: &HittableList) -> Color {
