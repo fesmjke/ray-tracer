@@ -125,7 +125,7 @@ impl Camera {
             return Color::empty_new();
         }
 
-        return if world.hit(&ray, 0.0, f32::MAX, &mut temp_hit) {
+        return if world.hit(&ray, 0.001, f32::MAX, &mut temp_hit) {
             let direction = Vec3::random_in_hemisphere(&temp_hit.normal);
 
             0.5 * self.world_color(&Ray::ray(temp_hit.point, direction), world, depth - 1)
