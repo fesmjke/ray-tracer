@@ -1,3 +1,4 @@
+use rand::{random, Rng};
 use std::ops;
 
 #[derive(Debug, Copy, Clone)]
@@ -59,6 +60,43 @@ impl Vec3 {
 
     pub fn unit_vector(v: &Vec3) -> Vec3 {
         *v / v.length()
+    }
+
+    pub fn random_vector() -> Vec3 {
+        Vec3::new(random::<f32>(), random::<f32>(), random::<f32>())
+    }
+
+    pub fn random_vector_mm(min: f32, max: f32) -> Vec3 {
+        let mut rng = rand::thread_rng();
+        Vec3::new(
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let r_point = Vec3::random_vector_mm(-1.0, 1.0);
+
+            if r_point.length() < 1.0 {
+                return r_point;
+            }
+        }
+    }
+
+    pub fn random_unit() -> Vec3 {
+        Vec3::unit_vector(&Vec3::random_in_unit_sphere())
+    }
+
+    pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
+        let on_unit_sphere = Vec3::random_unit();
+
+        return if Vec3::dot(&on_unit_sphere, normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        };
     }
 }
 
