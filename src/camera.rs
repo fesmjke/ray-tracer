@@ -15,6 +15,9 @@ pub struct Camera {
     // Antialiasing
     samples_per_pixel: i32,
 
+    // Rays depth
+    depth: u32,
+
     // Camera settings
     viewport_height: f32,
     viewport_width: f32,
@@ -40,6 +43,9 @@ impl Camera {
         // Antialiasing
         let samples_per_pixel = 10;
 
+        // Ray depth
+        let depth = 10;
+
         let origin = Point3::new(0f32, 0f32, 0f32);
         let horizontal = Vec3::new(viewport_width, 0f32, 0f32);
         let vertical = Vec3::new(0f32, viewport_height, 0f32);
@@ -54,6 +60,7 @@ impl Camera {
             viewport_width,
             focal_length,
             samples_per_pixel,
+            depth,
             origin,
             horizontal,
             vertical,
@@ -85,7 +92,7 @@ impl Camera {
 
                     let ray = self.get_ray(u, v);
 
-                    fallen_color = fallen_color + self.world_color(&ray, &world);
+                    fallen_color = fallen_color + self.world_color(&ray, &world, self.depth);
                 }
 
                 fallen_color = fallen_color / self.samples_per_pixel as f32;
@@ -111,13 +118,17 @@ impl Camera {
         )
     }
 
-    fn world_color(&self, ray: &Ray, world: &HittableList) -> Color {
+    fn world_color(&self, ray: &Ray, world: &HittableList, depth: u32) -> Color {
         let mut temp_hit = Hit::new();
+
+        if depth <= 0 {
+            return Color::empty_new();
+        }
 
         return if world.hit(&ray, 0.0, f32::MAX, &mut temp_hit) {
             let direction = Vec3::random_in_hemisphere(&temp_hit.normal);
 
-            0.5 * self.world_color(&Ray::ray(temp_hit.point, direction), world)
+            0.5 * self.world_color(&Ray::ray(temp_hit.point, direction), world, depth - 1)
         } else {
             let unit_direction = Vec3::unit_vector(&ray.direction());
             let transition = 0.5 * (unit_direction.y() + 1.0);
