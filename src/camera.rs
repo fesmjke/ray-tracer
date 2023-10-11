@@ -115,11 +115,9 @@ impl Camera {
         let mut temp_hit = Hit::new();
 
         return if world.hit(&ray, 0.0, f32::MAX, &mut temp_hit) {
-            0.5 * Color::new(
-                temp_hit.normal.x() + 1.0,
-                temp_hit.normal.y() + 1.0,
-                temp_hit.normal.z() + 1.0,
-            )
+            let direction = Vec3::random_in_hemisphere(&temp_hit.normal);
+
+            0.5 * self.world_color(&Ray::ray(temp_hit.point, direction), world)
         } else {
             let unit_direction = Vec3::unit_vector(&ray.direction());
             let transition = 0.5 * (unit_direction.y() + 1.0);
