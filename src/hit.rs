@@ -1,5 +1,5 @@
 use crate::ray::Ray;
-use crate::vec3::Vec3;
+use crate::vec3::{Point3, Vec3};
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit: &mut Hit) -> bool;
@@ -8,7 +8,7 @@ pub trait Hittable {
 #[derive(Copy, Clone)]
 pub struct Hit {
     pub t: f32,
-    pub p: Vec3,
+    pub point: Point3,
     pub normal: Vec3,
     pub front_face: bool,
 }
@@ -17,14 +17,14 @@ impl Hit {
     pub fn new() -> Self {
         Self {
             t: 0.0,
-            p: Vec3::empty_new(),
+            point: Point3::empty_new(),
             normal: Vec3::empty_new(),
             front_face: false,
         }
     }
 
     pub fn set_hit(&mut self, hit: &Hit) {
-        self.p = hit.p;
+        self.point = hit.point;
         self.normal = hit.normal;
         self.t = hit.t;
         self.front_face = hit.front_face;
