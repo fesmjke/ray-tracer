@@ -1,3 +1,4 @@
+use crate::materials::material::Material;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
@@ -9,6 +10,7 @@ pub trait Hittable {
 pub struct Hit {
     pub t: f32,
     pub point: Point3,
+    pub material: Box<dyn Material>,
     pub normal: Vec3,
     pub front_face: bool,
 }
