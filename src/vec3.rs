@@ -98,6 +98,14 @@ impl Vec3 {
             -on_unit_sphere
         };
     }
+
+    pub fn near_zero(&self) -> bool {
+        let almost_zero = 1e-8;
+
+        return self.e[0].abs() < almost_zero
+            && self.e[1].abs() < almost_zero
+            && self.e[2].abs() < almost_zero;
+    }
 }
 
 impl PartialEq for Vec3 {
