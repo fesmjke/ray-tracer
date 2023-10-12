@@ -6,6 +6,7 @@ use crate::vec3::Vec3;
 mod camera;
 mod color;
 mod hit;
+mod materials;
 mod objects;
 mod ray;
 mod vec3;
