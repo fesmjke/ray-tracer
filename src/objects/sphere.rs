@@ -1,22 +1,22 @@
 use crate::hit::{Hit, Hittable};
+use crate::materials::material::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
+use std::cell::Cell;
 
 pub struct Sphere {
     center: Vec3,
     radius: f32,
+    material: Box<Cell<dyn Material>>,
 }
 
 impl Sphere {
-    pub fn new() -> Self {
+    pub fn from(center: Vec3, radius: f32, material: Box<Cell<dyn Material>>) -> Self {
         Self {
-            center: Vec3::empty_new(),
-            radius: 0.0f32,
+            center,
+            radius,
+            material,
         }
-    }
-
-    pub fn from(center: Vec3, radius: f32) -> Self {
-        Self { center, radius }
     }
 }
 
@@ -47,6 +47,7 @@ impl Hittable for Sphere {
         hit.point = ray.at(hit.t);
         let outward_normal = (hit.point - self.center) / self.radius;
         hit.set_front_face(ray, &outward_normal);
+        hit.material = Box::from(self.material.as_ptr().clone());
 
         true
     }
