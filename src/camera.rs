@@ -95,11 +95,11 @@ impl Camera {
                     fallen_color = fallen_color + self.world_color(&ray, &world, self.depth);
                 }
 
-                fallen_color = fallen_color / self.samples_per_pixel as f32;
+                fallen_color = fallen_color * (1.0 / self.samples_per_pixel as f32);
 
-                let ir = (255.999 * fallen_color.r()) as i32;
-                let ig = (255.999 * fallen_color.g()) as i32;
-                let ib = (255.999 * fallen_color.b()) as i32;
+                let ir = (255.999 * fallen_color.r().sqrt().clamp(0.000, 0.999)) as i32;
+                let ig = (255.999 * fallen_color.g().sqrt().clamp(0.000, 0.999)) as i32;
+                let ib = (255.999 * fallen_color.b().sqrt().clamp(0.000, 0.999)) as i32;
 
                 let pixel_color = Color::new(ir as f32, ig as f32, ib as f32);
 
@@ -126,9 +126,9 @@ impl Camera {
         }
 
         return if world.hit(&ray, 0.001, f32::MAX, &mut temp_hit) {
-            let direction = Vec3::random_in_hemisphere(&temp_hit.normal);
+            let direction = temp_hit.normal + Vec3::random_unit();
 
-            0.5 * self.world_color(&Ray::ray(temp_hit.point, direction), world, depth - 1)
+            0.1 * self.world_color(&Ray::ray(temp_hit.point, direction), world, depth - 1)
         } else {
             let unit_direction = Vec3::unit_vector(&ray.direction());
             let transition = 0.5 * (unit_direction.y() + 1.0);
