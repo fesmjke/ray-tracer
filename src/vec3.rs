@@ -106,6 +106,10 @@ impl Vec3 {
             && self.e[1].abs() < almost_zero
             && self.e[2].abs() < almost_zero;
     }
+
+    pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+        return *v - 2.0 * Vec3::dot(v, n) * *n;
+    }
 }
 
 impl PartialEq for Vec3 {
