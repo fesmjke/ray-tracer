@@ -1,4 +1,4 @@
-use crate::materials::material::Material;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vec3::{Point3, Vec3};
 
@@ -6,11 +6,10 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit: &mut Hit) -> bool;
 }
 
-#[derive(Copy, Clone)]
 pub struct Hit {
     pub t: f32,
     pub point: Point3,
-    pub material: Box<dyn Material>,
+    pub material: Material,
     pub normal: Vec3,
     pub front_face: bool,
 }
@@ -20,6 +19,7 @@ impl Hit {
         Self {
             t: 0.0,
             point: Point3::empty_new(),
+            material: Material::new(),
             normal: Vec3::empty_new(),
             front_face: false,
         }
@@ -30,6 +30,7 @@ impl Hit {
         self.normal = hit.normal;
         self.t = hit.t;
         self.front_face = hit.front_face;
+        self.material = hit.material.clone();
     }
 
     pub fn set_front_face(&mut self, ray: &Ray, outward_normal: &Vec3) {
