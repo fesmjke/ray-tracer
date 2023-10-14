@@ -1,5 +1,6 @@
 use crate::color;
 use crate::hit::{Hit, Hittable, HittableList};
+use crate::material::Scattered;
 use crate::vec3::{Color, Point3, Vec3};
 
 use crate::ray::Ray;
@@ -126,9 +127,21 @@ impl Camera {
         }
 
         return if world.hit(&ray, 0.001, f32::MAX, &mut temp_hit) {
-            let direction = temp_hit.normal + Vec3::random_unit();
+            let mut scattered = Ray::new_empty();
+            let mut attenuation: Color = Color::new(0.0, 0.0, 0.0);
 
-            0.1 * self.world_color(&Ray::ray(temp_hit.point, direction), world, depth - 1)
+            if temp_hit
+                .material
+                .scatter(&ray, &temp_hit, &mut attenuation, &mut scattered)
+            {
+                return attenuation * self.world_color(&scattered, &world, depth - 1);
+            }
+
+            // let direction = temp_hit.normal + Vec3::random_unit();
+
+            // 0.1 * self.world_color(&Ray::ray(temp_hit.point, direction), world, depth - 1)
+
+            Color::new(0.0, 0.0, 0.0)
         } else {
             let unit_direction = Vec3::unit_vector(&ray.direction());
             let transition = 0.5 * (unit_direction.y() + 1.0);
