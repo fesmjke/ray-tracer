@@ -7,6 +7,13 @@ pub struct Ray {
 }
 
 impl Ray {
+    pub fn new_empty() -> Ray {
+        Self {
+            origin: Point3::empty_new(),
+            direction: Vec3::empty_new(),
+        }
+    }
+
     pub fn ray(orig: Point3, dir: Vec3) -> Ray {
         Ray {
             origin: orig,
