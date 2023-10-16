@@ -2,18 +2,23 @@ use crate::camera::Camera;
 use crate::hit::HittableList;
 use crate::material::Material;
 use crate::objects::sphere::Sphere;
+use crate::preset::{parse_preset, Preset};
 use crate::vec3::{Color, Vec3};
+use std::env;
 
 mod camera;
 mod color;
 mod hit;
 mod material;
 mod objects;
+mod preset;
 mod ray;
 mod vec3;
 
 fn main() {
     let image_width = 512;
+
+    let parsed = parse_preset(env::args());
 
     let mut world = HittableList::new();
 
@@ -51,7 +56,26 @@ fn main() {
     world.attach(left_sphere);
     world.attach(right_sphere);
 
-    let camera = Camera::new(image_width);
+    let mut camera = Camera::new(image_width);
+
+    if parsed.is_some() {
+        match parsed.unwrap() {
+            Preset::Fast {
+                samples_per_pixel,
+                depth,
+            } => {
+                camera.set_samples_per_pixel(samples_per_pixel);
+                camera.set_depth(depth);
+            }
+            Preset::Complex {
+                samples_per_pixel,
+                depth,
+            } => {
+                camera.set_samples_per_pixel(samples_per_pixel);
+                camera.set_depth(depth);
+            }
+        }
+    }
 
     camera.render(&world);
 }
