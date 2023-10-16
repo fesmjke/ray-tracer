@@ -149,4 +149,12 @@ impl Camera {
                 + transition * Color::new(0.5f32, 0.7f32, 1.0f32)
         };
     }
+
+    pub fn set_samples_per_pixel(&mut self, samples_per_pixel: i32) {
+        self.samples_per_pixel = samples_per_pixel;
+    }
+
+    pub fn set_depth(&mut self, depth: u32) {
+        self.depth = depth;
+    }
 }
