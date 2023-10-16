@@ -15,7 +15,7 @@ pub trait Scattered {
 #[derive(Copy, Clone)]
 pub enum Material {
     Lambertian { albedo: Color },
-    Metal { albedo: Color },
+    Metal { albedo: Color, fuzz: f32 },
 }
 
 impl Material {
@@ -47,13 +47,13 @@ impl Scattered for Material {
 
                 true
             }
-            Material::Metal { albedo } => {
+            Material::Metal { albedo, fuzz } => {
                 let reflected_ray =
                     Vec3::reflect(&Vec3::unit_vector(&ray_in.direction()), &hit.normal);
-                *ray_scattered = Ray::ray(hit.point, reflected_ray);
+                *ray_scattered = Ray::ray(hit.point, reflected_ray + Vec3::random_unit() * *fuzz);
                 *attenuation = *albedo;
 
-                true
+                return Vec3::dot(&ray_scattered.direction(), &hit.normal) > 0.0;
             }
             _ => false,
         };
