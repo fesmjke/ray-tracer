@@ -1,5 +1,6 @@
 use rand::{random, Rng};
 use std::ops;
+use std::ops::Deref;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
@@ -109,6 +110,14 @@ impl Vec3 {
 
     pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
         return *v - 2.0 * Vec3::dot(v, n) * *n;
+    }
+
+    pub fn refract(uv: &Vec3, n: &Vec3, etai_over_eta: f32) -> Vec3 {
+        let cos_theta = f32::min(Vec3::dot(&(-(*uv)), n), 1.0);
+        let r_out_perpendicular = etai_over_eta * ((*uv) + cos_theta * (*n));
+        let r_out_parallel = -f32::sqrt(f32::abs(1.0 - r_out_perpendicular.length())) * (*n);
+
+        return r_out_perpendicular + r_out_parallel;
     }
 }
 
