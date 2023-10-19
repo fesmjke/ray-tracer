@@ -1,4 +1,3 @@
-use std::env;
 use std::env::Args;
 
 pub enum Preset {
