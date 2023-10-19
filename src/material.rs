@@ -74,7 +74,6 @@ impl Scattered for Material {
 
                 return true;
             }
-            _ => false,
         };
     }
 }
