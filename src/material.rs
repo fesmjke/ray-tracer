@@ -16,6 +16,7 @@ pub trait Scattered {
 pub enum Material {
     Lambertian { albedo: Color },
     Metal { albedo: Color, fuzz: f32 },
+    Dielectric { index_of_refraction: f32 },
 }
 
 impl Material {
@@ -54,6 +55,24 @@ impl Scattered for Material {
                 *attenuation = *albedo;
 
                 return Vec3::dot(&ray_scattered.direction(), &hit.normal) > 0.0;
+            }
+            Material::Dielectric {
+                index_of_refraction,
+            } => {
+                *attenuation = Color::new(1.0, 1.0, 1.0);
+
+                let refraction_ratio = if hit.front_face {
+                    1.0 / (*index_of_refraction)
+                } else {
+                    *index_of_refraction
+                };
+
+                let unit_direction = Vec3::unit_vector(&ray_in.direction());
+                let refracted = Vec3::refract(&unit_direction, &hit.normal, refraction_ratio);
+
+                *ray_scattered = Ray::ray(hit.point, refracted);
+
+                return true;
             }
             _ => false,
         };
