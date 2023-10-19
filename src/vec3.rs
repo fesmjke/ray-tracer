@@ -1,6 +1,5 @@
 use rand::{random, Rng};
 use std::ops;
-use std::ops::Deref;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
