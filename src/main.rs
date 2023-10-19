@@ -67,7 +67,7 @@ fn main() {
                 camera.set_samples_per_pixel(samples_per_pixel);
                 camera.set_depth(depth);
             }
-            Preset::Complex {
+            Preset::Slow {
                 samples_per_pixel,
                 depth,
             } => {

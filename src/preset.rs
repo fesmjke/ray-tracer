@@ -3,7 +3,7 @@ use std::env::Args;
 
 pub enum Preset {
     Fast { samples_per_pixel: i32, depth: u32 },
-    Complex { samples_per_pixel: i32, depth: u32 },
+    Slow { samples_per_pixel: i32, depth: u32 },
 }
 
 pub fn parse_preset(args: Args) -> Option<Preset> {
@@ -17,8 +17,8 @@ pub fn parse_preset(args: Args) -> Option<Preset> {
                     depth: 10,
                 })
             }
-            "-complex" => {
-                preset = Some(Preset::Complex {
+            "-slow" => {
+                preset = Some(Preset::Slow {
                     samples_per_pixel: 100,
                     depth: 50,
                 })
