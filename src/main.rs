@@ -25,8 +25,8 @@ fn main() {
     let material_ground = Material::Lambertian {
         albedo: Color::new(0.8, 0.8, 0.0),
     };
-    let material_center = Material::Lambertian {
-        albedo: Color::new(0.7, 0.3, 0.3),
+    let material_center = Material::Dielectric {
+        index_of_refraction: 1.5,
     };
     let material_left = Material::Metal {
         albedo: Color::new(0.8, 0.8, 0.8),
