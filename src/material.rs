@@ -1,6 +1,7 @@
 use crate::hit::Hit;
 use crate::ray::Ray;
 use crate::vec3::{Color, Vec3};
+use rand::random;
 
 pub trait Scattered {
     fn scatter(
@@ -24,6 +25,12 @@ impl Material {
         Self::Lambertian {
             albedo: Color::empty_new(),
         }
+    }
+
+    fn reflectance(&self, cosine: f32, ref_index: f32) -> f32 {
+        let mut r0 = (1.0 - ref_index) / (1.0 + ref_index);
+        r0 = r0 * r0;
+        return r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0);
     }
 }
 
@@ -68,9 +75,27 @@ impl Scattered for Material {
                 };
 
                 let unit_direction = Vec3::unit_vector(&ray_in.direction());
-                let refracted = Vec3::refract(&unit_direction, &hit.normal, refraction_ratio);
+                let cos_theta = f32::min(Vec3::dot(&-unit_direction, &hit.normal), 1.0);
+                let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
-                *ray_scattered = Ray::ray(hit.point, refracted);
+                let cannot_refract = if refraction_ratio * sin_theta > 1.0 {
+                    true
+                } else {
+                    false
+                };
+                let mut direction = Vec3::empty_new();
+
+                if cannot_refract
+                    || (self.reflectance(cos_theta, refraction_ratio) > random::<f32>())
+                {
+                    direction = Vec3::reflect(&unit_direction, &hit.normal);
+                } else {
+                    direction = Vec3::refract(&unit_direction, &hit.normal, refraction_ratio);
+                }
+
+                // let refracted = Vec3::refract(&unit_direction, &hit.normal, refraction_ratio);
+
+                *ray_scattered = Ray::ray(hit.point, direction);
 
                 return true;
             }
