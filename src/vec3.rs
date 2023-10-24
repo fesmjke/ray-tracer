@@ -58,6 +58,10 @@ impl Vec3 {
         (self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]).sqrt()
     }
 
+    pub fn length_squared(self) -> f32 {
+        return self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2];
+    }
+
     pub fn unit_vector(v: &Vec3) -> Vec3 {
         *v / v.length()
     }
@@ -79,7 +83,7 @@ impl Vec3 {
         loop {
             let r_point = Vec3::random_vector_mm(-1.0, 1.0);
 
-            if r_point.length() < 1.0 {
+            if r_point.length_squared() < 1.0 {
                 return r_point;
             }
         }
@@ -114,7 +118,8 @@ impl Vec3 {
     pub fn refract(uv: &Vec3, n: &Vec3, etai_over_eta: f32) -> Vec3 {
         let cos_theta = f32::min(Vec3::dot(&(-(*uv)), n), 1.0);
         let r_out_perpendicular = etai_over_eta * ((*uv) + cos_theta * (*n));
-        let r_out_parallel = -f32::sqrt(f32::abs(1.0 - r_out_perpendicular.length())) * (*n);
+        let r_out_parallel =
+            -f32::sqrt(f32::abs(1.0 - r_out_perpendicular.length_squared())) * (*n);
 
         return r_out_perpendicular + r_out_parallel;
     }
