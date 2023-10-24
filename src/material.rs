@@ -30,7 +30,7 @@ impl Material {
     fn reflectance(&self, cosine: f32, ref_index: f32) -> f32 {
         let mut r0 = (1.0 - ref_index) / (1.0 + ref_index);
         r0 = r0 * r0;
-        return r0 + (1.0 - r0) * (1.0 - cosine).powf(5.0);
+        r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
     }
 }
 
@@ -75,14 +75,10 @@ impl Scattered for Material {
                 };
 
                 let unit_direction = Vec3::unit_vector(&ray_in.direction());
-                let cos_theta = f32::min(Vec3::dot(&-unit_direction, &hit.normal), 1.0);
+                let cos_theta = f32::min(Vec3::dot(&(-unit_direction), &hit.normal), 1.0);
                 let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
-                let cannot_refract = if refraction_ratio * sin_theta > 1.0 {
-                    true
-                } else {
-                    false
-                };
+                let cannot_refract = refraction_ratio * sin_theta > 1.0;
                 let mut direction = Vec3::empty_new();
 
                 if cannot_refract
