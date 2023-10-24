@@ -25,16 +25,15 @@ fn main() {
     let material_ground = Material::Lambertian {
         albedo: Color::new(0.8, 0.8, 0.0),
     };
-    let material_center = Material::Dielectric {
-        index_of_refraction: 1.5,
+    let material_center = Material::Lambertian {
+        albedo: Color::new(0.1, 0.2, 0.5),
     };
-    let material_left = Material::Metal {
-        albedo: Color::new(0.8, 0.8, 0.8),
-        fuzz: 0.3,
+    let material_left = Material::Dielectric {
+        index_of_refraction: 1.5,
     };
     let material_right = Material::Metal {
         albedo: Color::new(0.8, 0.6, 0.2),
-        fuzz: 1.0,
+        fuzz: 0.0,
     };
 
     let ground_sphere = Box::new(Sphere::from(
@@ -49,11 +48,17 @@ fn main() {
         material_center,
     ));
     let left_sphere = Box::new(Sphere::from(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
+    let inner_left_sphere = Box::new(Sphere::from(
+        Vec3::new(-1.0, 0.0, -1.0),
+        -0.4,
+        material_left,
+    ));
     let right_sphere = Box::new(Sphere::from(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
 
     world.attach(central_sphere);
     world.attach(ground_sphere);
     world.attach(left_sphere);
+    world.attach(inner_left_sphere);
     world.attach(right_sphere);
 
     let mut camera = Camera::new(image_width);
