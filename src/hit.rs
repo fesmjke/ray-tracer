@@ -6,6 +6,7 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit: &mut Hit) -> bool;
 }
 
+#[derive(Clone, Copy)]
 pub struct Hit {
     pub t: f32,
     pub point: Point3,
@@ -21,25 +22,12 @@ impl Hit {
             point: Point3::empty_new(),
             material: Material::new(),
             normal: Vec3::empty_new(),
-            front_face: false,
+            front_face: bool::default(),
         }
     }
 
-    pub fn set_hit(&mut self, hit: &Hit) {
-        self.point = hit.point;
-        self.normal = hit.normal;
-        self.t = hit.t;
-        self.front_face = hit.front_face;
-        self.material = hit.material.clone();
-    }
-
     pub fn set_front_face(&mut self, ray: &Ray, outward_normal: &Vec3) {
-        self.front_face = if Vec3::dot(&ray.direction(), outward_normal) < 0.0 {
-            true
-        } else {
-            false
-        };
-
+        self.front_face = Vec3::dot(&ray.direction(), outward_normal) < 0.0;
         self.normal = if self.front_face {
             outward_normal.clone()
         } else {
@@ -74,7 +62,7 @@ impl Hittable for HittableList {
             if object.hit(&ray, t_min, closest, &mut temp_hit) {
                 hit_any = true;
                 closest = temp_hit.t;
-                hit.set_hit(&temp_hit);
+                *hit = temp_hit.clone();
             }
         }
 
