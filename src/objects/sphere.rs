@@ -22,9 +22,9 @@ impl Sphere {
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, hit: &mut Hit) -> bool {
         let oc: Vec3 = ray.origin() - self.center;
-        let a = Vec3::dot(&ray.direction(), &ray.direction());
+        let a = ray.direction().length_squared();
         let b = Vec3::dot(&oc, &ray.direction());
-        let c = Vec3::dot(&oc, &oc) - (self.radius * self.radius);
+        let c = oc.length_squared() - (self.radius * self.radius);
         let discriminant = b * b - a * c;
 
         if discriminant < 0.0 {
