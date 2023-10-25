@@ -4,6 +4,8 @@ use crate::material::Scattered;
 use crate::vec3::{Color, Point3, Vec3};
 
 use crate::ray::Ray;
+use crate::utils::degrees_to_radians;
+use rand::rngs::ThreadRng;
 use rand::Rng;
 use std::io::{self, Write};
 
@@ -12,6 +14,19 @@ pub struct Camera {
     aspect_ratio: f32,
     image_width: i32,
     image_height: i32,
+
+    // FOV
+    vfov: f32,
+
+    // Camera orientation
+    look_from: Point3,
+    look_at: Point3,
+    up_vector: Vec3,
+
+    // Camera basis
+    w: Vec3,
+    u: Vec3,
+    v: Vec3,
 
     // Antialiasing
     samples_per_pixel: i32,
@@ -27,7 +42,9 @@ pub struct Camera {
     origin: Point3,
     horizontal: Point3,
     vertical: Point3,
-    lower_left_corner: Point3,
+    zero_pixel: Point3,
+    delta_horizontal: Point3,
+    delta_vertical: Point3,
 }
 
 impl Camera {
@@ -36,10 +53,26 @@ impl Camera {
         let aspect_ratio = 16.0 / 9.0;
         let image_height = (image_width as f32 / aspect_ratio) as i32;
 
+        // FOV
+        let fov = 20.0;
+
+        let theta = degrees_to_radians(fov);
+        let h = (theta / 2.0).tan();
+
+        // Camera orientation
+        let look_from = Point3::new(-2.0, 2.0, 1.0);
+        let look_at = Point3::new(0.0, 0.0, -1.0);
+        let up_vector = Vec3::new(0.0, 1.0, 0.0);
+
         // Camera settings
-        let viewport_height = 2.0f32;
+        let focal_length = (look_from - look_at).length();
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = aspect_ratio * viewport_height;
-        let focal_length = 1.0;
+
+        // Camera basis
+        let w = Vec3::unit_vector(&(look_from - look_at));
+        let u = Vec3::unit_vector(&Vec3::cross_product(&up_vector, &w));
+        let v = Vec3::cross_product(&w, &u);
 
         // Antialiasing
         let samples_per_pixel = 10;
@@ -47,16 +80,27 @@ impl Camera {
         // Ray depth
         let depth = 10;
 
-        let origin = Point3::new(0f32, 0f32, 0f32);
-        let horizontal = Vec3::new(viewport_width, 0f32, 0f32);
-        let vertical = Vec3::new(0f32, viewport_height, 0f32);
-        let lower_left_corner =
-            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0f32, 0f32, focal_length);
+        let origin = look_from;
+        let horizontal = viewport_width * u;
+        let vertical = viewport_height * (-v);
+
+        let delta_horizontal = horizontal / image_width as f32;
+        let delta_vertical = vertical / image_height as f32;
+
+        let viewport_upper_left = origin - (focal_length * w) - horizontal / 2.0 - vertical / 2.0;
+        let lower_left_corner = viewport_upper_left + 0.5 * (delta_horizontal + delta_vertical);
 
         Self {
             aspect_ratio,
             image_width,
             image_height,
+            vfov: fov,
+            look_from,
+            look_at,
+            up_vector,
+            w,
+            u,
+            v,
             viewport_height,
             viewport_width,
             focal_length,
@@ -65,7 +109,9 @@ impl Camera {
             origin,
             horizontal,
             vertical,
-            lower_left_corner,
+            delta_horizontal,
+            delta_vertical,
+            zero_pixel: lower_left_corner,
         }
     }
 
@@ -78,8 +124,8 @@ impl Camera {
 
         let mut generator = rand::thread_rng();
 
-        for j in (0..self.image_height).rev() {
-            let indicator = format!("\rScan lines remaining: {} ", j);
+        for j in 0..self.image_height {
+            let indicator = format!("\rScan lines remaining: {} ", self.image_height - j - 1);
             outerr
                 .write(indicator.as_bytes())
                 .expect("Unable to write indicator data to stderr");
@@ -88,10 +134,10 @@ impl Camera {
                 let mut fallen_color = Vec3::empty_new();
 
                 for _ in 0..self.samples_per_pixel {
-                    let u = (i as f32 + generator.gen::<f32>()) / (self.image_width) as f32;
-                    let v = (j as f32 + generator.gen::<f32>()) / (self.image_height) as f32;
+                    let px = generator.gen::<f32>();
+                    let py = generator.gen::<f32>();
 
-                    let ray = self.get_ray(u, v);
+                    let ray = self.get_ray(i, j, px, py);
 
                     fallen_color = fallen_color + self.world_color(&ray, &world, self.depth);
                 }
@@ -112,11 +158,22 @@ impl Camera {
             .expect("Unable to write to stderr");
     }
 
-    fn get_ray(&self, u: f32, v: f32) -> Ray {
-        Ray::ray(
-            self.origin,
-            self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin,
-        )
+    fn get_ray(&self, i: i32, j: i32, rd_px: f32, rd_py: f32) -> Ray {
+        let pixel_center =
+            self.zero_pixel + (i as f32 * self.delta_horizontal) + (j as f32 * self.delta_vertical);
+        let pixel_sample = pixel_center + self.pixel_sample_square(rd_px, rd_py);
+
+        let ray_origin = self.origin;
+        let ray_direction = pixel_sample - ray_origin;
+
+        Ray::ray(self.origin, ray_direction)
+    }
+
+    fn pixel_sample_square(&self, rd_px: f32, rd_py: f32) -> Vec3 {
+        let px = -0.5 + rd_px;
+        let py = -0.5 + rd_py;
+
+        (px * self.delta_horizontal) + (py * self.delta_vertical)
     }
 
     fn world_color(&self, ray: &Ray, world: &HittableList, depth: u32) -> Color {
