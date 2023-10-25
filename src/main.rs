@@ -5,6 +5,7 @@ use crate::objects::sphere::Sphere;
 use crate::preset::{parse_preset, Preset};
 use crate::vec3::{Color, Vec3};
 use std::env;
+use std::f32::consts::PI;
 
 mod camera;
 mod color;
@@ -26,15 +27,15 @@ fn main() {
     let material_ground = Material::Lambertian {
         albedo: Color::new(0.8, 0.8, 0.0),
     };
+    let material_right = Material::Metal {
+        albedo: Color::new(0.8, 0.6, 0.2),
+        fuzz: 0.0,
+    };
     let material_center = Material::Lambertian {
         albedo: Color::new(0.1, 0.2, 0.5),
     };
     let material_left = Material::Dielectric {
         index_of_refraction: 1.5,
-    };
-    let material_right = Material::Metal {
-        albedo: Color::new(0.8, 0.6, 0.2),
-        fuzz: 0.0,
     };
 
     let ground_sphere = Box::new(Sphere::from(
