@@ -13,6 +13,7 @@ mod material;
 mod objects;
 mod preset;
 mod ray;
+mod utils;
 mod vec3;
 
 fn main() {
