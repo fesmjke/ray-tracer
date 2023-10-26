@@ -61,15 +61,15 @@ impl Camera {
         let fov = 20.0;
 
         // Blur
-        let defocus_angle = 0.6;
+        let defocus_angle = 0.0;
         let focus_dist = 10.0;
 
         let theta = degrees_to_radians(fov);
         let h = (theta / 2.0).tan();
 
         // Camera orientation
-        let look_from = Point3::new(-2.0, 2.0, 1.0);
-        let look_at = Point3::new(0.0, 0.0, -1.0);
+        let look_from = Point3::new(13.0, 2.0, 3.0);
+        let look_at = Point3::new(0.0, 0.0, 0.0);
         let up_vector = Vec3::new(0.0, 1.0, 0.0);
 
         // Camera settings
