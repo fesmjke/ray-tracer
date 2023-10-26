@@ -1,4 +1,4 @@
-use rand::{random, Rng};
+use rand::{random, thread_rng, Rng};
 use std::ops;
 
 #[derive(Debug, Copy, Clone)]
@@ -82,6 +82,20 @@ impl Vec3 {
     pub fn random_in_unit_sphere() -> Vec3 {
         loop {
             let r_point = Vec3::random_vector_mm(-1.0, 1.0);
+
+            if r_point.length_squared() < 1.0 {
+                return r_point;
+            }
+        }
+    }
+
+    pub fn random_in_unit_disk() -> Vec3 {
+        let mut rng = thread_rng();
+
+        loop {
+            let rx = rng.gen_range(-1.0..=1.00);
+            let ry = rng.gen_range(-1.0..=1.00);
+            let r_point = Vec3::new(rx, ry, 0.0);
 
             if r_point.length_squared() < 1.0 {
                 return r_point;
