@@ -3,9 +3,9 @@ use crate::hit::HittableList;
 use crate::material::Material;
 use crate::objects::sphere::Sphere;
 use crate::preset::{parse_preset, Preset};
-use crate::vec3::{Color, Vec3};
+use crate::vec3::{Color, Point3, Vec3};
+use rand::{random, thread_rng, Rng};
 use std::env;
-use std::f32::consts::PI;
 
 mod camera;
 mod color;
@@ -18,50 +18,83 @@ mod utils;
 mod vec3;
 
 fn main() {
-    let image_width = 512;
+    let image_width = 1024;
 
     let parsed = parse_preset(env::args());
 
     let mut world = HittableList::new();
 
     let material_ground = Material::Lambertian {
-        albedo: Color::new(0.8, 0.8, 0.0),
-    };
-    let material_right = Material::Metal {
-        albedo: Color::new(0.8, 0.6, 0.2),
-        fuzz: 0.0,
-    };
-    let material_center = Material::Lambertian {
-        albedo: Color::new(0.1, 0.2, 0.5),
-    };
-    let material_left = Material::Dielectric {
-        index_of_refraction: 1.5,
+        albedo: Color::new(0.5, 0.5, 0.5),
     };
 
-    let ground_sphere = Box::new(Sphere::from(
-        Vec3::new(0f32, -100.5f32, -1f32),
-        100.0,
+    let ground = Box::from(Sphere::from(
+        Vec3::new(0.0, -1000.0, 0.0),
+        1000.0,
         material_ground,
     ));
 
-    let central_sphere = Box::new(Sphere::from(
-        Vec3::new(0f32, 0f32, -1f32),
-        0.5,
-        material_center,
-    ));
-    let left_sphere = Box::new(Sphere::from(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
-    let inner_left_sphere = Box::new(Sphere::from(
-        Vec3::new(-1.0, 0.0, -1.0),
-        -0.4,
-        material_left,
-    ));
-    let right_sphere = Box::new(Sphere::from(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
+    world.attach(ground);
 
-    world.attach(central_sphere);
-    world.attach(ground_sphere);
-    world.attach(left_sphere);
-    world.attach(inner_left_sphere);
-    world.attach(right_sphere);
+    let mut rng = thread_rng();
+
+    for i in -11..11 {
+        for j in -11..11 {
+            let choose: f32 = rng.gen();
+            let center = Point3::new(
+                i as f32 + 0.9 * rng.gen::<f32>(),
+                0.2,
+                j as f32 + rng.gen::<f32>(),
+            );
+
+            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let mut sphere_material = Material::new();
+
+                if choose < 0.8 {
+                    let albedo = Color::random_vector() * Color::random_vector();
+                    sphere_material = Material::Lambertian { albedo };
+                    world.attach(Box::from(Sphere::from(center, 0.2, sphere_material)));
+                } else if choose < 0.95 {
+                    let albedo = Color::random_vector_mm(0.5, 1.0);
+                    let fuzz = rng.gen_range(0.0..=0.5);
+                    sphere_material = Material::Metal { albedo, fuzz };
+                    world.attach(Box::from(Sphere::from(center, 0.2, sphere_material)));
+                } else {
+                    sphere_material = Material::Dielectric {
+                        index_of_refraction: 1.5,
+                    };
+                    world.attach(Box::from(Sphere::from(center, 0.2, sphere_material)));
+                }
+            }
+        }
+    }
+
+    let dielectric_material = Material::Dielectric {
+        index_of_refraction: 1.5,
+    };
+    let lambertia_material = Material::Lambertian {
+        albedo: Color::new(0.4, 0.2, 0.1),
+    };
+    let metal_material = Material::Metal {
+        albedo: Color::new(0.7, 0.6, 0.5),
+        fuzz: 0.0,
+    };
+
+    world.attach(Box::from(Sphere::from(
+        Vec3::new(0.0, 1.0, 0.0),
+        1.0,
+        dielectric_material,
+    )));
+    world.attach(Box::from(Sphere::from(
+        Vec3::new(-4.0, 1.0, 0.0),
+        1.0,
+        lambertia_material,
+    )));
+    world.attach(Box::from(Sphere::from(
+        Vec3::new(4.0, 1.0, 0.0),
+        1.0,
+        metal_material,
+    )));
 
     let mut camera = Camera::new(image_width);
 
