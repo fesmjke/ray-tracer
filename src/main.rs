@@ -4,9 +4,12 @@ use crate::material::Material;
 use crate::objects::sphere::Sphere;
 use crate::objects::triangle::Triangle;
 use crate::preset::{parse_preset, Preset};
-use crate::vec3::{Color, Point3, Vec3};
-use rand::{thread_rng, Rng};
+use crate::vec3::{Color, Vec3};
+use rand::thread_rng;
+use rayon::prelude::*;
 use std::env;
+use std::fs::File;
+use std::io::Write;
 
 mod camera;
 mod color;
@@ -17,6 +20,36 @@ mod preset;
 mod ray;
 mod utils;
 mod vec3;
+
+// TODO:remove later or move to separate file
+
+fn write_image(pixels: &[u8], image_width: usize, image_height: usize) {
+    let file = File::create("image.ppm");
+
+    match file {
+        Ok(mut f) => {
+            f.write(format!("P3\n {} {}\n255\n", image_width, image_height).as_bytes())
+                .expect("unable to write to file!");
+
+            for band in pixels.chunks(3) {
+                let pixel_color = Color::new(band[0] as f32, band[1] as f32, band[2] as f32);
+
+                let buf = format!(
+                    "{} {} {}\n",
+                    pixel_color.r(),
+                    pixel_color.g(),
+                    pixel_color.b()
+                );
+
+                f.write(buf.as_bytes()).expect("unable to write to file!");
+            }
+        }
+
+        Err(_) => {
+            println!("unable to create file!");
+        }
+    };
+}
 
 fn main() {
     let image_width = 512;
@@ -69,7 +102,7 @@ fn main() {
     //         }
     //     }
     // }
-    //
+
     let dielectric_material = Material::Dielectric {
         index_of_refraction: 1.5,
     };
@@ -121,5 +154,24 @@ fn main() {
         }
     }
 
-    camera.render(&world);
+    let image_width = image_width;
+
+    let aspect_ratio = 16.0 / 9.0;
+    let image_height = (image_width as f32 / aspect_ratio) as i32;
+
+    let mut pixels = vec![0; (image_width * image_height * 3) as usize];
+    let bands: Vec<(usize, &mut [u8])> = pixels
+        .chunks_mut((image_width * 3) as usize)
+        .enumerate()
+        .collect();
+
+    let start = std::time::Instant::now();
+
+    bands.into_par_iter().rev().for_each(|(i, band)| {
+        camera.render_parallel(&world, band, i as i32);
+    });
+
+    println!("Frame time: {}ms", start.elapsed().as_millis());
+
+    write_image(&pixels, image_width as usize, image_height as usize);
 }
