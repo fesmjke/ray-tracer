@@ -83,10 +83,10 @@ impl Camera {
         let v = Vec3::cross_product(&w, &u);
 
         // Antialiasing
-        let samples_per_pixel = 10;
+        let samples_per_pixel = 64;
 
         // Ray depth
-        let depth = 10;
+        let depth = 20;
 
         let origin = look_from;
         let horizontal = viewport_width * u;
@@ -127,6 +127,30 @@ impl Camera {
             delta_horizontal,
             delta_vertical,
             zero_pixel: lower_left_corner,
+        }
+    }
+
+    pub fn render_parallel(&self, world: &HittableList, pixels: &mut [u8], y: i32) {
+        let mut generator = rand::thread_rng();
+
+        for x in 0..self.image_width {
+            let mut fallen_color = Vec3::empty_new();
+            for _ in 0..self.samples_per_pixel {
+                let px = generator.gen::<f32>();
+                let py = generator.gen::<f32>();
+
+                let ray = self.get_ray(x, y, px, py);
+
+                fallen_color = fallen_color + self.world_color(&ray, &world, self.depth);
+            }
+
+            fallen_color = fallen_color * (1.0 / self.samples_per_pixel as f32);
+
+            pixels[x as usize * 3] = (255.999 * fallen_color.r().sqrt().clamp(0.000, 0.999)) as u8;
+            pixels[x as usize * 3 + 1] =
+                (255.999 * fallen_color.g().sqrt().clamp(0.000, 0.999)) as u8;
+            pixels[x as usize * 3 + 2] =
+                ((255.999 * fallen_color.b().sqrt().clamp(0.000, 0.999)) as i32) as u8;
         }
     }
 
