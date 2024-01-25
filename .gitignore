@@ -1,6 +1,8 @@
 /target
+*.png
 *.ppm
 *.iml
 .idea
+.DS_Store
 Cargo.lock
 *.bmp
