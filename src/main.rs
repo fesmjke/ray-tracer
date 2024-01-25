@@ -5,11 +5,13 @@ use crate::objects::sphere::Sphere;
 use crate::objects::triangle::Triangle;
 use crate::preset::{parse_preset, Preset};
 use crate::vec3::{Color, Vec3};
+
+use image::codecs::png::PngEncoder;
+use image::ImageEncoder;
 use rand::thread_rng;
 use rayon::prelude::*;
 use std::env;
 use std::fs::File;
-use std::io::Write;
 
 mod camera;
 mod color;
@@ -24,31 +26,17 @@ mod vec3;
 // TODO:remove later or move to separate file
 
 fn write_image(pixels: &[u8], image_width: usize, image_height: usize) {
-    let file = File::create("image.ppm");
+    let file = File::create("image.png").expect("Unable to create image.png file!");
+    let encoder = PngEncoder::new(file);
 
-    match file {
-        Ok(mut f) => {
-            f.write(format!("P3\n {} {}\n255\n", image_width, image_height).as_bytes())
-                .expect("unable to write to file!");
-
-            for band in pixels.chunks(3) {
-                let pixel_color = Color::new(band[0] as f32, band[1] as f32, band[2] as f32);
-
-                let buf = format!(
-                    "{} {} {}\n",
-                    pixel_color.r(),
-                    pixel_color.g(),
-                    pixel_color.b()
-                );
-
-                f.write(buf.as_bytes()).expect("unable to write to file!");
-            }
-        }
-
-        Err(_) => {
-            println!("unable to create file!");
-        }
-    };
+    encoder
+        .write_image(
+            pixels,
+            image_width as u32,
+            image_height as u32,
+            image::ColorType::Rgb8,
+        )
+        .expect("Unable to write to image.png file!");
 }
 
 fn main() {
@@ -127,10 +115,10 @@ fn main() {
     )));
 
     world.attach(Box::from(Triangle::from(
-        Vec3::new(-1.0, 0.0, 0.0),
-        Vec3::new(1.0, 0.0, -1.0),
+        Vec3::new(-4.0, 0.0, 0.0),
+        Vec3::new(4.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, -1.0),
-        lambertian_material,
+        metal_material,
     )));
 
     let mut camera = Camera::new(image_width);
