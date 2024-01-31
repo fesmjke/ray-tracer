@@ -1,10 +1,11 @@
 use crate::camera::Camera;
 use crate::hit::HittableList;
 use crate::material::Material;
+use crate::objects::plane::Plane;
 use crate::objects::sphere::Sphere;
 use crate::objects::triangle::Triangle;
 use crate::preset::{parse_preset, Preset};
-use crate::vec3::{Color, Vec3};
+use crate::vec3::{Color, Point3, Vec3};
 
 use image::codecs::png::PngEncoder;
 use image::ImageEncoder;
@@ -108,17 +109,23 @@ fn main() {
     //     dielectric_material,
     // )));
 
+    // world.attach(Box::from(Plane::from(
+    //     Point3::new(0.0, -100.0, 0.0),
+    //     Vec3::new(0.0, 1.0, 0.0),
+    //     material_ground,
+    // )));
+
     world.attach(Box::from(Sphere::from(
-        Vec3::new(-4.0, 1.0, 0.0),
+        Vec3::new(0.0, 0.0, 0.0),
         1.0,
-        lambertian_material,
+        metal_material,
     )));
 
     world.attach(Box::from(Triangle::from(
-        Vec3::new(-4.0, 0.0, 0.0),
+        Vec3::new(-1.0, 3.0, 0.0),
         Vec3::new(4.0, 0.0, -1.0),
         Vec3::new(0.0, 1.0, -1.0),
-        metal_material,
+        lambertian_material,
     )));
 
     let mut camera = Camera::new(image_width);
