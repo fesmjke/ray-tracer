@@ -37,10 +37,11 @@ impl Hittable for Triangle {
             return false;
         }
 
-        // TODO: outward normal
+        let outward_normal = hit.point - 0.3 * (self.v0 + self.v1 + self.v2);
 
         hit.point = ray.at(hit.t);
         hit.material = self.material.clone();
+        hit.set_front_face(ray, &outward_normal);
 
         return true;
     }
