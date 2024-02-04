@@ -1,4 +1,3 @@
-// use rand::{random, thread_rng, Rng};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
@@ -20,16 +19,6 @@ impl Default for Vector3 {
 impl Vector3 {
     pub fn new(x: f64, y: f64, z: f64) -> Vector3 {
         Self { x, y, z }
-    }
-
-    pub fn r(self) -> f64 {
-        self.x
-    }
-    pub fn g(self) -> f64 {
-        self.y
-    }
-    pub fn b(self) -> f64 {
-        self.z
     }
 
     /// Calculate the dot product of two 3D vectors.
@@ -184,5 +173,57 @@ mod vector_tests {
         assert_eq!(vector_addition, Vector3::new(0.0, 2.0, 4.0));
     }
 
-    // TODO: add tests
+    #[test]
+    fn vector_subtraction() {
+        let vector_a = Vector3::new(-2.5, 1.3, 0.0);
+        let vector_b = Vector3::new(0.4, 1.3, 2.2);
+
+        let expected_vector = Vector3::new(-2.9, 0.0, -2.2);
+        let vector_subtraction = vector_a - vector_b;
+        assert_eq!(expected_vector, vector_subtraction);
+
+        let vector_subtraction = vector_b - vector_a;
+        let expected_vector = Vector3::new(2.9, 0.0, 2.2);
+        assert_eq!(expected_vector, vector_subtraction);
+
+        let vector_subtraction = vector_a - vector_a;
+        let expected_vector = Vector3::new(0.0, 0.0, 0.0);
+        assert_eq!(expected_vector, vector_subtraction);
+    }
+
+    #[test]
+    fn vector_multiplication() {
+        let vector_a = Vector3::new(1.0, 2.0, 0.0);
+        let vector_b = Vector3::new(1.5, 4.0, 5.0);
+
+        let expected_vector = Vector3::new(1.5, 8.0, 0.0);
+        let vector_multiplication = vector_a * vector_b;
+        assert_eq!(expected_vector, vector_multiplication);
+
+        let expected_vector = Vector3::new(1.5, 8.0, 0.0);
+        let vector_multiplication = vector_b * vector_a;
+        assert_eq!(expected_vector, vector_multiplication);
+
+        let expected_vector = Vector3::new(1.0, 4.0, 0.0);
+        let vector_multiplication = vector_a * vector_a;
+        assert_eq!(expected_vector, vector_multiplication);
+    }
+
+    #[test]
+    fn vector_multiplication_scalar() {
+        let vector_a = Vector3::new(1.0, 2.0, 3.0);
+
+        let expected_vector = Vector3::new(2.0, 4.0, 6.0);
+        let vector_multiplication = vector_a * 2.0;
+        assert_eq!(expected_vector, vector_multiplication);
+    }
+
+    #[test]
+    fn vector_division_scalar() {
+        let vector_a = Vector3::new(2.0, 2.0, 4.0);
+
+        let expected_vector = Vector3::new(1.0, 1.0, 2.0);
+        let vector_division = vector_a / 2.0;
+        assert_eq!(expected_vector, vector_division);
+    }
 }
