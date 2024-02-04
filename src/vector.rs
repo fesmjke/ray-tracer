@@ -1,4 +1,4 @@
-use rand::{random, thread_rng, Rng};
+// use rand::{random, thread_rng, Rng};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
@@ -56,49 +56,6 @@ impl Vector3 {
         *self / self.magnitude()
     }
 
-    /// Generate a random vector in range (0.0, 1.0]
-    pub fn random_vector() -> Vector3 {
-        Vector3::new(random::<f64>(), random::<f64>(), random::<f64>())
-    }
-
-    /// Generate a random vector in range [min, max]
-    pub fn random_vector_mm(min: f64, max: f64) -> Vector3 {
-        let mut rng = thread_rng();
-
-        Vector3::new(
-            rng.gen_range(min..max),
-            rng.gen_range(min..max),
-            rng.gen_range(min..max),
-        )
-    }
-    pub fn random_in_unit_disk() -> Vector3 {
-        let mut rng = thread_rng();
-
-        loop {
-            let rx = rng.gen_range(-1.0..=1.00);
-            let ry = rng.gen_range(-1.0..=1.00);
-            let r_point = Vector3::new(rx, ry, 0.0);
-
-            if r_point.magnitude() < 1.0 {
-                return r_point;
-            }
-        }
-    }
-
-    pub fn random_unit() -> Vector3 {
-        Vector3::normalize(&Vector3::random_in_unit_disk())
-    }
-
-    pub fn random_in_hemisphere(normal: &Vector3) -> Vector3 {
-        let on_unit_sphere = Vector3::random_unit();
-
-        return if on_unit_sphere.dot(&normal) > 0.0 {
-            on_unit_sphere
-        } else {
-            -on_unit_sphere
-        };
-    }
-
     /// Checks vector is close to zero
     pub fn near_zero(&self) -> bool {
         let almost_zero = 1e-8;
@@ -113,6 +70,7 @@ impl Vector3 {
         *self - *normal * 2.0 * self.dot(normal)
     }
 
+    // TODO: rewrite / change uv: to self?
     pub fn refract(uv: &Vector3, n: &Vector3, etai_over_etat: f64) -> Vector3 {
         let cos_theta = f64::min(-uv.dot(n), 1.0);
         let r_out_perpendicular = (*uv + (*n * cos_theta)) * etai_over_etat;
