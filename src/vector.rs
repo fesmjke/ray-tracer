@@ -135,9 +135,9 @@ impl Div<f64> for Vector3 {
     type Output = Self;
     fn div(self, other: f64) -> Self::Output {
         Self {
-            x: 0.0 / other,
-            y: 0.0 / other,
-            z: 0.0 / other,
+            x: self.x / other,
+            y: self.y / other,
+            z: self.z / other,
         }
     }
 }
@@ -225,6 +225,26 @@ mod vector_tests {
         let expected_vector = Vector3::new(1.0, 1.0, 2.0);
         let vector_division = vector_a / 2.0;
         assert_eq!(expected_vector, vector_division);
+    }
+
+    #[test]
+    fn vector_magnitude() {
+        let vector_a = Vector3::new(2.0, 2.0, 4.0);
+
+        let expected_magnitude = 24.0_f64.sqrt();
+        let vector_magnitude = vector_a.magnitude();
+        assert_eq!(expected_magnitude, vector_magnitude);
+    }
+
+    #[test]
+    fn unit_vector() {
+        let vector_a = Vector3::new(1.0, 3.0, 4.0);
+
+        let expected_unit_vector =
+            Vector3::new(0.19611613513818404, 0.5883484054145521, 0.7844645405527362);
+        let unit_vector = vector_a / vector_a.magnitude();
+
+        assert_eq!(expected_unit_vector, unit_vector);
     }
 
     #[test]
