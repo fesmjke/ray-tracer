@@ -237,12 +237,11 @@ mod vector_tests {
     }
 
     #[test]
-    fn unit_vector() {
-        let vector_a = Vector3::new(1.0, 3.0, 4.0);
+    fn normalize_vector() {
+        let vector_a = Vector3::new(4.0, 0.0, 0.0);
 
-        let expected_unit_vector =
-            Vector3::new(0.19611613513818404, 0.5883484054145521, 0.7844645405527362);
-        let unit_vector = vector_a / vector_a.magnitude();
+        let expected_unit_vector = Vector3::new(1.0, 0.0, 0.0);
+        let unit_vector = vector_a.normalize();
 
         assert_eq!(expected_unit_vector, unit_vector);
     }
