@@ -226,4 +226,35 @@ mod vector_tests {
         let vector_division = vector_a / 2.0;
         assert_eq!(expected_vector, vector_division);
     }
+
+    #[test]
+    fn vector_negative() {
+        let vector_a = Vector3::new(2.0, 2.0, 4.0);
+
+        let expected_vector = Vector3::new(-2.0, -2.0, -4.0);
+
+        assert_eq!(expected_vector, -vector_a);
+    }
+
+    #[test]
+    fn vector_cross_production() {
+        let vector_a = Vector3::new(1.0, 3.0, 4.0);
+        let vector_b = Vector3::new(2.0, 7.0, -5.0);
+
+        let expected_vector = Vector3::new(-43.0, 13.0, 1.0);
+        let cross_vector_production = vector_a.cross(&vector_b);
+
+        assert_eq!(expected_vector, cross_vector_production);
+    }
+
+    #[test]
+    fn vector_dot_production() {
+        let vector_a = Vector3::new(2.0, 4.0, 6.0);
+        let vector_b = Vector3::new(1.0, 3.0, 5.0);
+
+        let expected_dot = 44.0;
+        let dot_vector_production = vector_a.dot(&vector_b);
+
+        assert_eq!(expected_dot, dot_vector_production);
+    }
 }
