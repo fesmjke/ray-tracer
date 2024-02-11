@@ -1,6 +1,8 @@
+use crate::vec3::Color;
 use crate::vector::Vector3;
 use rand::{random, thread_rng, Rng};
 use std::f32::consts::PI;
+use std::io::Stdout;
 
 pub fn degrees_to_radians(degrees: f32) -> f32 {
     degrees * PI / 180.0
@@ -47,4 +49,16 @@ pub fn random_in_hemisphere(normal: &Vector3) -> Vector3 {
     } else {
         -on_unit_sphere
     };
+}
+
+pub fn write_color(out: &mut Stdout, pixel_color: Color) {
+    let buf = format!(
+        "{} {} {}\n",
+        pixel_color.r(),
+        pixel_color.g(),
+        pixel_color.b()
+    );
+
+    out.write(buf.as_bytes())
+        .expect("Unable to write color data!");
 }
