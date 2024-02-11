@@ -151,9 +151,6 @@ impl Div<f64> for Vector3 {
     }
 }
 
-pub type Color = Vector3;
-pub type Point3 = Vector3;
-
 #[cfg(test)]
 mod vector_tests {
     use super::*;
