@@ -1,3 +1,4 @@
+use crate::color::Color;
 use image::{ImageBuffer, ImageResult};
 use std::ops::{Index, IndexMut};
 
@@ -5,13 +6,11 @@ use std::ops::{Index, IndexMut};
 pub struct Canvas {
     width: usize,
     height: usize,
-    // TODO: replace with Color
-    // TODO: check if this gonna work with u8 default value without Color struct
-    pixels: Vec<(f64, f64, f64)>,
+    pixels: Vec<Color>,
 }
 
 impl Canvas {
-    pub fn new(width: usize, height: usize, color: (f64, f64, f64)) -> Self {
+    pub fn new(width: usize, height: usize, color: Color) -> Self {
         Canvas {
             width,
             height,
@@ -31,11 +30,11 @@ impl Canvas {
         img.save(path)
     }
 
-    fn convert_color(&self, color: &(f64, f64, f64)) -> (u8, u8, u8) {
+    fn convert_color(&self, color: &Color) -> (u8, u8, u8) {
         (
-            self.convert_component(color.0),
-            self.convert_component(color.1),
-            self.convert_component(color.2),
+            self.convert_component(color.r),
+            self.convert_component(color.g),
+            self.convert_component(color.b),
         )
     }
 
@@ -51,15 +50,15 @@ impl Canvas {
         (component * 255.0) as u8
     }
 
-    pub fn pixels(&mut self) -> &mut Vec<(f64, f64, f64)> {
+    pub fn pixels(&mut self) -> &mut Vec<Color> {
         &mut self.pixels
     }
 }
 
 impl Index<usize> for Canvas {
-    type Output = [(f64, f64, f64)];
+    type Output = [Color];
 
-    fn index(&self, row: usize) -> &[(f64, f64, f64)] {
+    fn index(&self, row: usize) -> &[Color] {
         let start = row * self.width;
 
         &self.pixels[start..start + self.width]
@@ -67,7 +66,7 @@ impl Index<usize> for Canvas {
 }
 
 impl IndexMut<usize> for Canvas {
-    fn index_mut(&mut self, row: usize) -> &mut [(f64, f64, f64)] {
+    fn index_mut(&mut self, row: usize) -> &mut [Color] {
         let start = row * self.width;
 
         &mut self.pixels[start..start + self.width]
@@ -80,17 +79,17 @@ mod canvas_tests {
 
     #[test]
     fn canvas_creation() {
-        let canvas = Canvas::new(5, 5, (0.0, 0.0, 0.0));
+        let canvas = Canvas::new(5, 5, Color::new(0.0, 0.0, 0.0));
 
-        assert_eq!(canvas[1][1], (0.0, 0.0, 0.0));
+        assert_eq!(canvas[1][1], Color::new(0.0, 0.0, 0.0));
     }
 
     #[test]
     fn set_pixel() {
-        let mut canvas = Canvas::new(10, 20, (0.0, 0.0, 0.0));
-        canvas[2][3] = (1.0, 0.0, 0.0);
+        let mut canvas = Canvas::new(10, 20, Color::new(0.0, 0.0, 0.0));
+        canvas[2][3] = Color::new(1.0, 0.0, 0.0);
 
-        assert_eq!(canvas[2][3], (1.0, 0.0, 0.0));
-        assert_eq!(canvas[0][1], (0.0, 0.0, 0.0));
+        assert_eq!(canvas[2][3], Color::new(1.0, 0.0, 0.0));
+        assert_eq!(canvas[0][1], Color::new(0.0, 0.0, 0.0));
     }
 }
