@@ -21,6 +21,22 @@ impl Point {
     pub fn new(x: f64, y: f64, z: f64) -> Point {
         Self { x, y, z }
     }
+
+    fn x(&self) -> f64 {
+        self.x
+    }
+
+    fn y(&self) -> f64 {
+        self.y
+    }
+
+    fn z(&self) -> f64 {
+        self.z
+    }
+
+    fn zero() -> Self {
+        Point::default()
+    }
 }
 
 impl PartialEq for Point {
