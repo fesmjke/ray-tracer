@@ -78,12 +78,6 @@ impl PartialEq for Vector3 {
 
 impl ApproxEq for Vector3 {
     fn approx_eq(&self, other: &Self) -> bool {
-        println!(
-            "{} {} {}",
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z
-        );
         (self.x - other.x).abs() < EPSILON
             && (self.y - other.y).abs() < EPSILON
             && (self.z - other.z).abs() < EPSILON
