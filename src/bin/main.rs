@@ -1,18 +1,16 @@
-// use crate::camera::Camera;
-// use crate::hit::HittableList;
-// use crate::material::Material;
-// use crate::objects::plane::Plane;
-// use crate::objects::sphere::Sphere;
-// use crate::objects::triangle::Triangle;
-// use crate::preset::{parse_preset, Preset};
-// use crate::vec3::{Color, Point3, Vec3};
-//
-// use image::codecs::png::PngEncoder;
-// use image::ImageEncoder;
-// use rand::thread_rng;
-// use rayon::prelude::*;
-// use std::env;
-// use std::fs::File;
+use image::codecs::png::PngEncoder;
+use image::ImageEncoder;
+use rand::thread_rng;
+use rayon::prelude::*;
+use std::env;
+use std::fs::File;
+use warp::camera::Camera;
+use warp::hit::HittableList;
+use warp::material::Material;
+use warp::objects::sphere::Sphere;
+use warp::objects::triangle::Triangle;
+use warp::preset::{parse_preset, Preset};
+use warp::vec3::{Color, Vec3};
 
 // TODO:remove later or move to separate file
 
