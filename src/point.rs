@@ -1,4 +1,5 @@
 use crate::float_eq::{ApproxEq, EPSILON};
+use crate::vector::Vector3;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
@@ -116,6 +117,42 @@ impl Div<f64> for Point {
             x: self.x / other,
             y: self.y / other,
             z: self.z / other,
+        }
+    }
+}
+
+impl Add<Vector3> for Point {
+    type Output = Point;
+
+    fn add(self, other: Vector3) -> Self::Output {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl Add<Point> for Vector3 {
+    type Output = Point;
+
+    fn add(self, other: Point) -> Self::Output {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl Sub<Vector3> for Point {
+    type Output = Point;
+
+    fn sub(self, other: Vector3) -> Self::Output {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
         }
     }
 }
