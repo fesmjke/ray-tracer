@@ -12,6 +12,26 @@ impl Color {
     pub fn new(r: f64, g: f64, b: f64) -> Color {
         Color { r, g, b }
     }
+
+    pub fn black() -> Color {
+        Color::default()
+    }
+
+    pub fn white() -> Color {
+        Color::new(1.0, 1.0, 1.0)
+    }
+
+    pub fn red() -> Color {
+        Color::new(1.0, 0.0, 0.0)
+    }
+
+    pub fn green() -> Color {
+        Color::new(0.0, 1.0, 0.0)
+    }
+
+    pub fn blue() -> Color {
+        Color::new(0.0, 0.0, 1.0)
+    }
 }
 
 impl Default for Color {
@@ -79,13 +99,6 @@ impl Mul<f64> for Color {
             g: self.g * other,
             b: self.b * other,
         }
-    }
-}
-
-impl Mul<Color> for f64 {
-    type Output = Color;
-    fn mul(self, other: Color) -> Self::Output {
-        self * other
     }
 }
 
@@ -162,7 +175,7 @@ mod color_tests {
         let color_a = Color::new(0.3, 0.0, 1.0);
         let color_b = Color::new(0.2, 0.0, 1.0);
 
-        let expected_color = Color::new(0.6, 0.0, 1.0);
+        let expected_color = Color::new(0.06, 0.0, 1.0);
         let color_multiplication = color_a * color_b;
         assert_eq!(expected_color, color_multiplication);
     }
