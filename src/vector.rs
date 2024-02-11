@@ -1,3 +1,4 @@
+use crate::float_eq::{ApproxEq, EPSILON};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
@@ -71,7 +72,21 @@ impl Vector3 {
 
 impl PartialEq for Vector3 {
     fn eq(&self, other: &Self) -> bool {
-        self.x == other.x && self.y == other.y && self.z == other.z
+        self.approx_eq(&other)
+    }
+}
+
+impl ApproxEq for Vector3 {
+    fn approx_eq(&self, other: &Self) -> bool {
+        println!(
+            "{} {} {}",
+            self.x - other.x,
+            self.y - other.y,
+            self.z - other.z
+        );
+        (self.x - other.x).abs() < EPSILON
+            && (self.y - other.y).abs() < EPSILON
+            && (self.z - other.z).abs() < EPSILON
     }
 }
 
@@ -275,5 +290,15 @@ mod vector_tests {
         let dot_vector_production = vector_a.dot(&vector_b);
 
         assert_eq!(expected_dot, dot_vector_production);
+    }
+
+    #[test]
+    fn normalize_vector_approx() {
+        let vector_a = Vector3::new(1.0, 2.0, 3.0);
+
+        let expected_unit_vector = Vector3::new(0.2672612, 0.5345224, 0.8017837);
+        let unit_vector = vector_a.normalize();
+
+        assert_eq!(expected_unit_vector, unit_vector);
     }
 }
