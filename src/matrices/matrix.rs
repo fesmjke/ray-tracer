@@ -251,6 +251,15 @@ mod matrix_tests {
     }
 
     #[test]
+    fn matrix_transpose_identity() {
+        let mut identity = Matrix4::identity();
+
+        identity.transpose();
+
+        assert_eq!(identity, Matrix4::identity());
+    }
+
+    #[test]
     fn matrix_multiplication() {
         let matrix_a = Matrix4::from(vec![
             vec![1.0, 2.0, 3.0, 4.0],
