@@ -168,6 +168,38 @@ mod matrix_tests {
     }
 
     #[test]
+    fn matrix_identity_by_vector() {
+        let identity = Matrix4::identity();
+        let vector_b = Vector3::new(1.0, 2.0, 3.0);
+
+        let expected_vector = Vector3::new(1.0, 2.0, 3.0);
+        let multiplication = identity * vector_b;
+
+        assert_eq!(expected_vector, multiplication);
+    }
+
+    #[test]
+    fn matrix_identity_by_matrix() {
+        let matrix_a = Matrix4::from(vec![
+            vec![0.0, 1.0, 2.0, 4.0],
+            vec![1.0, 2.0, 4.0, 8.0],
+            vec![2.0, 4.0, 8.0, 16.0],
+            vec![4.0, 8.0, 16.0, 32.0],
+        ]);
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![0.0, 1.0, 2.0, 4.0],
+            vec![1.0, 2.0, 4.0, 8.0],
+            vec![2.0, 4.0, 8.0, 16.0],
+            vec![4.0, 8.0, 16.0, 32.0],
+        ]);
+
+        let multiplication = matrix_a * Matrix4::identity();
+
+        assert_eq!(expected_matrix, multiplication);
+    }
+
+    #[test]
     fn matrix_equality() {
         let mut matrix_a = Matrix2::default();
 
