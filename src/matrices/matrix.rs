@@ -1,6 +1,7 @@
 use crate::float_eq::ApproxEq;
 use crate::matrices::{Matrix2, Matrix3, Matrix4};
 use std::fmt::{Debug, Formatter, Result};
+use std::ops::Mul;
 
 pub trait Matrix {
     const COLUMNS: usize;
@@ -94,6 +95,26 @@ macro_rules! impl_matrix {
                 write!(f, "Matrix: {:?}", self.data)
             }
         }
+
+        impl Mul for $ty {
+            type Output = Self;
+
+            fn mul(self, other: Self) -> Self::Output {
+                let mut result = Self::new();
+
+                for row in 0..self.rows() {
+                    for col in 0..self.columns() {
+                        let mut delta = 0.0;
+                        for i in 0..self.rows() {
+                            delta += self.data[row][i] * other.data[i][col];
+                        }
+                        result.data[row][col] = delta;
+                    }
+                }
+
+                result
+            }
+        }
     };
 }
 
@@ -104,6 +125,7 @@ impl_matrix!(Matrix4, 4, 4);
 #[cfg(test)]
 mod matrix_tests {
     use super::*;
+    use crate::vector::Vector3;
 
     #[test]
     fn matrix_creation() {
@@ -194,5 +216,51 @@ mod matrix_tests {
         matrix_b.transpose();
 
         assert_eq!(expected_matrix, matrix_b);
+    }
+
+    #[test]
+    fn matrix_multiplication() {
+        let matrix_a = Matrix4::from(vec![
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![5.0, 6.0, 7.0, 8.0],
+            vec![9.0, 8.0, 7.0, 6.0],
+            vec![5.0, 4.0, 3.0, 2.0],
+        ]);
+
+        let matrix_b = Matrix4::from(vec![
+            vec![-2.0, 1.0, 2.0, 3.0],
+            vec![3.0, 2.0, 1.0, -1.0],
+            vec![4.0, 3.0, 6.0, 5.0],
+            vec![1.0, 2.0, 7.0, 8.0],
+        ]);
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![20.0, 22.0, 50.0, 48.0],
+            vec![44.0, 54.0, 114.0, 108.0],
+            vec![40.0, 58.0, 110.0, 102.0],
+            vec![16.0, 26.0, 46.0, 42.0],
+        ]);
+
+        let multiplication = matrix_a * matrix_b;
+
+        assert_eq!(expected_matrix, multiplication);
+    }
+
+    #[test]
+    fn matrix_multiplication_by_vector() {
+        let matrix_a = Matrix4::from(vec![
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![2.0, 4.0, 4.0, 2.0],
+            vec![8.0, 6.0, 4.0, 1.0],
+            vec![0.0, 0.0, 0.0, 1.0],
+        ]);
+
+        let vector_b = Vector3::new(1.0, 2.0, 3.0);
+
+        let expected_vector = Vector3::new(18.0, 24.0, 33.0);
+
+        let multiplication = matrix_a * vector_b;
+
+        assert_eq!(expected_vector, multiplication);
     }
 }
