@@ -9,7 +9,10 @@ pub trait Matrix {
     fn columns(&self) -> usize;
     fn rows(&self) -> usize;
     fn identity() -> Self;
+    fn transpose(&mut self);
 }
+
+// TODO: replace Vec with slice?
 
 macro_rules! impl_matrix {
     ($ty: ty,$col:expr, $row:expr) => {
@@ -41,6 +44,16 @@ macro_rules! impl_matrix {
                 }
 
                 Self { data: v }
+            }
+
+            fn transpose(&mut self) {
+                let temp = self.data.clone();
+
+                for (i, iv) in temp.iter().enumerate() {
+                    for (j, _) in iv.iter().enumerate() {
+                        self.data[i][j] = temp[j][i];
+                    }
+                }
             }
         }
 
@@ -153,5 +166,33 @@ mod matrix_tests {
         matrix_a.data[0][0] = 0.0;
 
         assert_ne!(matrix_a, matrix_b);
+    }
+
+    #[test]
+    fn matrix_transpose() {
+        let mut matrix_a = Matrix2::from(vec![vec![2.0, 1.0], vec![3.0, 1.0]]);
+        let expected_matrix = Matrix2::from(vec![vec![2.0, 3.0], vec![1.0, 1.0]]);
+
+        matrix_a.transpose();
+
+        assert_eq!(expected_matrix, matrix_a);
+
+        let mut matrix_b = Matrix4::from(vec![
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![4.0, 2.0, 3.0, 4.0],
+            vec![6.0, 2.0, 3.0, 4.0],
+            vec![8.0, 2.0, 3.0, 4.0],
+        ]);
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![1.0, 4.0, 6.0, 8.0],
+            vec![2.0, 2.0, 2.0, 2.0],
+            vec![3.0, 3.0, 3.0, 3.0],
+            vec![4.0, 4.0, 4.0, 4.0],
+        ]);
+
+        matrix_b.transpose();
+
+        assert_eq!(expected_matrix, matrix_b);
     }
 }
