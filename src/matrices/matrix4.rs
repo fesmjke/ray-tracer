@@ -9,7 +9,10 @@ pub struct Matrix4 {
 
 impl Matrix4 {
     pub fn determinant(&self) -> f64 {
-        todo!()
+        self.data[0]
+            .iter()
+            .enumerate()
+            .fold(0.0, |acc, (i, x)| acc + (x * self.cofactor(0, i)))
     }
 
     pub fn submatrix(&self, row: usize, column: usize) -> Matrix3 {
@@ -31,6 +34,20 @@ impl Matrix4 {
             .collect::<Vec<Vec<f64>>>();
 
         Matrix3::from(sb)
+    }
+
+    fn minor(&self, row: usize, column: usize) -> f64 {
+        self.submatrix(row, column).determinant()
+    }
+
+    fn cofactor(&self, row: usize, column: usize) -> f64 {
+        let minor = self.minor(row, column);
+
+        if (row + column) % 2 == 0 {
+            minor
+        } else {
+            -minor
+        }
     }
 }
 
@@ -120,7 +137,28 @@ mod matrix4_tests {
     }
 
     #[test]
-    fn matrix3_determinant() {
-        todo!()
+    fn matrix4_determinant() {
+        let matrix = Matrix4::from(vec![
+            vec![-2.0, -8.0, 3.0, 5.0],
+            vec![-3.0, 1.0, 7.0, 3.0],
+            vec![1.0, 2.0, -9.0, 6.0],
+            vec![-6.0, 7.0, 7.0, -9.0],
+        ]);
+
+        let cofactor_a = matrix.cofactor(0, 0);
+        let cofactor_b = matrix.cofactor(0, 1);
+        let cofactor_c = matrix.cofactor(0, 2);
+        let cofactor_d = matrix.cofactor(0, 3);
+
+        let dt = matrix.determinant();
+        let expected_result_explicit = -4071.0;
+        let expected_result = matrix.data[0][0] * cofactor_a // -4071.0
+            + matrix.data[0][1] * cofactor_b
+            + matrix.data[0][2] * cofactor_c
+            + matrix.data[0][3] * cofactor_d;
+
+        assert_eq!(expected_result, dt);
+        assert_eq!(expected_result_explicit, dt);
+        assert_eq!(expected_result_explicit, expected_result);
     }
 }

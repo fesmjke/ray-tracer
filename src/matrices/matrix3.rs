@@ -7,7 +7,10 @@ pub struct Matrix3 {
 
 impl Matrix3 {
     pub fn determinant(&self) -> f64 {
-        todo!()
+        self.data[0]
+            .iter()
+            .enumerate()
+            .fold(0.0, |acc, (i, x)| acc + (x * self.cofactor(0, i)))
     }
 
     pub fn submatrix(&self, row: usize, column: usize) -> Matrix2 {
@@ -140,6 +143,21 @@ mod matrix3_tests {
 
     #[test]
     fn matrix3_determinant() {
-        todo!()
+        let matrix = Matrix3::from(vec![
+            vec![1.0, 2.0, 6.0],
+            vec![-5.0, 8.0, -4.0],
+            vec![2.0, 6.0, 4.0],
+        ]);
+
+        let cofactor_a = matrix.cofactor(0, 0);
+        let cofactor_b = matrix.cofactor(0, 1);
+        let cofactor_c = matrix.cofactor(0, 2);
+
+        let dt = matrix.determinant();
+        let expected_result = matrix.data[0][0] * cofactor_a // -196.0
+            + matrix.data[0][1] * cofactor_b
+            + matrix.data[0][2] * cofactor_c;
+
+        assert_eq!(expected_result, dt);
     }
 }
