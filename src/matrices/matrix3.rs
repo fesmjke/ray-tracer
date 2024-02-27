@@ -30,6 +30,20 @@ impl Matrix3 {
 
         Matrix2::from(sb)
     }
+
+    fn minor(&self, row: usize, column: usize) -> f64 {
+        self.submatrix(row, column).determinant()
+    }
+
+    fn cofactor(&self, row: usize, column: usize) -> f64 {
+        let minor = self.minor(row, column);
+
+        if (row + column) % 2 == 0 {
+            minor
+        } else {
+            -minor
+        }
+    }
 }
 
 #[cfg(test)]
@@ -91,6 +105,37 @@ mod matrix3_tests {
         let expected_matrix = Matrix2::from(vec![vec![-3.0, 2.0], vec![0.0, 6.0]]);
 
         assert_eq!(expected_matrix, sub_a);
+    }
+
+    #[test]
+    fn matrix3_minor() {
+        let matrix = Matrix3::from(vec![
+            vec![3.0, 5.0, 0.0],
+            vec![2.0, -1.0, -7.0],
+            vec![6.0, -1.0, 5.0],
+        ]);
+
+        let dt = matrix.minor(1, 0);
+        let expected_dt = 25.0;
+
+        assert_eq!(expected_dt, dt);
+    }
+
+    #[test]
+    fn matrix3_cofactor() {
+        let matrix = Matrix3::from(vec![
+            vec![3.0, 5.0, 0.0],
+            vec![2.0, -1.0, -7.0],
+            vec![6.0, -1.0, 5.0],
+        ]);
+
+        let dt = matrix.minor(0, 0);
+        let cf = matrix.cofactor(0, 0);
+        assert_eq!(dt, cf);
+
+        let dt = matrix.minor(1, 0);
+        let cf = matrix.cofactor(1, 0);
+        assert_ne!(dt, cf);
     }
 
     #[test]
