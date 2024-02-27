@@ -25,12 +25,10 @@ mod matrix2_tests {
 
     #[test]
     fn matrix2_equality() {
-        {
-            let matrix_a = Matrix2::from(vec![vec![-3.0, 5.0], vec![1.0, -2.0]]);
-            let matrix_b = matrix_a.clone();
+        let matrix_a = Matrix2::from(vec![vec![-3.0, 5.0], vec![1.0, -2.0]]);
+        let matrix_b = matrix_a.clone();
 
-            assert_eq!(matrix_a, matrix_b);
-        }
+        assert_eq!(matrix_a, matrix_b);
     }
 
     #[test]
