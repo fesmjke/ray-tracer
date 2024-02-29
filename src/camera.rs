@@ -1,7 +1,7 @@
-use crate::color;
 use crate::hit::{Hit, Hittable, HittableList};
 use crate::material::Scattered;
 use crate::vec3::{Color, Point3, Vec3};
+use crate::{color, utils};
 
 use crate::ray::Ray;
 use crate::utils::degrees_to_radians;
@@ -189,7 +189,7 @@ impl Camera {
 
                 let pixel_color = Color::new(ir as f32, ig as f32, ib as f32);
 
-                color::write_color(&mut out, pixel_color);
+                utils::write_color(&mut out, pixel_color);
             }
         }
         outerr

@@ -1,33 +1,21 @@
-use crate::camera::Camera;
-use crate::hit::HittableList;
-use crate::material::Material;
-use crate::objects::plane::Plane;
-use crate::objects::sphere::Sphere;
-use crate::objects::triangle::Triangle;
-use crate::preset::{parse_preset, Preset};
-use crate::vec3::{Color, Point3, Vec3};
-
 use image::codecs::png::PngEncoder;
 use image::ImageEncoder;
 use rand::thread_rng;
 use rayon::prelude::*;
 use std::env;
 use std::fs::File;
-
-mod camera;
-mod color;
-mod hit;
-mod material;
-mod objects;
-mod preset;
-mod ray;
-mod utils;
-mod vec3;
+use warp::camera::Camera;
+use warp::hit::HittableList;
+use warp::material::Material;
+use warp::objects::sphere::Sphere;
+use warp::objects::triangle::Triangle;
+use warp::preset::{parse_preset, Preset};
+use warp::vec3::{Color, Vec3};
 
 // TODO:remove later or move to separate file
 
 fn write_image(pixels: &[u8], image_width: usize, image_height: usize) {
-    let file = File::create("image.png").expect("Unable to create image.png file!");
+    let file = File::create("../../image.png").expect("Unable to create image.png file!");
     let encoder = PngEncoder::new(file);
 
     encoder
