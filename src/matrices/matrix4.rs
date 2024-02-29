@@ -1,3 +1,4 @@
+use crate::float_eq::ApproxEq;
 use crate::matrices::{Matrix, Matrix3};
 use crate::vector::Vector3;
 use std::ops::Mul;
@@ -48,6 +49,14 @@ impl Matrix4 {
         } else {
             -minor
         }
+    }
+
+    pub fn invert(&self) -> Matrix4 {
+        todo!()
+    }
+
+    fn is_invertible(&self) -> bool {
+        !self.determinant().approx_eq(&0.0)
     }
 }
 
@@ -160,5 +169,25 @@ mod matrix4_tests {
         assert_eq!(expected_result, dt);
         assert_eq!(expected_result_explicit, dt);
         assert_eq!(expected_result_explicit, expected_result);
+    }
+
+    #[test]
+    fn matrix4_inversion() {
+        let matrix_a = Matrix4::from(vec![
+            vec![6.0, 4.0, 4.0, 4.0],
+            vec![5.0, 5.0, 7.0, 6.0],
+            vec![4.0, -9.0, 3.0, -7.0],
+            vec![9.0, 1.0, 7.0, -6.0],
+        ]);
+
+        let matrix_b = Matrix4::from(vec![
+            vec![-4.0, 2.0, -2.0, -3.0],
+            vec![9.0, 6.0, 2.0, 6.0],
+            vec![0.0, -5.0, 1.0, -5.0],
+            vec![0.0, 0.0, 0.0, 0.0],
+        ]);
+
+        assert!(matrix_a.is_invertible()); // yes -> determinant = -2120
+        assert!(!matrix_b.is_invertible()); // no -> determinant = 0
     }
 }
