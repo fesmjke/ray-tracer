@@ -52,7 +52,25 @@ impl Matrix4 {
     }
 
     pub fn invert(&self) -> Matrix4 {
-        todo!()
+        if self.is_invertible() {
+            let dt = self.determinant();
+
+            let temp = self
+                .data
+                .iter()
+                .enumerate()
+                .map(|(i, s)| {
+                    s.iter()
+                        .enumerate()
+                        .map(|(j, _)| self.cofactor(j, i) / dt)
+                        .collect::<Vec<f64>>()
+                })
+                .collect::<Vec<Vec<f64>>>();
+
+            return Matrix4::from(temp);
+        } else {
+            panic!("Matrix {:?} is not invertible!", &self);
+        }
     }
 
     fn is_invertible(&self) -> bool {
@@ -172,7 +190,7 @@ mod matrix4_tests {
     }
 
     #[test]
-    fn matrix4_inversion() {
+    fn matrix4_is_invertible() {
         let matrix_a = Matrix4::from(vec![
             vec![6.0, 4.0, 4.0, 4.0],
             vec![5.0, 5.0, 7.0, 6.0],
@@ -189,5 +207,26 @@ mod matrix4_tests {
 
         assert!(matrix_a.is_invertible()); // yes -> determinant = -2120
         assert!(!matrix_b.is_invertible()); // no -> determinant = 0
+    }
+
+    #[test]
+    fn matrix_inverse() {
+        let matrix_a = Matrix4::from(vec![
+            vec![-5.0, 2.0, 6.0, -8.0],
+            vec![1.0, -5.0, 1.0, 8.0],
+            vec![7.0, 7.0, -6.0, -7.0],
+            vec![1.0, -3.0, 7.0, 4.0],
+        ]);
+
+        let matrix_a_inverted = matrix_a.invert();
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![0.21805, 0.45113, 0.24060, -0.04511],
+            vec![-0.80827, -1.45677, -0.44361, 0.52068],
+            vec![-0.07895, -0.22368, -0.05263, 0.19737],
+            vec![-0.52256, -0.81391, -0.30075, 0.30639],
+        ]);
+
+        assert_eq!(expected_matrix, matrix_a_inverted);
     }
 }
