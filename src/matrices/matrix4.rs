@@ -265,4 +265,26 @@ mod matrix4_tests {
 
         assert_eq!(expected_matrix, matrix_c_inverted);
     }
+
+    #[test]
+    fn matrix4_back_initial() {
+        let matrix_a = Matrix4::from(vec![
+            vec![3.0, -9.0, 7.0, 3.0],
+            vec![3.0, -8.0, 2.0, -9.0],
+            vec![-4.0, 4.0, 4.0, 1.0],
+            vec![-6.0, 5.0, -1.0, 1.0],
+        ]);
+
+        let matrix_b = Matrix4::from(vec![
+            vec![8.0, 2.0, 2.0, 2.0],
+            vec![3.0, -1.0, 7.0, 0.0],
+            vec![7.0, 0.0, 5.0, 4.0],
+            vec![6.0, -2.0, 0.0, 5.0],
+        ]);
+
+        // TODO: remove clone when matrix vec will be replaced with slice
+        let matrix_c = matrix_a.clone() * matrix_b.clone();
+        let initial_matrix = matrix_c * matrix_b.invert();
+        assert_eq!(initial_matrix, matrix_a)
+    }
 }
