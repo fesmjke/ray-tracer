@@ -228,5 +228,41 @@ mod matrix4_tests {
         ]);
 
         assert_eq!(expected_matrix, matrix_a_inverted);
+
+        let matrix_b = Matrix4::from(vec![
+            vec![8.0, -5.0, 9.0, 2.0],
+            vec![7.0, 5.0, 6.0, 1.0],
+            vec![-6.0, 0.0, 9.0, 6.0],
+            vec![-3.0, 0.0, -9.0, -4.0],
+        ]);
+
+        let matrix_b_inverted = matrix_b.invert();
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![-0.15385, -0.15385, -0.28205, -0.53846],
+            vec![-0.07692, 0.12308, 0.02564, 0.03077],
+            vec![0.35897, 0.35897, 0.43590, 0.92308],
+            vec![-0.69231, -0.69231, -0.76923, -1.92308],
+        ]);
+
+        assert_eq!(expected_matrix, matrix_b_inverted);
+
+        let matrix_c = Matrix4::from(vec![
+            vec![9.0, 3.0, 0.0, 9.0],
+            vec![-5.0, -2.0, -6.0, -3.0],
+            vec![-4.0, 9.0, 6.0, 4.0],
+            vec![-7.0, 6.0, 6.0, 2.0],
+        ]);
+
+        let matrix_c_inverted = matrix_c.invert();
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![-0.04074, -0.07778, 0.14444, -0.22222],
+            vec![-0.07778, 0.03333, 0.36667, -0.33333],
+            vec![-0.02901, -0.14630, -0.10926, 0.12963],
+            vec![0.17778, 0.06667, -0.26667, 0.33333],
+        ]);
+
+        assert_eq!(expected_matrix, matrix_c_inverted);
     }
 }
