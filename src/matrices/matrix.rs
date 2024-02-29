@@ -80,7 +80,7 @@ macro_rules! impl_matrix {
             fn eq(&self, other: &Self) -> bool {
                 for i in 0..self.rows() {
                     for j in 0..self.columns() {
-                        if !self.data[i][j].approx_eq(&other.data[i][j]) {
+                        if !self.data[i][j].approx_eq_low(&other.data[i][j]) {
                             return false;
                         }
                     }
