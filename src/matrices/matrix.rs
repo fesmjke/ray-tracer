@@ -125,6 +125,7 @@ impl_matrix!(Matrix4, 4, 4);
 #[cfg(test)]
 mod matrix_tests {
     use super::*;
+    use crate::point::Point;
     use crate::vector::Vector3;
 
     #[test]
@@ -298,10 +299,25 @@ mod matrix_tests {
 
         let vector_b = Vector3::new(1.0, 2.0, 3.0);
 
-        let expected_vector = Vector3::new(18.0, 24.0, 33.0);
+        let expected_vector = Vector3::new(14.0, 22.0, 32.0);
 
         let multiplication = matrix_a * vector_b;
 
         assert_eq!(expected_vector, multiplication);
+    }
+
+    #[test]
+    fn matrix_multiplication_point() {
+        let matrix_a = Matrix4::from(vec![
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![2.0, 4.0, 4.0, 2.0],
+            vec![8.0, 6.0, 4.0, 1.0],
+            vec![0.0, 0.0, 0.0, 1.0],
+        ]);
+
+        let point = matrix_a * Point::new(1.0, 2.0, 3.0);
+        let expected_point = Point::new(18.0, 24.0, 33.0);
+
+        assert_eq!(expected_point, point);
     }
 }
