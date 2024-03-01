@@ -2,7 +2,7 @@ use crate::vec3::Color;
 use crate::vector::Vector3;
 use rand::{random, thread_rng, Rng};
 use std::f32::consts::PI;
-use std::io::Stdout;
+use std::io::{Stdout, Write};
 
 pub fn degrees_to_radians(degrees: f32) -> f32 {
     degrees * PI / 180.0
