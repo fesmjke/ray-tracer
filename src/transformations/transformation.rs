@@ -11,7 +11,7 @@ pub enum Transform {
     Translate(f64, f64, f64),
     Rotate(Over, f64),
     Scale(f64, f64, f64),
-    Shear,
+    Shear(f64, f64, f64, f64, f64, f64),
 }
 
 impl Transform {
@@ -38,9 +38,13 @@ impl Transform {
                     .set(1, 1, f64::cos(angle)),
             },
             Transform::Scale(x, y, z) => Matrix4::identity().set(0, 0, x).set(1, 1, y).set(2, 2, z),
-            Transform::Shear => {
-                todo!()
-            }
+            Transform::Shear(xy, xz, yx, yz, zx, zy) => Matrix4::identity()
+                .set(0, 1, xy)
+                .set(0, 2, xz)
+                .set(1, 0, yx)
+                .set(1, 2, yz)
+                .set(2, 0, zx)
+                .set(2, 1, zy),
         }
     }
 }
@@ -195,5 +199,83 @@ mod transformations_tests {
 
         assert_eq!(expected_point_half, npoint_half);
         assert_eq!(expected_point_full, npoint_full);
+    }
+
+    #[test]
+    fn transformation_shear_x_proportion_y() {
+        let transformation = Transform::Shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0).transformation();
+
+        let point = Point::new(2.0, 3.0, 4.0);
+
+        let expected_point = Point::new(5.0, 3.0, 4.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_shear_x_proportion_z() {
+        let transformation = Transform::Shear(0.0, 1.0, 0.0, 0.0, 0.0, 0.0).transformation();
+
+        let point = Point::new(2.0, 3.0, 4.0);
+
+        let expected_point = Point::new(6.0, 3.0, 4.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_shear_y_proportion_x() {
+        let transformation = Transform::Shear(0.0, 0.0, 1.0, 0.0, 0.0, 0.0).transformation();
+
+        let point = Point::new(2.0, 3.0, 4.0);
+
+        let expected_point = Point::new(2.0, 5.0, 4.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_shear_y_proportion_z() {
+        let transformation = Transform::Shear(0.0, 0.0, 0.0, 1.0, 0.0, 0.0).transformation();
+
+        let point = Point::new(2.0, 3.0, 4.0);
+
+        let expected_point = Point::new(2.0, 7.0, 4.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_shear_z_proportion_x() {
+        let transformation = Transform::Shear(0.0, 0.0, 0.0, 0.0, 1.0, 0.0).transformation();
+
+        let point = Point::new(2.0, 3.0, 4.0);
+
+        let expected_point = Point::new(2.0, 3.0, 6.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_shear_z_proportion_y() {
+        let transformation = Transform::Shear(0.0, 0.0, 0.0, 0.0, 0.0, 1.0).transformation();
+
+        let point = Point::new(2.0, 3.0, 4.0);
+
+        let expected_point = Point::new(2.0, 3.0, 7.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
     }
 }
