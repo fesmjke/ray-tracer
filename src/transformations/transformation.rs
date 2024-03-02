@@ -3,7 +3,7 @@ use crate::matrices::{Matrix, Matrix4};
 pub enum Transform {
     Translate(f64, f64, f64),
     Rotate,
-    Scale,
+    Scale(f64, f64, f64),
     Shear,
 }
 
@@ -16,9 +16,7 @@ impl Transform {
             Transform::Rotate => {
                 todo!()
             }
-            Transform::Scale => {
-                todo!()
-            }
+            Transform::Scale(x, y, z) => Matrix4::identity().set(0, 0, x).set(1, 1, y).set(2, 2, z),
             Transform::Shear => {
                 todo!()
             }
@@ -68,5 +66,39 @@ mod transformations_tests {
         let npoint = transformation.invert() * point;
 
         assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_scaling_point() {
+        let transformation = Transform::Scale(2.0, 3.0, 4.0).transformation();
+        let point = Point::new(-4.0, 6.0, 8.0);
+        let expected_point = Point::new(-8.0, 18.0, 32.0);
+
+        let npoint = transformation * point;
+
+        assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_scaling_vector() {
+        let transformation = Transform::Scale(2.0, 3.0, 4.0).transformation();
+        let vector = Vector3::new(-4.0, 6.0, 8.0);
+        let expected_vector = Vector3::new(-8.0, 18.0, 32.0);
+
+        let nvector = transformation * vector;
+
+        assert_eq!(expected_vector, nvector);
+        assert_eq!(expected_vector.magnitude(), nvector.magnitude()); // ~37.5765
+    }
+
+    #[test]
+    fn transformation_scaling_inverse_vector() {
+        let transformation = Transform::Scale(2.0, 3.0, 4.0).transformation();
+        let vector = Vector3::new(-4.0, 6.0, 8.0);
+        let expected_vector = Vector3::new(-2.0, 2.0, 2.0);
+
+        let nvector = transformation.invert() * vector;
+
+        assert_eq!(expected_vector, nvector);
     }
 }
