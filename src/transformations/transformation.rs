@@ -50,8 +50,11 @@ impl Transform {
 }
 
 /// TODO
-pub trait Transferable {
+pub trait Transformable {
     fn translate(self, x: f64, y: f64, z: f64);
+    fn rotate(self, over: Over, angle: f64);
+    fn scale(self, x: f64, y: f64, z: f64);
+    fn shear(self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64);
 }
 
 #[cfg(test)]
