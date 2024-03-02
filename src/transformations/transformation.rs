@@ -31,9 +31,11 @@ impl Transform {
                     .set(0, 2, f64::sin(angle))
                     .set(2, 0, -f64::sin(angle))
                     .set(2, 2, f64::cos(angle)),
-                Over::Z => {
-                    todo!()
-                }
+                Over::Z => Matrix4::identity()
+                    .set(0, 0, f64::cos(angle))
+                    .set(0, 1, -f64::sin(angle))
+                    .set(1, 0, f64::sin(angle))
+                    .set(1, 1, f64::cos(angle)),
             },
             Transform::Scale(x, y, z) => Matrix4::identity().set(0, 0, x).set(1, 1, y).set(2, 2, z),
             Transform::Shear => {
@@ -171,6 +173,22 @@ mod transformations_tests {
         let point = Point::new(0.0, 0.0, 1.0);
         let expected_point_half = Point::new(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0);
         let expected_point_full = Point::new(1.0, 0.0, 0.0);
+
+        let npoint_half = half_quarter * point;
+        let npoint_full = full_quarter * point;
+
+        assert_eq!(expected_point_half, npoint_half);
+        assert_eq!(expected_point_full, npoint_full);
+    }
+
+    #[test]
+    fn transformation_rotate_over_z_point() {
+        // TODO: later add separate method for reflection in different axis
+        let half_quarter = Transform::Rotate(Over::Z, PI / 4.0).transformation();
+        let full_quarter = Transform::Rotate(Over::Z, PI / 2.0).transformation();
+        let point = Point::new(0.0, 1.0, 0.0);
+        let expected_point_half = Point::new(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0);
+        let expected_point_full = Point::new(-1.0, 0.0, 0.0);
 
         let npoint_half = half_quarter * point;
         let npoint_full = full_quarter * point;
