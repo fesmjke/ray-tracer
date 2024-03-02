@@ -52,6 +52,11 @@ impl Matrix4 {
         }
     }
 
+    pub fn set(mut self, row: usize, column: usize, value: f64) -> Self {
+        self.data[row][column] = value;
+        self
+    }
+
     pub fn invert(&self) -> Matrix4 {
         if self.is_invertible() {
             let dt = self.determinant();
@@ -300,5 +305,19 @@ mod matrix4_tests {
         let matrix_c = matrix_a.clone() * matrix_b.clone();
         let initial_matrix = matrix_c * matrix_b.invert();
         assert_eq!(initial_matrix, matrix_a)
+    }
+
+    #[test]
+    fn matrix4_chain_set() {
+        let matrix_a = Matrix4::identity().set(0, 3, 1.0);
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![1.0, 0.0, 0.0, 1.0],
+            vec![0.0, 1.0, 0.0, 0.0],
+            vec![0.0, 0.0, 1.0, 0.0],
+            vec![0.0, 0.0, 0.0, 1.0],
+        ]);
+
+        assert_eq!(expected_matrix, matrix_a)
     }
 }
