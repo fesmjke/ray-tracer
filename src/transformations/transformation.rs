@@ -1,8 +1,15 @@
 use crate::matrices::{Matrix, Matrix4};
 
+// TODO: find better solution, or union with transformation?
+pub enum Over {
+    X,
+    Y,
+    Z,
+}
+
 pub enum Transform {
     Translate(f64, f64, f64),
-    Rotate,
+    Rotate(Over, f64),
     Scale(f64, f64, f64),
     Shear,
 }
@@ -13,9 +20,19 @@ impl Transform {
             Transform::Translate(x, y, z) => {
                 Matrix4::identity().set(0, 3, x).set(1, 3, y).set(2, 3, z)
             }
-            Transform::Rotate => {
-                todo!()
-            }
+            Transform::Rotate(over, angle) => match over {
+                Over::X => Matrix4::identity()
+                    .set(1, 1, f64::cos(angle))
+                    .set(1, 2, -f64::sin(angle))
+                    .set(2, 1, f64::sin(angle))
+                    .set(2, 2, f64::cos(angle)),
+                Over::Y => {
+                    todo!()
+                }
+                Over::Z => {
+                    todo!()
+                }
+            },
             Transform::Scale(x, y, z) => Matrix4::identity().set(0, 0, x).set(1, 1, y).set(2, 2, z),
             Transform::Shear => {
                 todo!()
@@ -34,6 +51,7 @@ mod transformations_tests {
     use super::*;
     use crate::point::Point;
     use crate::vector::Vector3;
+    use std::f64::consts::PI;
 
     #[test]
     fn transformation_transition_vector() {
@@ -112,5 +130,34 @@ mod transformations_tests {
         let nvector = transformation * vector;
 
         assert_eq!(expected_vector, nvector);
+    }
+
+    #[test]
+    fn transformation_rotate_over_x_point() {
+        // TODO: later add separate method for reflection in different axis
+        let half_quarter = Transform::Rotate(Over::X, PI / 4.0).transformation();
+        let full_quarter = Transform::Rotate(Over::X, PI / 2.0).transformation();
+        let point = Point::new(0.0, 1.0, 0.0);
+        let expected_point_half = Point::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0);
+        let expected_point_full = Point::new(0.0, 0.0, 1.0);
+
+        let npoint_half = half_quarter * point;
+        let npoint_full = full_quarter * point;
+
+        assert_eq!(expected_point_half, npoint_half);
+        assert_eq!(expected_point_full, npoint_full);
+    }
+
+    #[test]
+    fn transformation_rotate_over_x_inverse_point() {
+        // TODO: later add separate method for reflection in different axis
+        let half_quarter = Transform::Rotate(Over::X, PI / 4.0).transformation();
+
+        let point = Point::new(0.0, 1.0, 0.0);
+        let expected_point_half = Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
+
+        let npoint_half = half_quarter.invert() * point;
+
+        assert_eq!(expected_point_half, npoint_half);
     }
 }
