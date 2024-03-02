@@ -101,4 +101,16 @@ mod transformations_tests {
 
         assert_eq!(expected_vector, nvector);
     }
+
+    #[test]
+    fn transformation_scaling_reflect_vector() {
+        // TODO: later add separate method for reflection in different axis
+        let transformation = Transform::Scale(-1.0, 1.0, 1.0).transformation();
+        let vector = Vector3::new(2.0, 3.0, 4.0);
+        let expected_vector = Vector3::new(-2.0, 3.0, 4.0);
+
+        let nvector = transformation * vector;
+
+        assert_eq!(expected_vector, nvector);
+    }
 }
