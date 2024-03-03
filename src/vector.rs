@@ -1,4 +1,6 @@
 use crate::float_eq::{ApproxEq, EPSILON};
+use crate::matrices::Matrix4;
+use crate::transformations::Transformable;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
@@ -67,6 +69,12 @@ impl Vector3 {
         let r_out_parallel = (*n) * -f64::sqrt(f64::abs(1.0 - r_out_perpendicular.magnitude()));
 
         return r_out_perpendicular + r_out_parallel;
+    }
+}
+
+impl Transformable for Vector3 {
+    fn transform(self, transformation: &Matrix4) -> Self {
+        transformation.clone() * self
     }
 }
 
