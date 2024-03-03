@@ -1,4 +1,6 @@
 use crate::float_eq::{ApproxEq, EPSILON};
+use crate::matrices::Matrix4;
+use crate::transformations::Transformable;
 use crate::vector::Vector3;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
@@ -51,6 +53,12 @@ impl ApproxEq for Point {
         (self.x - other.x).abs() < EPSILON
             && (self.y - other.y).abs() < EPSILON
             && (self.z - other.z).abs() < EPSILON
+    }
+}
+
+impl Transformable for Point {
+    fn transform(self, transformation: &Matrix4) -> Self {
+        transformation.clone() * self
     }
 }
 
