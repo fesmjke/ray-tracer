@@ -11,7 +11,7 @@ impl<T> TransformBuilder<T>
 where
     T: Transformable,
 {
-    fn transform(self) -> Matrix4 {
+    fn transform(self) -> T {
         self.inner.transform(&self.transformation)
     }
 
@@ -37,7 +37,7 @@ where
 }
 
 pub trait Transformable {
-    fn transform(self, transformation: &Matrix4) -> Matrix4;
+    fn transform(self, transformation: &Matrix4) -> Self;
     fn translate(self, x: f64, y: f64, z: f64) -> TransformBuilder<Self>
     where
         Self: Sized,
@@ -78,8 +78,35 @@ pub trait Transformable {
 
 #[cfg(test)]
 mod transformations_builder_tests {
-    use crate::transformations::builder::TransformBuilder;
+    use crate::point::Point;
+    use crate::transformations::transformation::Over;
+    use crate::transformations::Transformable;
+    use crate::vector::Vector3;
+    use std::f64::consts::PI;
 
     #[test]
-    fn builder_point() {}
+    fn builder_point() {
+        let point = Point::new(1.0, 0.0, 1.0)
+            .rotate(Over::X, PI / 2.0)
+            .scale(5.0, 5.0, 5.0)
+            .translate(10.0, 5.0, 7.0)
+            .transform();
+
+        let expected_point = Point::new(15.0, 0.0, 7.0);
+
+        assert_eq!(expected_point, point);
+    }
+
+    #[test]
+    fn builder_vector() {
+        let vector = Vector3::new(0.0, 1.0, 0.0)
+            .rotate(Over::X, PI / 2.0)
+            .transform()
+            .scale(0.0, 0.0, 10.0)
+            .transform();
+
+        let expected_vector = Vector3::new(0.0, 0.0, 10.0);
+
+        assert_eq!(expected_vector, vector);
+    }
 }
