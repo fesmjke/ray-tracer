@@ -29,4 +29,9 @@ pub mod matrices {
     mod matrix4;
 }
 
-pub mod transformations {}
+pub mod transformations {
+    pub use builder::Transformable;
+    pub use transformation::{Over, Transform};
+    mod builder;
+    mod transformation;
+}
