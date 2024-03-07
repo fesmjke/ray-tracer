@@ -1,5 +1,6 @@
 use crate::float_eq::{ApproxEq, EPSILON};
 use crate::matrices::Matrix4;
+use crate::point::Point;
 use crate::transformations::Transformable;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
@@ -26,6 +27,11 @@ impl Vector3 {
 
     /// Calculate the dot product of two 3D vectors.
     pub fn dot(&self, other: &Vector3) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    // TODO: move to somewhere else, temporary solution
+    pub fn dot_point(&self, other: &Point) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 

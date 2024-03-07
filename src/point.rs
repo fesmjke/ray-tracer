@@ -37,6 +37,11 @@ impl Point {
         self.z
     }
 
+    // TODO: move to somewhere else, temporary solution
+    pub fn dot(&self, other: &Point) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
     fn zero() -> Self {
         Point::default()
     }
