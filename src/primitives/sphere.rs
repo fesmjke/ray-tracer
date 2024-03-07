@@ -1,4 +1,5 @@
 use crate::point::Point;
+use crate::ray::Ray;
 
 pub struct Sphere {
     id: String, // TODO: replace with UUID
@@ -9,6 +10,24 @@ pub struct Sphere {
 impl Sphere {
     fn new(id: String, origin: Point, radius: f64) -> Self {
         Self { id, origin, radius }
+    }
+
+    pub fn intersect(&self, ray: &Ray) -> Vec<f64> {
+        let sphere_to_ray = ray.origin - Point::default();
+        let a = ray.direction.dot(&ray.direction);
+        let b = 2.0 * ray.direction.dot_point(&sphere_to_ray);
+        let c = sphere_to_ray.dot(&sphere_to_ray) - 1.0;
+
+        let discriminant = b.powi(2) - (4.0 * a * c);
+
+        if discriminant < 0.0 {
+            vec![]
+        } else {
+            let x1 = (-b - discriminant.sqrt()) / (2.0 * a);
+            let x2 = (-b + discriminant.sqrt()) / (2.0 * a);
+
+            vec![x1, x2]
+        }
     }
 }
 
