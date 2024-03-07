@@ -1,36 +1,24 @@
-use crate::vec3::{Point3, Vec3};
+use crate::point::Point;
+use crate::vector::Vector3;
 
-#[derive(PartialEq, Debug, Copy, Clone)]
-pub struct Ray {
-    origin: Point3,
-    direction: Vec3,
+// TODO: reference and lifetimes
+struct Ray {
+    pub origin: Point,
+    pub direction: Vector3,
 }
 
 impl Ray {
-    pub fn new_empty() -> Ray {
+    fn new(origin: Point, direction: Vector3) -> Self {
+        Self { origin, direction }
+    }
+}
+
+impl Default for Ray {
+    fn default() -> Self {
         Self {
-            origin: Point3::empty_new(),
-            direction: Vec3::empty_new(),
+            origin: Point::default(),
+            direction: Vector3::default(),
         }
-    }
-
-    pub fn ray(orig: Point3, dir: Vec3) -> Ray {
-        Ray {
-            origin: orig,
-            direction: dir,
-        }
-    }
-
-    pub fn origin(&self) -> Point3 {
-        self.origin
-    }
-
-    pub fn direction(&self) -> Vec3 {
-        self.direction
-    }
-
-    pub fn at(&self, t: f32) -> Point3 {
-        return self.origin + self.direction * t;
     }
 }
 
@@ -39,30 +27,21 @@ mod ray_tests {
     use super::*;
 
     #[test]
-    fn ray_init() {
-        let p = Point3::new(0f32, 0f32, 0f32);
-        let v = Vec3::new(1f32, 2f32, 3f32);
+    fn ray_creation() {
+        let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(1.0, 2.0, 3.0));
+        let expected_origin = Point::new(0.0, 0.0, 0.0);
+        let expected_direction = Vector3::new(1.0, 2.0, 3.0);
 
-        let r = Ray::ray(p, v);
-
-        assert_eq!(
-            r,
-            Ray {
-                direction: Vec3::new(1f32, 2f32, 3f32),
-                origin: Point3::empty_new()
-            }
-        );
+        assert_eq!(expected_origin, ray.origin);
+        assert_eq!(expected_direction, ray.direction);
     }
 
     #[test]
-    fn ray_at() {
-        let p = Point3::new(0f32, 0f32, 0f32);
-        let v = Vec3::new(1f32, 2f32, 3f32);
+    fn ray_creation_default() {
+        let ray = Ray::default();
+        let expected_ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 0.0));
 
-        let r = Ray::ray(p, v);
-
-        let p_at = r.at(4.0);
-
-        assert_eq!(p_at, Point3::new(4f32, 8f32, 12f32));
+        assert_eq!(expected_ray.origin, ray.origin);
+        assert_eq!(expected_ray.direction, ray.direction);
     }
 }
