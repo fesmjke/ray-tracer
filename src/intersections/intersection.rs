@@ -1,7 +1,6 @@
 use crate::primitives::Sphere;
 use crate::ray::Ray;
-use std::fmt::Debug;
-use std::ops::Index;
+use std::{cmp::Ordering, fmt::Debug, ops::Index};
 
 pub trait Intersectable {
     fn intersect(&self, ray: &Ray) -> Intersections;
@@ -16,6 +15,30 @@ pub struct Intersection<'a> {
 impl<'a> Intersection<'a> {
     pub fn new(time: f64, object: &Sphere) -> Intersection {
         Intersection { time, object }
+    }
+}
+
+impl<'a> Eq for Intersection<'a> {}
+
+impl<'a> PartialOrd for Intersection<'a> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<'a> Ord for Intersection<'a> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.time.is_nan() {
+            Ordering::Greater
+        } else if other.time.is_nan() {
+            Ordering::Less
+        } else if self.time > other.time {
+            Ordering::Greater
+        } else if self.time < other.time {
+            Ordering::Less
+        } else {
+            Ordering::Equal
+        }
     }
 }
 
@@ -37,7 +60,11 @@ impl<'a> Intersections<'a> {
     }
 
     pub fn hit(&self) -> Option<&Intersection> {
-        self.intersections.iter().find(|i| i.time >= 0.0)
+        self.intersections
+            .iter()
+            .filter(|i| i.time >= 0.0)
+            .into_iter()
+            .min()
     }
 }
 
@@ -60,7 +87,7 @@ mod intersection_tests {
         let sphere = Sphere::default();
         let intersection_a = Intersection::new(3.5, &sphere);
 
-        assert_eq!(3.5, intersection_a.time,);
+        assert_eq!(3.5, intersection_a.time);
         assert_eq!(&sphere, intersection_a.object);
     }
 
@@ -85,6 +112,46 @@ mod intersection_tests {
         let intersection_b = Intersection::new(2.0, &sphere);
         let intersections = Intersections::new().with(vec![intersection_a.clone(), intersection_b]);
         let expected_hit = Some(&intersection_a);
+
+        assert_eq!(expected_hit, intersections.hit());
+    }
+
+    #[test]
+    fn intersections_hit_some_negative() {
+        let sphere = Sphere::default();
+        let intersection_a = Intersection::new(-1.0, &sphere);
+        let intersection_b = Intersection::new(2.0, &sphere);
+        let intersections = Intersections::new().with(vec![intersection_a, intersection_b.clone()]);
+        let expected_hit = Some(&intersection_b);
+
+        assert_eq!(expected_hit, intersections.hit());
+    }
+
+    #[test]
+    fn intersections_hit_all_negative() {
+        let sphere = Sphere::default();
+        let intersection_a = Intersection::new(-1.0, &sphere);
+        let intersection_b = Intersection::new(-2.0, &sphere);
+        let intersections = Intersections::new().with(vec![intersection_a, intersection_b]);
+        let expected_hit = None;
+
+        assert_eq!(expected_hit, intersections.hit());
+    }
+
+    #[test]
+    fn intersections_hit_lowest_non_negative() {
+        let sphere = Sphere::default();
+        let intersection_a = Intersection::new(5.0, &sphere);
+        let intersection_b = Intersection::new(7.0, &sphere);
+        let intersection_c = Intersection::new(-1.0, &sphere);
+        let intersection_d = Intersection::new(2.0, &sphere);
+        let intersections = Intersections::new().with(vec![
+            intersection_a,
+            intersection_b,
+            intersection_c,
+            intersection_d.clone(),
+        ]);
+        let expected_hit = Some(&intersection_d);
 
         assert_eq!(expected_hit, intersections.hit());
     }
