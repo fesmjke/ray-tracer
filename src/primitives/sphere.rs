@@ -1,6 +1,9 @@
+use crate::intersections::{Intersectable, Intersection, Intersections};
 use crate::point::Point;
+use crate::primitives::Shape;
 use crate::ray::Ray;
 
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct Sphere {
     pub origin: Point,
     pub radius: f64,
@@ -10,8 +13,12 @@ impl Sphere {
     fn new(origin: Point, radius: f64) -> Self {
         Self { origin, radius }
     }
+}
 
-    pub fn intersect(&self, ray: &Ray) -> Vec<f64> {
+impl Shape for Sphere {}
+
+impl Intersectable for Sphere {
+    fn intersect(&self, ray: &Ray) -> Intersections {
         let sphere_to_ray = ray.origin - Point::default();
         let a = ray.direction.dot(&ray.direction);
         let b = 2.0 * ray.direction.dot_point(&sphere_to_ray);
@@ -20,12 +27,15 @@ impl Sphere {
         let discriminant = b.powi(2) - (4.0 * a * c);
 
         if discriminant < 0.0 {
-            vec![]
+            Intersections::new()
         } else {
-            let x1 = (-b - discriminant.sqrt()) / (2.0 * a);
-            let x2 = (-b + discriminant.sqrt()) / (2.0 * a);
+            let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
+            let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
-            vec![x1, x2]
+            Intersections::new().with(vec![
+                Intersection::new(t1, &self),
+                Intersection::new(t2, &self),
+            ])
         }
     }
 }
@@ -41,6 +51,7 @@ impl Default for Sphere {
 
 #[cfg(test)]
 mod sphere_tests {
+    use crate::intersections::{Intersectable, Intersection, Intersections};
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
     use crate::ray::Ray;
@@ -71,7 +82,10 @@ mod sphere_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
-        let expected_intersects = vec![4.0, 6.0];
+        let expected_intersects = Intersections::new().with(vec![
+            Intersection::new(4.0, &sphere),
+            Intersection::new(6.0, &sphere),
+        ]);
 
         assert_eq!(expected_intersects, intersects);
     }
@@ -81,7 +95,10 @@ mod sphere_tests {
         let ray = Ray::new(Point::new(0.0, 1.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
-        let expected_intersects = vec![5.0, 5.0];
+        let expected_intersects = Intersections::new().with(vec![
+            Intersection::new(5.0, &sphere),
+            Intersection::new(5.0, &sphere),
+        ]);
 
         assert_eq!(expected_intersects, intersects);
     }
@@ -91,7 +108,10 @@ mod sphere_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
-        let expected_intersects = vec![-1.0, 1.0];
+        let expected_intersects = Intersections::new().with(vec![
+            Intersection::new(-1.0, &sphere),
+            Intersection::new(1.0, &sphere),
+        ]);
 
         assert_eq!(expected_intersects, intersects);
     }
@@ -101,7 +121,10 @@ mod sphere_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
-        let expected_intersects = vec![-6.0, -4.0];
+        let expected_intersects = Intersections::new().with(vec![
+            Intersection::new(-6.0, &sphere),
+            Intersection::new(-4.0, &sphere),
+        ]);
 
         assert_eq!(expected_intersects, intersects);
     }
