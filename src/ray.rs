@@ -1,4 +1,6 @@
+use crate::matrices::Matrix4;
 use crate::point::Point;
+use crate::transformations::Transformable;
 use crate::vector::Vector3;
 
 // TODO: reference and lifetimes
@@ -14,6 +16,16 @@ impl Ray {
 
     pub fn position(&self, time: f64) -> Point {
         self.origin + self.direction * time
+    }
+}
+
+impl Transformable for Ray {
+    fn transform(self, transformation: &Matrix4) -> Ray {
+        Ray {
+            // TODO: Replace with {*transformation} when matrix is slice and has Copy trait, instead of vector
+            origin: transformation.clone() * self.origin,
+            direction: transformation.clone() * self.direction,
+        }
     }
 }
 
@@ -57,5 +69,27 @@ mod ray_tests {
         assert_eq!(Point::new(3.0, 3.0, 4.0), ray.position(1.0));
         assert_eq!(Point::new(1.0, 3.0, 4.0), ray.position(-1.0));
         assert_eq!(Point::new(4.5, 3.0, 4.0), ray.position(2.5));
+    }
+
+    #[test]
+    fn ray_translate() {
+        let ray = Ray::new(Point::new(1.0, 2.0, 3.0), Vector3::new(0.0, 1.0, 0.0));
+        let expected_ray = Ray::new(Point::new(4.0, 6.0, 8.0), Vector3::new(0.0, 1.0, 0.0));
+
+        let translated_ray = ray.translate(3.0, 4.0, 5.0).transform();
+
+        assert_eq!(expected_ray.origin, translated_ray.origin);
+        assert_eq!(expected_ray.direction, translated_ray.direction);
+    }
+
+    #[test]
+    fn ray_scale() {
+        let ray = Ray::new(Point::new(1.0, 2.0, 3.0), Vector3::new(0.0, 1.0, 0.0));
+        let expected_ray = Ray::new(Point::new(2.0, 6.0, 12.0), Vector3::new(0.0, 3.0, 0.0));
+
+        let translated_ray = ray.scale(2.0, 3.0, 4.0).transform();
+
+        assert_eq!(expected_ray.origin, translated_ray.origin);
+        assert_eq!(expected_ray.direction, translated_ray.direction);
     }
 }
