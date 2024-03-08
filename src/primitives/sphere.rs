@@ -2,14 +2,13 @@ use crate::point::Point;
 use crate::ray::Ray;
 
 pub struct Sphere {
-    id: String, // TODO: replace with UUID
     pub origin: Point,
     pub radius: f64,
 }
 
 impl Sphere {
-    fn new(id: String, origin: Point, radius: f64) -> Self {
-        Self { id, origin, radius }
+    fn new(origin: Point, radius: f64) -> Self {
+        Self { origin, radius }
     }
 
     pub fn intersect(&self, ray: &Ray) -> Vec<f64> {
@@ -34,7 +33,6 @@ impl Sphere {
 impl Default for Sphere {
     fn default() -> Self {
         Self {
-            id: String::default(), // TODO: replace with UUID (not unique).
             origin: Point::default(),
             radius: 1.0,
         }
@@ -45,10 +43,12 @@ impl Default for Sphere {
 mod sphere_tests {
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
+    use crate::ray::Ray;
+    use crate::vector::Vector3;
 
     #[test]
     fn sphere_creation() {
-        let sphere = Sphere::new(String::from("Sphere"), Point::new(0.0, 0.0, 0.0), 1.0);
+        let sphere = Sphere::new(Point::new(0.0, 0.0, 0.0), 1.0);
         let expected_origin = Point::default();
         let expected_radius = 1.0;
 
@@ -64,5 +64,45 @@ mod sphere_tests {
 
         assert_eq!(expected_origin, sphere.origin);
         assert_eq!(expected_radius, sphere.radius);
+    }
+
+    #[test]
+    fn ray_intersect_sphere_at_two_points() {
+        let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere = Sphere::default();
+        let intersects = sphere.intersect(&ray);
+        let expected_intersects = vec![4.0, 6.0];
+
+        assert_eq!(expected_intersects, intersects);
+    }
+
+    #[test]
+    fn ray_intersect_sphere_at_one_point() {
+        let ray = Ray::new(Point::new(0.0, 1.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere = Sphere::default();
+        let intersects = sphere.intersect(&ray);
+        let expected_intersects = vec![5.0, 5.0];
+
+        assert_eq!(expected_intersects, intersects);
+    }
+
+    #[test]
+    fn ray_originated_inside_intersects_sphere() {
+        let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere = Sphere::default();
+        let intersects = sphere.intersect(&ray);
+        let expected_intersects = vec![-1.0, 1.0];
+
+        assert_eq!(expected_intersects, intersects);
+    }
+
+    #[test]
+    fn ray_behind_sphere() {
+        let ray = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere = Sphere::default();
+        let intersects = sphere.intersect(&ray);
+        let expected_intersects = vec![-6.0, -4.0];
+
+        assert_eq!(expected_intersects, intersects);
     }
 }
