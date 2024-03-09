@@ -41,6 +41,14 @@ impl Point {
     pub fn dot(&self, other: &Point) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
+    // TODO: move to somewhere else, temporary solution
+    pub fn magnitude(&self) -> f64 {
+        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
+    }
+    // TODO: move to somewhere else, temporary solution
+    pub fn normalize(&self) -> Self {
+        *self / self.magnitude()
+    }
 
     fn zero() -> Self {
         Point::default()
