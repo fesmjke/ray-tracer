@@ -12,6 +12,10 @@ pub mod primitives {
     mod sphere;
 }
 
+pub mod intersections {
+    pub use intersection::{Intersectable, Intersection, Intersections};
+    mod intersection;
+}
 pub mod matrices {
     pub use matrix::Matrix;
     pub use matrix2::Matrix2;
