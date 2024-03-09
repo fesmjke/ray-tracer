@@ -1,4 +1,4 @@
-use crate::float_eq::{ApproxEq, EPSILON};
+use crate::float_eq::{ApproxEq, EPSILON, LOW_EPSILON};
 use crate::matrices::Matrix4;
 use crate::point::Point;
 use crate::transformations::Transformable;
@@ -86,7 +86,7 @@ impl Transformable for Vector3 {
 
 impl PartialEq for Vector3 {
     fn eq(&self, other: &Self) -> bool {
-        self.approx_eq(&other)
+        self.approx_eq_low(&other)
     }
 }
 
@@ -95,6 +95,11 @@ impl ApproxEq for Vector3 {
         (self.x - other.x).abs() < EPSILON
             && (self.y - other.y).abs() < EPSILON
             && (self.z - other.z).abs() < EPSILON
+    }
+    fn approx_eq_low(&self, other: &Self) -> bool {
+        (self.x - other.x).abs() < LOW_EPSILON
+            && (self.y - other.y).abs() < LOW_EPSILON
+            && (self.z - other.z).abs() < LOW_EPSILON
     }
 }
 
