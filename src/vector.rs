@@ -311,4 +311,24 @@ mod vector_tests {
 
         assert_eq!(expected_unit_vector, unit_vector);
     }
+
+    #[test]
+    fn vector_reflect_45_degree() {
+        let vector = Vector3::new(1.0, -1.0, 0.0);
+        let normal = Vector3::new(0.0, 1.0, 0.0);
+        let reflect = vector.reflect(&normal);
+        let expected_reflection = Vector3::new(1.0, 1.0, 0.0);
+
+        assert_eq!(expected_reflection, reflect);
+    }
+
+    #[test]
+    fn vector_reflect_slanted() {
+        let vector = Vector3::new(0.0, -1.0, 0.0);
+        let normal = Vector3::new(f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0);
+        let reflect = vector.reflect(&normal);
+        let expected_reflection = Vector3::new(1.0, 0.0, 0.0);
+
+        assert_eq!(expected_reflection, reflect);
+    }
 }
