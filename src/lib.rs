@@ -8,7 +8,10 @@ pub mod utils;
 pub mod vector;
 
 pub mod primitives {
+    pub use shape::Shape;
+
     pub use sphere::Sphere;
+    mod shape;
     mod sphere;
 }
 
