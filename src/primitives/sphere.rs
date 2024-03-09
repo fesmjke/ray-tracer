@@ -49,7 +49,10 @@ impl Intersectable for Sphere {
 
 impl Shape for Sphere {
     fn normal(&self, world: Point) -> Vector3 {
-        todo!()
+        let object_point = self.transformation.invert() * world;
+        let object_normal = object_point - Point::default();
+        let world_normal = self.transformation.invert().transpose() * object_normal;
+        Vector3::new(world_normal.x, world_normal.y, world_normal.z).normalize()
     }
 }
 
@@ -74,14 +77,16 @@ impl Default for Sphere {
 
 #[cfg(test)]
 mod sphere_tests {
+    use crate::float_eq::ApproxEq;
     use crate::intersections::{Intersectable, Intersection, Intersections};
     use crate::matrices::{Matrix, Matrix4};
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
     use crate::primitives::Shape;
     use crate::ray::Ray;
-    use crate::transformations::{Transform, Transformable};
+    use crate::transformations::{Over, Transform, Transformable};
     use crate::vector::Vector3;
+    use std::f64::consts::PI;
 
     #[test]
     fn sphere_creation() {
@@ -232,6 +237,45 @@ mod sphere_tests {
             f64::sqrt(3.0) / 3.0,
             f64::sqrt(3.0) / 3.0,
         );
+
+        assert_eq!(expected_vector, normal_vector);
+    }
+
+    #[test]
+    fn sphere_normal_is_normalized() {
+        let sphere = Sphere::default();
+        let normal_vector = sphere.normal(Point::new(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        ));
+        let expected_vector = Vector3::new(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        );
+
+        assert_eq!(expected_vector, normal_vector.normalize());
+    }
+
+    #[test]
+    fn sphere_translated_normal() {
+        let sphere = Sphere::default().translate(0.0, 1.0, 0.0).transform();
+        let normal_vector = sphere.normal(Point::new(0.0, 1.70711, -0.70711));
+        let expected_vector = Vector3::new(0.0, 0.70711, -0.70711);
+
+        assert_eq!(expected_vector, normal_vector);
+    }
+
+    #[test]
+    fn sphere_transformed_normal() {
+        let sphere = Sphere::default()
+            .rotate(Over::Z, PI / 5.0)
+            .scale(1.0, 0.5, 1.0)
+            .transform();
+        let normal_vector =
+            sphere.normal(Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0));
+        let expected_vector = Vector3::new(0.0, 0.97014, -0.24254);
 
         assert_eq!(expected_vector, normal_vector);
     }
