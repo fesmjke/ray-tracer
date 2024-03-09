@@ -4,6 +4,7 @@ use crate::point::Point;
 use crate::primitives::Shape;
 use crate::ray::Ray;
 use crate::transformations::Transformable;
+use crate::vector::Vector3;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sphere {
@@ -21,8 +22,6 @@ impl Sphere {
         }
     }
 }
-
-impl Shape for Sphere {}
 
 impl Intersectable for Sphere {
     fn intersect(&self, ray: &Ray) -> Intersections {
@@ -45,6 +44,12 @@ impl Intersectable for Sphere {
                 Intersection::new(t2, &self),
             ])
         }
+    }
+}
+
+impl Shape for Sphere {
+    fn normal(&self, world: Point) -> Vector3 {
+        todo!()
     }
 }
 
@@ -73,6 +78,7 @@ mod sphere_tests {
     use crate::matrices::{Matrix, Matrix4};
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
+    use crate::primitives::Shape;
     use crate::ray::Ray;
     use crate::transformations::{Transform, Transformable};
     use crate::vector::Vector3;
@@ -184,5 +190,49 @@ mod sphere_tests {
         let expected_intersects = Intersections::new().with(vec![]);
 
         assert_eq!(expected_intersects, intersects);
+    }
+
+    #[test]
+    fn sphere_normal_on_x() {
+        let sphere = Sphere::default();
+        let normal_vector = sphere.normal(Point::new(1.0, 0.0, 0.0));
+        let expected_vector = Vector3::new(1.0, 0.0, 0.0);
+
+        assert_eq!(expected_vector, normal_vector);
+    }
+
+    #[test]
+    fn sphere_normal_on_y() {
+        let sphere = Sphere::default();
+        let normal_vector = sphere.normal(Point::new(0.0, 1.0, 0.0));
+        let expected_vector = Vector3::new(0.0, 1.0, 0.0);
+
+        assert_eq!(expected_vector, normal_vector);
+    }
+
+    #[test]
+    fn sphere_normal_on_z() {
+        let sphere = Sphere::default();
+        let normal_vector = sphere.normal(Point::new(0.0, 0.0, 1.0));
+        let expected_vector = Vector3::new(0.0, 0.0, 1.0);
+
+        assert_eq!(expected_vector, normal_vector);
+    }
+
+    #[test]
+    fn sphere_normal_nonaxial() {
+        let sphere = Sphere::default();
+        let normal_vector = sphere.normal(Point::new(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        ));
+        let expected_vector = Vector3::new(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        );
+
+        assert_eq!(expected_vector, normal_vector);
     }
 }
