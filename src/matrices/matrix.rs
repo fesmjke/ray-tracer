@@ -10,7 +10,7 @@ pub trait Matrix {
     fn columns(&self) -> usize;
     fn rows(&self) -> usize;
     fn identity() -> Self;
-    fn transpose(&mut self);
+    fn transpose(&mut self) -> Self;
 }
 
 // TODO: replace Vec with slice, because cannot implement Copy trait
@@ -47,7 +47,7 @@ macro_rules! impl_matrix {
                 Self { data: v }
             }
 
-            fn transpose(&mut self) {
+            fn transpose(&mut self) -> Self {
                 let temp = self.data.clone();
 
                 for (i, iv) in temp.iter().enumerate() {
@@ -55,6 +55,8 @@ macro_rules! impl_matrix {
                         self.data[i][j] = temp[j][i];
                     }
                 }
+
+                self.clone()
             }
         }
 
