@@ -66,6 +66,10 @@ impl<'a> Intersections<'a> {
             .into_iter()
             .min()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.intersections.is_empty()
+    }
 }
 
 impl<'a> Index<usize> for Intersections<'a> {
