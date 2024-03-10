@@ -8,8 +8,8 @@ pub trait Intersectable {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Intersection<'a> {
-    time: f64,
-    object: &'a Sphere, // TODO: add general object or replace with Intersectable
+    pub time: f64,
+    pub object: &'a Sphere, // TODO: add general object or replace with Intersectable
 }
 
 impl<'a> Intersection<'a> {
