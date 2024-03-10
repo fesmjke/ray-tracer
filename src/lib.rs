@@ -15,6 +15,11 @@ pub mod primitives {
     mod sphere;
 }
 
+pub mod lights {
+    pub use point_light::PointLight;
+    mod point_light;
+}
+
 pub mod intersections {
     pub use intersection::{Intersectable, Intersection, Intersections};
     mod intersection;
