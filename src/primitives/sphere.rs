@@ -1,4 +1,5 @@
 use crate::intersections::{Intersectable, Intersection, Intersections};
+use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 use crate::primitives::Shape;
@@ -11,15 +12,22 @@ pub struct Sphere {
     pub origin: Point,
     pub radius: f64,
     transformation: Matrix4,
+    material: Material,
 }
 
 impl Sphere {
-    pub fn new(origin: Point, radius: f64) -> Self {
+    pub fn new(origin: Point, radius: f64, material: Material) -> Self {
         Self {
             origin,
             radius,
             transformation: Matrix4::identity(),
+            material,
         }
+    }
+
+    pub fn apply_material(mut self, material: Material) -> Self {
+        self.material = material;
+        self
     }
 }
 
@@ -71,14 +79,16 @@ impl Default for Sphere {
             origin: Point::default(),
             radius: 1.0,
             transformation: Matrix4::identity(),
+            material: Default::default(),
         }
     }
 }
 
 #[cfg(test)]
 mod sphere_tests {
-    use crate::float_eq::ApproxEq;
+    use crate::color::Color;
     use crate::intersections::{Intersectable, Intersection, Intersections};
+    use crate::material::Material;
     use crate::matrices::{Matrix, Matrix4};
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
@@ -90,7 +100,7 @@ mod sphere_tests {
 
     #[test]
     fn sphere_creation() {
-        let sphere = Sphere::new(Point::new(0.0, 0.0, 0.0), 1.0);
+        let sphere = Sphere::new(Point::new(0.0, 0.0, 0.0), 1.0, Material::default());
         let expected_origin = Point::default();
         let expected_radius = 1.0;
 
@@ -278,5 +288,23 @@ mod sphere_tests {
         let expected_vector = Vector3::new(0.0, 0.97014, -0.24254);
 
         assert_eq!(expected_vector, normal_vector);
+    }
+
+    #[test]
+    fn sphere_default_material() {
+        let sphere = Sphere::default();
+
+        let expected_material = Material::default();
+
+        assert_eq!(expected_material, sphere.material);
+    }
+
+    #[test]
+    fn sphere_assigned_material() {
+        let sphere = Sphere::default().apply_material(Material::default().color(Color::red()));
+
+        let expected_material = Material::default().color(Color::red());
+
+        assert_eq!(expected_material, sphere.material);
     }
 }
