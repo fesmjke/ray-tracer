@@ -12,7 +12,7 @@ pub struct Sphere {
     pub origin: Point,
     pub radius: f64,
     transformation: Matrix4,
-    material: Material,
+    pub material: Material,
 }
 
 impl Sphere {
