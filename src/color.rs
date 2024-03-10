@@ -1,4 +1,4 @@
-use crate::float_eq::{ApproxEq, EPSILON};
+use crate::float_eq::{ApproxEq, EPSILON, LOW_EPSILON};
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Copy, Clone, Debug)]
@@ -46,7 +46,7 @@ impl Default for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Self) -> bool {
-        self.approx_eq(&other)
+        self.approx_eq_low(&other)
     }
 }
 
@@ -55,6 +55,11 @@ impl ApproxEq for Color {
         (self.r - other.r).abs() < EPSILON
             && (self.g - other.g).abs() < EPSILON
             && (self.b - other.b).abs() < EPSILON
+    }
+    fn approx_eq_low(&self, other: &Self) -> bool {
+        (self.r - other.r).abs() < LOW_EPSILON
+            && (self.g - other.g).abs() < LOW_EPSILON
+            && (self.b - other.b).abs() < LOW_EPSILON
     }
 }
 
