@@ -9,10 +9,11 @@ pub mod utils;
 pub mod vector;
 
 pub mod primitives {
-    pub use shape::Shape;
+    pub use primitive::Primitive;
 
     pub use sphere::Sphere;
-    mod shape;
+    mod primitive;
+
     mod sphere;
 }
 
@@ -22,7 +23,7 @@ pub mod lights {
 }
 
 pub mod intersections {
-    pub use intersection::{Intersectable, Intersection, Intersections};
+    pub use intersection::{Intersection, Intersections};
     mod intersection;
 }
 pub mod matrices {

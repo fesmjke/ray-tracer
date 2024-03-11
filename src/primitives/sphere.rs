@@ -1,8 +1,8 @@
-use crate::intersections::{Intersectable, Intersection, Intersections};
+use crate::intersections::{Intersection, Intersections};
 use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
-use crate::primitives::Shape;
+use crate::primitives::Primitive;
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
@@ -31,7 +31,7 @@ impl Sphere {
     }
 }
 
-impl Intersectable for Sphere {
+impl Primitive for Sphere {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let ray = ray.transform(&self.transformation.invert());
         let sphere_to_ray = ray.origin - Point::default();
@@ -53,9 +53,7 @@ impl Intersectable for Sphere {
             ])
         }
     }
-}
 
-impl Shape for Sphere {
     fn normal(&self, world: Point) -> Vector3 {
         let object_point = self.transformation.invert() * world;
         let object_normal = object_point - Point::default();
@@ -87,12 +85,12 @@ impl Default for Sphere {
 #[cfg(test)]
 mod sphere_tests {
     use crate::color::Color;
-    use crate::intersections::{Intersectable, Intersection, Intersections};
+    use crate::intersections::{Intersection, Intersections};
     use crate::material::Material;
     use crate::matrices::{Matrix, Matrix4};
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
-    use crate::primitives::Shape;
+    use crate::primitives::Primitive;
     use crate::ray::Ray;
     use crate::transformations::{Over, Transform, Transformable};
     use crate::vector::Vector3;

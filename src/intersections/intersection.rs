@@ -1,15 +1,10 @@
 use crate::primitives::Sphere;
-use crate::ray::Ray;
 use std::{cmp::Ordering, fmt::Debug, ops::Index};
-
-pub trait Intersectable {
-    fn intersect(&self, ray: &Ray) -> Intersections;
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Intersection<'a> {
     pub time: f64,
-    pub object: &'a Sphere, // TODO: add general object or replace with Intersectable
+    pub object: &'a Sphere, // TODO: add general object or replace with Primitive
 }
 
 impl<'a> Intersection<'a> {
