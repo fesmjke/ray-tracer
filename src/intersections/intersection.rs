@@ -62,6 +62,15 @@ impl Intersections {
             .min()
     }
 
+    pub fn merge(&mut self, other: Intersections) {
+        self.intersections.extend(other.intersections);
+    }
+
+    pub fn sort(mut self) -> Self {
+        self.intersections.sort_by(|a, b| a.cmp(b));
+        self
+    }
+
     pub fn is_empty(&self) -> bool {
         self.intersections.is_empty()
     }
