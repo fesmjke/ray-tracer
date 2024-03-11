@@ -3,10 +3,10 @@ use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 use crate::primitives::Primitive;
+use crate::primitives::PrimitiveShape::SphereShape;
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
-use std::any::Any;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sphere {
@@ -49,8 +49,8 @@ impl Primitive for Sphere {
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
             Intersections::new().with(vec![
-                Intersection::new(t1, &self),
-                Intersection::new(t2, &self),
+                Intersection::new(t1, SphereShape(self.clone())),
+                Intersection::new(t2, SphereShape(self.clone())),
             ])
         }
     }
@@ -62,8 +62,8 @@ impl Primitive for Sphere {
         Vector3::new(world_normal.x, world_normal.y, world_normal.z).normalize()
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self as &dyn Any
+    fn material(&self) -> Material {
+        self.material
     }
 }
 
@@ -96,6 +96,7 @@ mod sphere_tests {
     use crate::point::Point;
     use crate::primitives::sphere::Sphere;
     use crate::primitives::Primitive;
+    use crate::primitives::PrimitiveShape::SphereShape;
     use crate::ray::Ray;
     use crate::transformations::{Over, Transform, Transformable};
     use crate::vector::Vector3;
@@ -127,8 +128,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(4.0, &sphere),
-            Intersection::new(6.0, &sphere),
+            Intersection::new(4.0, SphereShape(sphere.clone())),
+            Intersection::new(6.0, SphereShape(sphere.clone())),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -140,8 +141,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(5.0, &sphere),
-            Intersection::new(5.0, &sphere),
+            Intersection::new(5.0, SphereShape(sphere.clone())),
+            Intersection::new(5.0, SphereShape(sphere.clone())),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -153,8 +154,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(-1.0, &sphere),
-            Intersection::new(1.0, &sphere),
+            Intersection::new(-1.0, SphereShape(sphere.clone())),
+            Intersection::new(1.0, SphereShape(sphere.clone())),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -166,8 +167,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(-6.0, &sphere),
-            Intersection::new(-4.0, &sphere),
+            Intersection::new(-6.0, SphereShape(sphere.clone())),
+            Intersection::new(-4.0, SphereShape(sphere.clone())),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -193,8 +194,8 @@ mod sphere_tests {
         let sphere = Sphere::default().scale(2.0, 2.0, 2.0).transform();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(3.0, &sphere),
-            Intersection::new(7.0, &sphere),
+            Intersection::new(3.0, SphereShape(sphere.clone())),
+            Intersection::new(7.0, SphereShape(sphere.clone())),
         ]);
 
         assert_eq!(expected_intersects, intersects);
