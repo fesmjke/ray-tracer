@@ -6,6 +6,7 @@ use crate::primitives::Primitive;
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
+use std::any::Any;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Sphere {
@@ -59,6 +60,10 @@ impl Primitive for Sphere {
         let object_normal = object_point - Point::default();
         let world_normal = self.transformation.invert().transpose() * object_normal;
         Vector3::new(world_normal.x, world_normal.y, world_normal.z).normalize()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self as &dyn Any
     }
 }
 
