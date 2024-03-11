@@ -7,9 +7,10 @@ pub mod preset;
 pub mod ray;
 pub mod utils;
 pub mod vector;
+pub mod world;
 
 pub mod primitives {
-    pub use primitive::Primitive;
+    pub use primitive::{Primitive, PrimitiveShape};
 
     pub use sphere::Sphere;
     mod primitive;
