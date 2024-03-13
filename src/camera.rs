@@ -1,8 +1,11 @@
+use crate::canvas::Canvas;
+use crate::color::Color;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
+use crate::world::World;
 
 #[derive(Debug, PartialEq)]
 pub struct Camera {
@@ -53,6 +56,21 @@ impl Camera {
         let direction = (pixel - origin).normalize();
 
         Ray::new(origin, Vector3::new(direction.x, direction.y, direction.z))
+    }
+
+    pub fn render(&self, world: &World) -> Canvas {
+        let mut image = Canvas::new(self.horizontal_size, self.vertical_size, Color::default());
+
+        for x in 0..self.horizontal_size {
+            for y in 0..self.vertical_size {
+                let ray = self.ray_for_pixel(x as f64, y as f64);
+                let color = world.color_at(&ray);
+
+                image[y][x] = color;
+            }
+        }
+
+        image
     }
 }
 
