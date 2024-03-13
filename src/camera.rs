@@ -1,4 +1,8 @@
 use crate::matrices::{Matrix, Matrix4};
+use crate::point::Point;
+use crate::ray::Ray;
+use crate::transformations::Transformable;
+use crate::vector::Vector3;
 
 #[derive(Debug, PartialEq)]
 pub struct Camera {
@@ -34,12 +38,41 @@ impl Camera {
             half_height,
         }
     }
+
+    pub fn ray_for_pixel(&self, px: f64, py: f64) -> Ray {
+        let x_offset = (px + 0.5) * self.pixel_size;
+        let y_offset = (py + 0.5) * self.pixel_size;
+
+        let world_x = self.half_width - x_offset;
+        let world_y = self.half_height - y_offset;
+
+        let transformation_inv = self.transformation.invert();
+        let pixel = transformation_inv.clone() * Point::new(world_x, world_y, -1.0);
+
+        let origin = transformation_inv * Point::default();
+        let direction = (pixel - origin).normalize();
+
+        Ray::new(origin, Vector3::new(direction.x, direction.y, direction.z))
+    }
+}
+
+impl Transformable for Camera {
+    fn transform(self, transformation: &Matrix4) -> Self {
+        Self {
+            transformation: transformation.clone() * self.transformation,
+            ..self
+        }
+    }
 }
 
 #[cfg(test)]
 mod camera_tests {
     use crate::camera::Camera;
     use crate::matrices::{Matrix, Matrix4};
+    use crate::point::Point;
+    use crate::ray::Ray;
+    use crate::transformations::{Over, Transformable};
+    use crate::vector::Vector3;
     use std::f64::consts::PI;
 
     #[test]
@@ -56,5 +89,39 @@ mod camera_tests {
         };
 
         assert_eq!(expected_camera, camera);
+    }
+
+    #[test]
+    fn camera_ray_trough_center() {
+        let camera = Camera::new(201, 101, PI / 2.0);
+        let expected_ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, -1.0));
+
+        assert_eq!(expected_ray, camera.ray_for_pixel(100.0, 50.0));
+    }
+
+    #[test]
+    fn camera_ray_trough_corner() {
+        let camera = Camera::new(201, 101, PI / 2.0);
+        let expected_ray = Ray::new(
+            Point::new(0.0, 0.0, 0.0),
+            Vector3::new(0.66519, 0.33259, -0.66851),
+        );
+
+        assert_eq!(expected_ray, camera.ray_for_pixel(0.0, 0.0));
+    }
+
+    #[test]
+    fn camera_ray_when_transformed() {
+        let camera = Camera::new(201, 101, PI / 2.0)
+            .translate(0.0, -2.0, 5.0)
+            .rotate(Over::Y, PI / 4.0)
+            .transform();
+
+        let expected_ray = Ray::new(
+            Point::new(0.0, 2.0, -5.0),
+            Vector3::new(f64::sqrt(2.0) / 2.0, 0.0, -f64::sqrt(2.0) / 2.0),
+        );
+
+        assert_eq!(expected_ray, camera.ray_for_pixel(100.0, 50.0));
     }
 }
