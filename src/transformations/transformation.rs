@@ -1,4 +1,5 @@
 use crate::matrices::{Matrix, Matrix4};
+use crate::vector::Vector3;
 
 // TODO: find better solution, or union with transformation?
 pub enum Over {
@@ -12,6 +13,7 @@ pub enum Transform {
     Rotate(Over, f64),
     Scale(f64, f64, f64),
     Shear(f64, f64, f64, f64, f64, f64),
+    Orientation(Vector3, Vector3, Vector3),
 }
 
 impl Transform {
@@ -45,6 +47,24 @@ impl Transform {
                 .set(1, 2, yz)
                 .set(2, 0, zx)
                 .set(2, 1, zy),
+            Transform::Orientation(from, to, up) => {
+                let forward = (to - from).normalize();
+                let left = forward * up.normalize();
+                let true_up = left * forward;
+
+                let orientation = Matrix4::identity()
+                    .set(0, 0, left.x)
+                    .set(0, 1, left.y)
+                    .set(0, 2, left.z)
+                    .set(1, 0, true_up.x)
+                    .set(1, 1, true_up.y)
+                    .set(1, 2, true_up.z)
+                    .set(2, 0, -forward.x)
+                    .set(2, 1, -forward.y)
+                    .set(2, 2, -forward.z);
+
+                orientation * Self::Translate(-from.x, -from.y, -from.z).transformation()
+            }
         }
     }
 }
@@ -53,6 +73,7 @@ impl Transform {
 mod transformations_tests {
     use super::*;
     use crate::point::Point;
+    use crate::transformations::Transform::{Orientation, Scale, Translate};
     use crate::vector::Vector3;
     use std::f64::consts::PI;
 
@@ -272,5 +293,54 @@ mod transformations_tests {
         let npoint = transformation * point;
 
         assert_eq!(expected_point, npoint);
+    }
+
+    #[test]
+    fn transformation_default_orientation() {
+        let from = Vector3::new(0.0, 0.0, 0.0);
+        let to = Vector3::new(0.0, 0.0, -1.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+
+        let expected_matrix = Matrix4::identity();
+
+        assert_eq!(expected_matrix, Orientation(from, to, up).transformation());
+    }
+
+    #[test]
+    fn transformation_orientation_looking_positive_z() {
+        let from = Vector3::new(0.0, 0.0, 0.0);
+        let to = Vector3::new(0.0, 0.0, 1.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+
+        let expected_matrix = Scale(-1.0, 1.0, -1.0).transformation();
+
+        assert_eq!(expected_matrix, Orientation(from, to, up).transformation());
+    }
+
+    #[test]
+    fn transformation_orientation_moves_world() {
+        let from = Vector3::new(0.0, 0.0, 8.0);
+        let to = Vector3::new(0.0, 0.0, 0.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+
+        let expected_matrix = Translate(0.0, 0.0, -8.0).transformation();
+
+        assert_eq!(expected_matrix, Orientation(from, to, up).transformation());
+    }
+
+    #[test]
+    fn transformation_orientation_arbitrary_view() {
+        let from = Vector3::new(1.0, 3.0, 2.0);
+        let to = Vector3::new(4.0, -2.0, 8.0);
+        let up = Vector3::new(1.0, 1.0, 0.0);
+
+        let expected_matrix = Matrix4::from(vec![
+            vec![-0.50709, 0.50709, 0.67612, -2.36643],
+            vec![0.76772, 0.60609, 0.12122, -2.82843],
+            vec![-0.35857, 0.59761, -0.71714, 0.00000],
+            vec![0.00000, 0.00000, 0.00000, 1.00000],
+        ]);
+
+        assert_eq!(expected_matrix, Orientation(from, to, up).transformation());
     }
 }
