@@ -15,7 +15,7 @@ pub struct IntersectionDetails {
 }
 
 impl IntersectionDetails {
-    pub fn from(intersection: Intersection, ray: &Ray) -> Self {
+    pub fn from(intersection: &Intersection, ray: &Ray) -> Self {
         let point = ray.position(intersection.time);
         let eye_vector = -ray.direction;
         let mut normal_vector = intersection.object.normal(point);
@@ -30,7 +30,7 @@ impl IntersectionDetails {
         Self {
             time: intersection.time,
             point,
-            object: intersection.object,
+            object: intersection.object.clone(),
             normal_vector,
             eye_vector,
             inside,
@@ -74,7 +74,7 @@ mod intersection_details_tests {
 
         assert_eq!(
             expected_details,
-            IntersectionDetails::from(intersection, &ray)
+            IntersectionDetails::from(&intersection, &ray)
         );
     }
 
@@ -94,7 +94,7 @@ mod intersection_details_tests {
 
         assert_eq!(
             expected_details,
-            IntersectionDetails::from(intersection, &ray)
+            IntersectionDetails::from(&intersection, &ray)
         );
     }
 }
