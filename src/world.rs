@@ -1,7 +1,9 @@
-use crate::intersections::Intersections;
+use crate::color::Color;
+use crate::intersections::{IntersectionDetails, Intersections};
 use crate::lights::PointLight;
 use crate::primitives::{Primitive, PrimitiveShape};
 use crate::ray::Ray;
+use std::ops::Deref;
 
 pub struct World {
     objects: Vec<PrimitiveShape>,
@@ -26,6 +28,16 @@ impl World {
         self
     }
 
+    pub fn with_objects(mut self, objects: Vec<PrimitiveShape>) -> Self {
+        self.objects = objects;
+        self
+    }
+
+    pub fn with_light_sources(mut self, sources: Vec<PointLight>) -> Self {
+        self.light_sources = sources;
+        self
+    }
+
     pub fn intersect_objects(&self, ray: &Ray) -> Intersections {
         let mut intersections = Intersections::new();
 
@@ -35,6 +47,21 @@ impl World {
 
         // TODO: move sort to intersections
         intersections.sort()
+    }
+
+    pub fn shade_hit(&self, details: IntersectionDetails) -> Color {
+        self.light_sources
+            .iter()
+            .fold(Color::default(), |acc, light| {
+                let color = details.object.material().color_reflection(
+                    *light,
+                    details.point,
+                    details.eye_vector,
+                    details.normal_vector,
+                );
+
+                acc + color
+            })
     }
 }
 
@@ -47,12 +74,12 @@ impl Default for World {
 #[cfg(test)]
 mod world_tests {
     use crate::color::Color;
-    use crate::intersections::{Intersection, Intersections};
+    use crate::intersections::{Intersection, IntersectionDetails, Intersections};
     use crate::lights::PointLight;
     use crate::material::Material;
     use crate::point::Point;
     use crate::primitives::PrimitiveShape::SphereShape;
-    use crate::primitives::{PrimitiveShape, Sphere};
+    use crate::primitives::Sphere;
     use crate::ray::Ray;
     use crate::transformations::Transformable;
     use crate::vector::Vector3;
@@ -137,5 +164,35 @@ mod world_tests {
         ]);
 
         assert_eq!(expected_intersections, world.intersect_objects(&ray));
+    }
+
+    #[test]
+    fn world_shade_intersection() {
+        let world = simulated_world();
+        let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
+
+        let intersection = Intersection::new(4.0, world.objects[1].clone());
+        let intersection_details = IntersectionDetails::from(intersection, &ray);
+
+        let expected_color = Color::new(0.38066, 0.47583, 0.2855);
+
+        assert_eq!(expected_color, world.shade_hit(intersection_details));
+    }
+
+    #[test]
+    fn world_shade_intersection_from_inside() {
+        let world = simulated_world().with_light_sources(vec![PointLight::new(
+            Color::new(1.0, 1.0, 1.0),
+            Point::new(0.0, 0.25, 0.0),
+        )]);
+        let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let intersection = Intersection::new(0.5, SphereShape(sphere_a));
+        let intersection_details = IntersectionDetails::from(intersection, &ray);
+
+        let expected_color = Color::new(0.90498, 0.90498, 0.90498);
+
+        assert_eq!(expected_color, world.shade_hit(intersection_details));
     }
 }
