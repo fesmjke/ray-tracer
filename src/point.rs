@@ -25,18 +25,6 @@ impl Point {
         Self { x, y, z }
     }
 
-    fn x(&self) -> f64 {
-        self.x
-    }
-
-    fn y(&self) -> f64 {
-        self.y
-    }
-
-    fn z(&self) -> f64 {
-        self.z
-    }
-
     // TODO: move to somewhere else, temporary solution
     pub fn dot(&self, other: &Point) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
@@ -48,10 +36,6 @@ impl Point {
     // TODO: move to somewhere else, temporary solution
     pub fn normalize(&self) -> Self {
         *self / self.magnitude()
-    }
-
-    fn zero() -> Self {
-        Point::default()
     }
 }
 
