@@ -140,9 +140,9 @@ impl Mul for Vector3 {
 
     fn mul(self, other: Self) -> Self {
         Self {
-            x: self.x * other.x,
-            y: self.y * other.y,
-            z: self.z * other.z,
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
         }
     }
 }
@@ -218,19 +218,11 @@ mod vector_tests {
 
     #[test]
     fn vector_multiplication() {
-        let vector_a = Vector3::new(1.0, 2.0, 0.0);
-        let vector_b = Vector3::new(1.5, 4.0, 5.0);
+        let vector_a = Vector3::new(1.0, 2.0, 3.0);
+        let vector_b = Vector3::new(2.0, 3.0, 4.0);
 
-        let expected_vector = Vector3::new(1.5, 8.0, 0.0);
+        let expected_vector = Vector3::new(-1.0, 2.0, -1.0);
         let vector_multiplication = vector_a * vector_b;
-        assert_eq!(expected_vector, vector_multiplication);
-
-        let expected_vector = Vector3::new(1.5, 8.0, 0.0);
-        let vector_multiplication = vector_b * vector_a;
-        assert_eq!(expected_vector, vector_multiplication);
-
-        let expected_vector = Vector3::new(1.0, 4.0, 0.0);
-        let vector_multiplication = vector_a * vector_a;
         assert_eq!(expected_vector, vector_multiplication);
     }
 
