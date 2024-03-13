@@ -4,7 +4,7 @@ use crate::transformations::Transformable;
 use crate::vector::Vector3;
 
 // TODO: reference and lifetimes
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector3,
