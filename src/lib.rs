@@ -25,7 +25,9 @@ pub mod lights {
 
 pub mod intersections {
     pub use intersection::{Intersection, Intersections};
+    pub use intersection_details::IntersectionDetails;
     mod intersection;
+    mod intersection_details;
 }
 pub mod matrices {
     pub use matrix::Matrix;
