@@ -3,9 +3,11 @@ use crate::color::Color;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 use crate::ray::Ray;
+use crate::render::{Render, Rendering};
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
 use crate::world::World;
+use rayon::prelude::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Camera {
@@ -58,7 +60,7 @@ impl Camera {
         Ray::new(origin, Vector3::new(direction.x, direction.y, direction.z))
     }
 
-    pub fn render(&self, world: &World) -> Canvas {
+    pub fn sequential_render(&self, world: &World) -> Canvas {
         let mut image = Canvas::new(self.horizontal_size, self.vertical_size, Color::default());
 
         for x in 0..self.horizontal_size {
@@ -71,6 +73,34 @@ impl Camera {
         }
 
         image
+    }
+
+    pub fn parallel_render(&self, world: &World) -> Canvas {
+        const BAND_SIZE: usize = 3;
+        let mut image = Canvas::new(self.horizontal_size, self.vertical_size, Color::default());
+
+        image
+            .pixels()
+            .par_chunks_mut(self.horizontal_size * BAND_SIZE)
+            .enumerate()
+            .for_each(|(i, band)| {
+                for row in 0..BAND_SIZE {
+                    for col in 0..self.horizontal_size {
+                        let ray = self.ray_for_pixel(col as f64, (row + i * BAND_SIZE) as f64);
+                        let color = world.color_at(&ray);
+                        band[row * self.horizontal_size + col] = color;
+                    }
+                }
+            });
+
+        image
+    }
+
+    pub fn render(&self, world: &World, setting: Render) -> Canvas {
+        match setting.render_mode {
+            Rendering::Parallel => self.parallel_render(&world),
+            Rendering::Sequential => self.sequential_render(&world),
+        }
     }
 }
 
