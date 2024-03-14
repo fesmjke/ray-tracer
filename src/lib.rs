@@ -6,6 +6,7 @@ pub mod material;
 pub mod point;
 pub mod preset;
 pub mod ray;
+pub mod render;
 pub mod utils;
 pub mod vector;
 pub mod world;
