@@ -32,6 +32,7 @@ impl Material {
         position: Point,
         eye_vector: Vector3,
         normal_vector: Vector3,
+        in_shadow: bool,
     ) -> Color {
         let effective_color = self.color * light.intensity;
         let delta = (light.position - position).normalize();
@@ -39,6 +40,10 @@ impl Material {
         let ambient = effective_color * self.ambient;
         let mut diffuse = Color::default();
         let mut specular = Color::default();
+
+        if in_shadow {
+            return ambient;
+        }
 
         let light_dot = light_vector.dot(&normal_vector);
 
@@ -134,7 +139,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector)
+            material.color_reflection(light, position, eye_vector, normal_vector, false)
         );
     }
 
@@ -145,12 +150,12 @@ mod material_tests {
         let eye_vector = Vector3::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normal_vector = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
-
+        let in_shadow = false;
         let expected_color = Color::new(1.0, 1.0, 1.0);
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector)
+            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
         );
     }
 
@@ -161,12 +166,12 @@ mod material_tests {
         let eye_vector = Vector3::new(0.0, 0.0, -1.0);
         let normal_vector = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
-
+        let in_shadow = false;
         let expected_color = Color::new(0.7364, 0.7364, 0.7364);
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector)
+            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
         );
     }
 
@@ -177,12 +182,12 @@ mod material_tests {
         let eye_vector = Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normal_vector = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 10.0, -10.0));
-
+        let in_shadow = false;
         let expected_color = Color::new(1.6364, 1.6364, 1.6364);
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector)
+            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
         );
     }
 
@@ -193,12 +198,29 @@ mod material_tests {
         let eye_vector = Vector3::new(0.0, 0.0, -1.0);
         let normal_vector = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, 10.0));
+        let in_shadow = false;
+        let expected_color = Color::new(0.1, 0.1, 0.1);
+
+        assert_eq!(
+            expected_color,
+            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+        );
+    }
+
+    #[test]
+    fn material_color_with_surface_in_shadow() {
+        let material = Material::default();
+        let position = Point::default();
+        let eye_vector = Vector3::new(0.0, 0.0, -1.0);
+        let normal_vector = Vector3::new(0.0, 0.0, -1.0);
+        let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
+        let in_shadow = true;
 
         let expected_color = Color::new(0.1, 0.1, 0.1);
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector)
+            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
         );
     }
 }
