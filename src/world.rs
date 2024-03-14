@@ -54,7 +54,7 @@ impl World {
         self.light_sources
             .iter()
             .fold(Color::default(), |acc, light| {
-                let is_shadowed = self.shadow_cast(details.point);
+                let is_shadowed = self.shadow_cast(details.over_point);
 
                 let color = details.object.material().color_reflection(
                     *light,
