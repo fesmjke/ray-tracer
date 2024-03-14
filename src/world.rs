@@ -1,8 +1,10 @@
 use crate::color::Color;
 use crate::intersections::{IntersectionDetails, Intersections};
 use crate::lights::PointLight;
+use crate::point::Point;
 use crate::primitives::{Primitive, PrimitiveShape};
 use crate::ray::Ray;
+use crate::vector::Vector3;
 
 pub struct World {
     objects: Vec<PrimitiveShape>,
@@ -52,11 +54,14 @@ impl World {
         self.light_sources
             .iter()
             .fold(Color::default(), |acc, light| {
+                let is_shadowed = self.shadow_cast(details.point);
+
                 let color = details.object.material().color_reflection(
                     *light,
                     details.point,
                     details.eye_vector,
                     details.normal_vector,
+                    is_shadowed,
                 );
 
                 acc + color
@@ -73,6 +78,25 @@ impl World {
             }
             None => Color::black(),
         }
+    }
+
+    pub fn shadow_cast(&self, point: Point) -> bool {
+        for light in &self.light_sources {
+            let v = light.position - point;
+            let distance = v.magnitude();
+            let direction = v.normalize();
+
+            let ray = Ray::new(point, Vector3::new(direction.x, direction.y, direction.z));
+            let intersections = self.intersect_objects(&ray);
+
+            if let Some(hit) = intersections.hit() {
+                if hit.time < distance {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 }
 
@@ -240,5 +264,63 @@ mod world_tests {
         let expected_color = Color::new(1.0, 1.0, 1.0);
 
         assert_eq!(expected_color, world.color_at(&ray));
+    }
+
+    #[test]
+    fn world_there_are_no_shadow() {
+        let world = simulated_world();
+        let point = Point::new(0.0, 10.0, 0.0);
+
+        let expected_shadow = false;
+
+        assert_eq!(expected_shadow, world.shadow_cast(point));
+    }
+
+    #[test]
+    fn world_there_are_shadow_between_sphere_and_light() {
+        let world = simulated_world();
+        let point = Point::new(10.0, -10.0, 10.0);
+
+        let expected_shadow = true;
+
+        assert_eq!(expected_shadow, world.shadow_cast(point));
+    }
+
+    #[test]
+    fn world_there_are_no_shadow_point_behind_light() {
+        let world = simulated_world();
+        let point = Point::new(-20.0, 20.0, -20.0);
+
+        let expected_shadow = false;
+
+        assert_eq!(expected_shadow, world.shadow_cast(point));
+    }
+
+    #[test]
+    fn world_there_are_no_shadow_between_sphere_and_light() {
+        let world = simulated_world();
+        let point = Point::new(-2.0, 2.0, -2.0);
+
+        let expected_shadow = false;
+
+        assert_eq!(expected_shadow, world.shadow_cast(point));
+    }
+
+    #[test]
+    fn world_intersection_in_shadow() {
+        let sphere_a = SphereShape(Sphere::default());
+        let sphere_b = SphereShape(Sphere::default().translate(0.0, 0.0, 10.0).transform());
+        let light_point = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![sphere_a.clone(), sphere_b.clone()])
+            .with_light_sources(vec![light_point]);
+
+        let ray = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
+        let intersection = Intersection::new(4.0, sphere_b.clone());
+        let intersection_details = IntersectionDetails::from(&intersection, &ray);
+        let expected_color = Color::new(0.1, 0.1, 0.1);
+
+        assert_eq!(expected_color, world.shade_hit(&intersection_details));
     }
 }
