@@ -14,9 +14,11 @@ pub mod world;
 pub mod primitives {
     pub use primitive::{Primitive, PrimitiveShape};
 
+    pub use plane::Plane;
     pub use sphere::Sphere;
     mod primitive;
 
+    mod plane;
     mod sphere;
 }
 
