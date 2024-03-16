@@ -34,7 +34,7 @@ impl Primitive for Plane {
     fn intersect(&self, ray: &Ray) -> Intersections {
         let intersections = Intersections::new();
 
-        if ray.direction.y.abs() < EPSILON {
+        if ray.direction.y.abs() <= EPSILON {
             intersections
         } else {
             intersections.with(vec![Intersection::new(
@@ -50,6 +50,10 @@ impl Primitive for Plane {
 
     fn material(&self) -> Material {
         self.material
+    }
+
+    fn transformation(&self) -> &Matrix4 {
+        &self.transformation
     }
 }
 
