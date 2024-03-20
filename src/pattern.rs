@@ -14,14 +14,22 @@ impl Pattern {
     pub fn new_striped(color_a: Color, color_b: Color) -> Self {
         Self {
             transformation: Matrix4::identity(),
-            pattern: PatternType::Striped(StripedPattern::from(color_a, color_b)),
+            pattern: PatternType::Stripe(StripePattern::from(color_a, color_b)),
+        }
+    }
+
+    pub fn new_gradient(color_a: Color, color_b: Color) -> Self {
+        Self {
+            transformation: Matrix4::identity(),
+            pattern: PatternType::Gradient(GradientPattern::from(color_a, color_b)),
         }
     }
 
     fn pattern_at(&self, point: Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
-            PatternType::Striped(striped) => striped.striped_at(point),
+            PatternType::Stripe(stripe) => stripe.stripe_at(point),
+            PatternType::Gradient(gradient) => gradient.gradient_at(point),
         }
     }
 
@@ -56,31 +64,33 @@ impl Transformable for Pattern {
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum PatternType {
     Plain(PlainPattern),
-    Striped(StripedPattern),
+    Stripe(StripePattern),
+    Gradient(GradientPattern),
 }
 
 impl PatternType {
     pub fn pattern_at(&self, point: Point) -> Color {
         match self {
             PatternType::Plain(pattern) => pattern.plain_at(point),
-            PatternType::Striped(pattern) => pattern.striped_at(point),
+            PatternType::Stripe(pattern) => pattern.stripe_at(point),
+            PatternType::Gradient(pattern) => pattern.gradient_at(point),
         }
     }
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct StripedPattern {
+pub struct StripePattern {
     color_a: Color,
     color_b: Color,
 }
 
-impl StripedPattern {
+impl StripePattern {
     fn from(color_a: Color, color_b: Color) -> Self {
         Self { color_a, color_b }
     }
 
-    pub fn striped_at(&self, point: Point) -> Color {
-        if point.x.floor() % 2.0 == 0.0 {
+    pub fn stripe_at(&self, point: Point) -> Color {
+        if point.x.floor().abs() % 2.0 == 0.0 {
             self.color_a
         } else {
             self.color_b
@@ -104,6 +114,24 @@ impl Default for PlainPattern {
 impl PlainPattern {
     fn plain_at(&self, _point: Point) -> Color {
         self.color
+    }
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct GradientPattern {
+    color_from: Color,
+    color_to: Color,
+}
+
+impl GradientPattern {
+    pub fn from(color_from: Color, color_to: Color) -> Self {
+        Self {
+            color_from,
+            color_to,
+        }
+    }
+    pub fn gradient_at(&self, point: Point) -> Color {
+        self.color_from + ((self.color_to - self.color_from) * point.x)
     }
 }
 
@@ -246,5 +274,27 @@ mod pattern_tests {
         let color = pattern.pattern_at_local(sphere, Point::new(2.5, 0.0, 0.0));
 
         assert_eq!(expected_color, color);
+    }
+
+    #[test]
+    fn pattern_gradient_linearly_interpolate() {
+        let pattern = Pattern::new_gradient(Color::white(), Color::black());
+
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::new(0.75, 0.75, 0.75),
+            pattern.pattern_at(Point::new(0.25, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::new(0.5, 0.5, 0.5),
+            pattern.pattern_at(Point::new(0.5, 0.0, 2.0))
+        );
+        assert_eq!(
+            Color::new(0.25, 0.25, 0.25),
+            pattern.pattern_at(Point::new(0.75, 0.0, 2.0))
+        );
     }
 }
