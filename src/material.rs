@@ -2,9 +2,10 @@ use crate::color::Color;
 use crate::lights::PointLight;
 use crate::pattern::Pattern;
 use crate::point::Point;
+use crate::primitives::PrimitiveShape;
 use crate::vector::Vector3;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Material {
     pub color: Color,
     pub ambient: f64,
@@ -33,13 +34,17 @@ impl Material {
     pub fn color_reflection(
         &self,
         light: PointLight,
+        primitive: PrimitiveShape,
         position: Point,
         eye_vector: Vector3,
         normal_vector: Vector3,
         in_shadow: bool,
     ) -> Color {
         let color = if self.pattern.is_some() {
-            self.pattern.unwrap().pattern_at(position)
+            self.pattern
+                .clone()
+                .unwrap()
+                .pattern_at_local(primitive, position)
         } else {
             self.color
         };
@@ -126,6 +131,7 @@ mod material_tests {
     use crate::material::Material;
     use crate::pattern::Pattern;
     use crate::point::Point;
+    use crate::primitives::{PrimitiveShape, Sphere};
     use crate::vector::Vector3;
 
     #[test]
@@ -156,7 +162,14 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector, false)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position,
+                eye_vector,
+                normal_vector,
+                false
+            )
         );
     }
 
@@ -172,7 +185,14 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
     }
 
@@ -188,7 +208,14 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
     }
 
@@ -204,7 +231,14 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
     }
 
@@ -220,7 +254,14 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
     }
 
@@ -237,7 +278,14 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
     }
 
@@ -263,12 +311,26 @@ mod material_tests {
 
         assert_eq!(
             expected_color_white,
-            material.color_reflection(light, position_a, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position_a,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
 
         assert_eq!(
             expected_color_black,
-            material.color_reflection(light, position_b, eye_vector, normal_vector, in_shadow)
+            material.color_reflection(
+                light,
+                PrimitiveShape::SphereShape(Sphere::default()),
+                position_b,
+                eye_vector,
+                normal_vector,
+                in_shadow
+            )
         );
     }
 }
