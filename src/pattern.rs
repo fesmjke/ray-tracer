@@ -1,17 +1,14 @@
 use crate::color::Color;
-use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Pattern {
-    transformation: Matrix4,
     pub pattern: PatternType,
 }
 
 impl Pattern {
     pub fn new_striped(color_a: Color, color_b: Color) -> Self {
         Self {
-            transformation: Default::default(),
             pattern: PatternType::Striped(StripedPattern::from(color_a, color_b)),
         }
     }
@@ -27,13 +24,12 @@ impl Pattern {
 impl Default for Pattern {
     fn default() -> Self {
         Self {
-            transformation: Matrix4::identity(),
             pattern: PatternType::Plain(PlainPattern::default()),
         }
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum PatternType {
     Plain(PlainPattern),
     Striped(StripedPattern),
@@ -48,7 +44,7 @@ impl PatternType {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct StripedPattern {
     color_a: Color,
     color_b: Color,
@@ -68,7 +64,7 @@ impl StripedPattern {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct PlainPattern {
     color: Color,
 }
@@ -90,7 +86,6 @@ impl PlainPattern {
 #[cfg(test)]
 mod pattern_tests {
     use crate::color::Color;
-    use crate::matrices::{Matrix, Matrix4};
     use crate::pattern::PatternType::Plain;
     use crate::pattern::{Pattern, PlainPattern};
     use crate::point::Point;
@@ -99,7 +94,6 @@ mod pattern_tests {
     fn pattern_creation() {
         let pattern = Pattern::default();
         let expected_pattern = Pattern {
-            transformation: Matrix4::identity(),
             pattern: Plain(PlainPattern::default()),
         };
 
