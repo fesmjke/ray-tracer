@@ -1,6 +1,6 @@
 use crate::color::Color;
 use crate::lights::PointLight;
-use crate::pattern::Pattern;
+use crate::pattern::{Pattern, PatternType};
 use crate::point::Point;
 use crate::primitives::PrimitiveShape;
 use crate::vector::Vector3;
@@ -13,7 +13,7 @@ pub struct Material {
     pub specular: f64,
     pub shininess: f64,
     // TODO: replace with default Pattern
-    pub pattern: Option<Pattern>,
+    pub pattern: Pattern,
 }
 
 impl Material {
@@ -40,13 +40,12 @@ impl Material {
         normal_vector: Vector3,
         in_shadow: bool,
     ) -> Color {
-        let color = if self.pattern.is_some() {
-            self.pattern
-                .clone()
-                .unwrap()
-                .pattern_at_local(primitive, position)
-        } else {
-            self.color
+        // TODO: replace with better solution
+        let color = match self.pattern.pattern {
+            PatternType::Plain(_) => self.color,
+            PatternType::Stripe(_) => self.pattern.pattern_at_local(primitive, position),
+            PatternType::Gradient(_) => self.pattern.pattern_at_local(primitive, position),
+            PatternType::Ring(_) => self.pattern.pattern_at_local(primitive, position),
         };
 
         let effective_color = color * light.intensity;
@@ -81,7 +80,7 @@ impl Material {
     }
 
     pub fn apply_pattern(mut self, pattern: Pattern) -> Self {
-        self.pattern = Some(pattern);
+        self.pattern = pattern;
         self
     }
 
