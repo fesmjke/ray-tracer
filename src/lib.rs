@@ -3,6 +3,7 @@ pub mod canvas;
 pub mod color;
 pub mod float_eq;
 pub mod material;
+pub mod pattern;
 pub mod point;
 pub mod preset;
 pub mod ray;
