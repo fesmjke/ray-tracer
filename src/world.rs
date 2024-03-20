@@ -58,6 +58,7 @@ impl World {
 
                 let color = details.object.material().color_reflection(
                     *light,
+                    details.object.clone(),
                     details.point,
                     details.eye_vector,
                     details.normal_vector,
