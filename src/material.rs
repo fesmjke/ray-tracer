@@ -46,6 +46,7 @@ impl Material {
             PatternType::Stripe(_) => self.pattern.pattern_at_local(primitive, position),
             PatternType::Gradient(_) => self.pattern.pattern_at_local(primitive, position),
             PatternType::Ring(_) => self.pattern.pattern_at_local(primitive, position),
+            PatternType::Checker(_) => self.pattern.pattern_at_local(primitive, position),
         };
 
         let effective_color = color * light.intensity;
