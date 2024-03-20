@@ -1,5 +1,6 @@
 use crate::color::Color;
 use crate::lights::PointLight;
+use crate::pattern::Pattern;
 use crate::point::Point;
 use crate::vector::Vector3;
 
@@ -10,6 +11,8 @@ pub struct Material {
     pub diffuse: f64,
     pub specular: f64,
     pub shininess: f64,
+    // TODO: replace with default Pattern
+    pub pattern: Option<Pattern>,
 }
 
 impl Material {
@@ -23,6 +26,7 @@ impl Material {
             diffuse,
             specular,
             shininess,
+            pattern: Default::default(),
         }
     }
 
@@ -34,7 +38,13 @@ impl Material {
         normal_vector: Vector3,
         in_shadow: bool,
     ) -> Color {
-        let effective_color = self.color * light.intensity;
+        let color = if self.pattern.is_some() {
+            self.pattern.unwrap().pattern_at(position)
+        } else {
+            self.color
+        };
+
+        let effective_color = color * light.intensity;
         let delta = (light.position - position).normalize();
         let light_vector = Vector3::new(delta.x, delta.y, delta.z);
         let ambient = effective_color * self.ambient;
@@ -63,6 +73,11 @@ impl Material {
         }
 
         return ambient + diffuse + specular;
+    }
+
+    pub fn apply_pattern(mut self, pattern: Pattern) -> Self {
+        self.pattern = Some(pattern);
+        self
     }
 
     pub fn color(mut self, color: Color) -> Self {
@@ -99,6 +114,7 @@ impl Default for Material {
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            pattern: Default::default(),
         }
     }
 }
@@ -108,6 +124,7 @@ mod material_tests {
     use crate::color::Color;
     use crate::lights::PointLight;
     use crate::material::Material;
+    use crate::pattern::Pattern;
     use crate::point::Point;
     use crate::vector::Vector3;
 
@@ -221,6 +238,37 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.color_reflection(light, position, eye_vector, normal_vector, in_shadow)
+        );
+    }
+
+    #[test]
+    fn material_with_pattern() {
+        let material = Material::default()
+            .ambient(1.0)
+            .diffuse(0.0)
+            .specular(0.0)
+            .apply_pattern(Pattern::new_striped(
+                Color::new(1.0, 1.0, 1.0),
+                Color::new(0.0, 0.0, 0.0),
+            ));
+        let position_a = Point::new(0.9, 0.0, 0.0);
+        let position_b = Point::new(1.1, 0.0, 0.0);
+        let eye_vector = Vector3::new(0.0, 0.0, -1.0);
+        let normal_vector = Vector3::new(0.0, 0.0, -1.0);
+        let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
+        let in_shadow = false;
+
+        let expected_color_white = Color::white();
+        let expected_color_black = Color::black();
+
+        assert_eq!(
+            expected_color_white,
+            material.color_reflection(light, position_a, eye_vector, normal_vector, in_shadow)
+        );
+
+        assert_eq!(
+            expected_color_black,
+            material.color_reflection(light, position_b, eye_vector, normal_vector, in_shadow)
         );
     }
 }
