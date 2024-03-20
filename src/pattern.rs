@@ -14,29 +14,29 @@ pub struct Pattern {
 impl Pattern {
     pub fn new_striped(color_a: Color, color_b: Color) -> Self {
         Self {
-            transformation: Matrix4::identity(),
             pattern: PatternType::Stripe(StripePattern::from(color_a, color_b)),
+            ..Default::default()
         }
     }
 
     pub fn new_gradient(color_a: Color, color_b: Color) -> Self {
         Self {
-            transformation: Matrix4::identity(),
             pattern: PatternType::Gradient(GradientPattern::from(color_a, color_b)),
+            ..Default::default()
         }
     }
 
     pub fn new_ring(colors: Vec<Color>) -> Self {
         Self {
-            transformation: Matrix4::identity(),
             pattern: PatternType::Ring(RingPattern::from(colors)),
+            ..Default::default()
         }
     }
 
     pub fn new_checker(color_a: Color, color_b: Color) -> Self {
         Self {
-            transformation: Matrix4::identity(),
             pattern: PatternType::Checker(CheckerPattern::from(color_a, color_b)),
+            ..Default::default()
         }
     }
 
