@@ -1,4 +1,5 @@
 use crate::color::Color;
+use crate::float_eq::ApproxEq;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 use crate::primitives::{Primitive, PrimitiveShape};
@@ -32,12 +33,20 @@ impl Pattern {
         }
     }
 
+    pub fn new_checker(color_a: Color, color_b: Color) -> Self {
+        Self {
+            transformation: Matrix4::identity(),
+            pattern: PatternType::Checker(CheckerPattern::from(color_a, color_b)),
+        }
+    }
+
     fn pattern_at(&self, point: Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
             PatternType::Stripe(stripe) => stripe.stripe_at(point),
             PatternType::Gradient(gradient) => gradient.gradient_at(point),
             PatternType::Ring(ring) => ring.ring_at(point),
+            PatternType::Checker(checker) => checker.checker_at(point),
         }
     }
 
@@ -75,6 +84,7 @@ pub enum PatternType {
     Stripe(StripePattern),
     Gradient(GradientPattern),
     Ring(RingPattern),
+    Checker(CheckerPattern),
 }
 
 impl PatternType {
@@ -84,6 +94,7 @@ impl PatternType {
             PatternType::Stripe(pattern) => pattern.stripe_at(point),
             PatternType::Gradient(pattern) => pattern.gradient_at(point),
             PatternType::Ring(pattern) => pattern.ring_at(point),
+            PatternType::Checker(pattern) => pattern.checker_at(point),
         }
     }
 }
@@ -162,6 +173,27 @@ impl RingPattern {
         let index = distance.floor() as usize % self.colors.len();
 
         self.colors[index]
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CheckerPattern {
+    color_a: Color,
+    color_b: Color,
+}
+
+impl CheckerPattern {
+    pub fn from(color_a: Color, color_b: Color) -> Self {
+        Self { color_a, color_b }
+    }
+
+    fn checker_at(&self, point: Point) -> Color {
+        let sum = point.x.floor() + point.y.floor() + point.z.floor();
+        if (sum % 2.0).approx_eq_low(&0.0) {
+            self.color_a
+        } else {
+            self.color_b
+        }
     }
 }
 
@@ -347,6 +379,60 @@ mod pattern_tests {
         assert_eq!(
             Color::black(),
             pattern.pattern_at(Point::new(0.708, 0.0, 0.708)),
+        );
+    }
+
+    #[test]
+    fn pattern_checker_should_repeat_in_x() {
+        let pattern = Pattern::new_checker(Color::white(), Color::black());
+
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.99, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::black(),
+            pattern.pattern_at(Point::new(1.01, 0.0, 0.0))
+        );
+    }
+
+    #[test]
+    fn pattern_checker_should_repeat_in_y() {
+        let pattern = Pattern::new_checker(Color::white(), Color::black());
+
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.99, 0.0))
+        );
+        assert_eq!(
+            Color::black(),
+            pattern.pattern_at(Point::new(0.0, 1.01, 0.0))
+        );
+    }
+
+    #[test]
+    fn pattern_checker_should_repeat_in_z() {
+        let pattern = Pattern::new_checker(Color::white(), Color::black());
+
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 0.9))
+        );
+        assert_eq!(
+            Color::black(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 1.01))
         );
     }
 }
