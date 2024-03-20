@@ -49,7 +49,7 @@ impl Primitive for Plane {
     }
 
     fn material(&self) -> Material {
-        self.material
+        self.material.clone()
     }
 
     fn transformation(&self) -> &Matrix4 {

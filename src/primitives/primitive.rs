@@ -59,8 +59,8 @@ impl Primitive for PrimitiveShape {
 
     fn material(&self) -> Material {
         match self {
-            SphereShape(sphere) => sphere.material,
-            PlaneShape(plane) => plane.material,
+            SphereShape(sphere) => sphere.material.clone(),
+            PlaneShape(plane) => plane.material.clone(),
         }
     }
 
