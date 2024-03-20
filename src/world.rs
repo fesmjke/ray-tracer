@@ -59,7 +59,7 @@ impl World {
                 let color = details.object.material().color_reflection(
                     *light,
                     details.object.clone(),
-                    details.point,
+                    details.over_point,
                     details.eye_vector,
                     details.normal_vector,
                     is_shadowed,
