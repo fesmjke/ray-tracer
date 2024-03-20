@@ -40,44 +40,33 @@ impl Material {
         normal_vector: Vector3,
         in_shadow: bool,
     ) -> Color {
-        // TODO: replace with better solution
-        let color = match self.pattern.pattern {
-            PatternType::Plain(_) => self.color,
-            PatternType::Stripe(_) => self.pattern.pattern_at_local(primitive, position),
-            PatternType::Gradient(_) => self.pattern.pattern_at_local(primitive, position),
-            PatternType::Ring(_) => self.pattern.pattern_at_local(primitive, position),
-            PatternType::Checker(_) => self.pattern.pattern_at_local(primitive, position),
-        };
-
+        let color = self.pattern.pattern_at_local(primitive, position);
         let effective_color = color * light.intensity;
-        let delta = (light.position - position).normalize();
-        let light_vector = Vector3::new(delta.x, delta.y, delta.z);
         let ambient = effective_color * self.ambient;
-        let mut diffuse = Color::default();
-        let mut specular = Color::default();
 
         if in_shadow {
-            return ambient;
-        }
-
-        let light_dot = light_vector.dot(&normal_vector);
-
-        if light_dot < 0.0 {
-            diffuse = Color::black();
-            specular = Color::black();
+            ambient
         } else {
-            diffuse = effective_color * self.diffuse * light_dot;
-            let reflect_vector = -light_vector.reflect(&normal_vector);
-            let reflect_dot_eye = reflect_vector.dot(&eye_vector);
-            if reflect_dot_eye <= 0.0 {
-                specular = Color::black();
-            } else {
-                let factor = reflect_dot_eye.powf(self.shininess);
-                specular = light.intensity * self.specular * factor;
-            }
-        }
+            let mut diffuse = Color::black();
+            let mut specular = Color::black();
 
-        return ambient + diffuse + specular;
+            let delta = (light.position - position).normalize();
+            let light_vector = Vector3::new(delta.x, delta.y, delta.z);
+            let light_dot_normal = light_vector.dot(&normal_vector);
+
+            if light_dot_normal >= 0.0 {
+                diffuse = effective_color * self.diffuse * light_dot_normal;
+                let reflect_vector = (-light_vector).reflect(&normal_vector);
+                let reflect_dot_eye = reflect_vector.dot(&eye_vector);
+
+                if reflect_dot_eye > 0.0 {
+                    let factor = f64::powf(reflect_dot_eye, self.shininess);
+                    specular = light.intensity * self.specular * factor
+                }
+            }
+
+            ambient + diffuse + specular
+        }
     }
 
     pub fn apply_pattern(mut self, pattern: Pattern) -> Self {
