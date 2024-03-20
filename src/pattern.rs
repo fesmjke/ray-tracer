@@ -25,11 +25,19 @@ impl Pattern {
         }
     }
 
+    pub fn new_ring(colors: Vec<Color>) -> Self {
+        Self {
+            transformation: Matrix4::identity(),
+            pattern: PatternType::Ring(RingPattern::from(colors)),
+        }
+    }
+
     fn pattern_at(&self, point: Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
             PatternType::Stripe(stripe) => stripe.stripe_at(point),
             PatternType::Gradient(gradient) => gradient.gradient_at(point),
+            PatternType::Ring(ring) => ring.ring_at(point),
         }
     }
 
@@ -61,11 +69,12 @@ impl Transformable for Pattern {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum PatternType {
     Plain(PlainPattern),
     Stripe(StripePattern),
     Gradient(GradientPattern),
+    Ring(RingPattern),
 }
 
 impl PatternType {
@@ -74,6 +83,7 @@ impl PatternType {
             PatternType::Plain(pattern) => pattern.plain_at(point),
             PatternType::Stripe(pattern) => pattern.stripe_at(point),
             PatternType::Gradient(pattern) => pattern.gradient_at(point),
+            PatternType::Ring(pattern) => pattern.ring_at(point),
         }
     }
 }
@@ -112,6 +122,9 @@ impl Default for PlainPattern {
 }
 
 impl PlainPattern {
+    pub fn from(color: Color) -> Self {
+        Self { color }
+    }
     fn plain_at(&self, _point: Point) -> Color {
         self.color
     }
@@ -132,6 +145,23 @@ impl GradientPattern {
     }
     pub fn gradient_at(&self, point: Point) -> Color {
         self.color_from + ((self.color_to - self.color_from) * point.x)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct RingPattern {
+    colors: Vec<Color>,
+}
+
+impl RingPattern {
+    pub fn from(colors: Vec<Color>) -> Self {
+        Self { colors }
+    }
+    pub fn ring_at(&self, point: Point) -> Color {
+        let distance = (point.x * point.x + point.z * point.z).sqrt();
+        let index = distance.floor() as usize % self.colors.len();
+
+        self.colors[index]
     }
 }
 
@@ -290,11 +320,33 @@ mod pattern_tests {
         );
         assert_eq!(
             Color::new(0.5, 0.5, 0.5),
-            pattern.pattern_at(Point::new(0.5, 0.0, 2.0))
+            pattern.pattern_at(Point::new(0.5, 0.0, 0.0))
         );
         assert_eq!(
             Color::new(0.25, 0.25, 0.25),
-            pattern.pattern_at(Point::new(0.75, 0.0, 2.0))
+            pattern.pattern_at(Point::new(0.75, 0.0, 0.0))
+        );
+    }
+
+    #[test]
+    fn pattern_ring_extend_in_both_x_z() {
+        let pattern = Pattern::new_ring(vec![Color::white(), Color::black()]);
+
+        assert_eq!(
+            Color::white(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::black(),
+            pattern.pattern_at(Point::new(1.0, 0.0, 0.0))
+        );
+        assert_eq!(
+            Color::black(),
+            pattern.pattern_at(Point::new(0.0, 0.0, 1.0))
+        );
+        assert_eq!(
+            Color::black(),
+            pattern.pattern_at(Point::new(0.708, 0.0, 0.708)),
         );
     }
 }
