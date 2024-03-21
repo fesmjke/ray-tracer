@@ -18,12 +18,14 @@ pub mod patterns {
     pub use plain::PlainPattern;
     pub use ring::RingPattern;
     pub use stripe::StripePattern;
+    pub use texture::TexturePattern;
     mod checker;
     mod gradient;
     mod pattern;
     mod plain;
     mod ring;
     mod stripe;
+    mod texture;
 }
 
 pub mod primitives {
