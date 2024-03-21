@@ -12,7 +12,7 @@ pub struct Pattern {
 }
 
 impl Pattern {
-    pub fn new_striped(color_a: Color, color_b: Color) -> Self {
+    pub fn new_stripe(color_a: Color, color_b: Color) -> Self {
         Self {
             pattern: PatternType::Stripe(StripePattern::from(color_a, color_b)),
             ..Default::default()
@@ -99,7 +99,7 @@ impl PatternType {
     }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct StripePattern {
     color_a: Color,
     color_b: Color,
@@ -111,7 +111,7 @@ impl StripePattern {
     }
 
     pub fn stripe_at(&self, point: Point) -> Color {
-        if point.x.floor().abs() % 2.0 == 0.0 {
+        if point.x.floor() as i32 % 2 == 0 {
             self.color_a
         } else {
             self.color_b
@@ -155,7 +155,9 @@ impl GradientPattern {
         }
     }
     pub fn gradient_at(&self, point: Point) -> Color {
-        self.color_from + ((self.color_to - self.color_from) * point.x)
+        let fraction = point.x - point.x.floor();
+        let distance = self.color_to - self.color_from;
+        self.color_from + (distance * fraction)
     }
 }
 
@@ -221,7 +223,7 @@ mod pattern_tests {
 
     #[test]
     fn pattern_striped_constant_in_y() {
-        let pattern = Pattern::new_striped(Color::white(), Color::black());
+        let pattern = Pattern::new_stripe(Color::white(), Color::black());
         let expected_color = Color::white();
 
         assert_eq!(
@@ -240,7 +242,7 @@ mod pattern_tests {
 
     #[test]
     fn pattern_striped_constant_in_z() {
-        let pattern = Pattern::new_striped(Color::white(), Color::black());
+        let pattern = Pattern::new_stripe(Color::white(), Color::black());
         let expected_color = Color::white();
 
         assert_eq!(
@@ -259,7 +261,7 @@ mod pattern_tests {
 
     #[test]
     fn pattern_striped_alternates_in_x() {
-        let pattern = Pattern::new_striped(Color::white(), Color::black());
+        let pattern = Pattern::new_stripe(Color::white(), Color::black());
         let expected_color_white = Color::white();
         let expected_color_black = Color::black();
 
@@ -291,7 +293,7 @@ mod pattern_tests {
 
     #[test]
     fn pattern_striped_with_primitive_transformation() {
-        let pattern = Pattern::new_striped(Color::white(), Color::black());
+        let pattern = Pattern::new_stripe(Color::white(), Color::black());
         let sphere = PrimitiveShape::SphereShape(
             Sphere::default()
                 .scale(2.0, 2.0, 2.0)
@@ -307,7 +309,7 @@ mod pattern_tests {
 
     #[test]
     fn pattern_striped_with_pattern_transformation() {
-        let pattern = Pattern::new_striped(Color::white(), Color::black())
+        let pattern = Pattern::new_stripe(Color::white(), Color::black())
             .scale(2.0, 2.0, 2.0)
             .transform();
         let sphere = PrimitiveShape::SphereShape(
@@ -322,7 +324,7 @@ mod pattern_tests {
 
     #[test]
     fn pattern_striped_with_both_transformation() {
-        let pattern = Pattern::new_striped(Color::white(), Color::black())
+        let pattern = Pattern::new_stripe(Color::white(), Color::black())
             .translate(0.5, 0.0, 0.0)
             .transform();
         let sphere = PrimitiveShape::SphereShape(
