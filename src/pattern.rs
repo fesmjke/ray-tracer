@@ -40,6 +40,12 @@ impl Pattern {
         }
     }
 
+    pub fn new_plain(color: Color) -> Self {
+        Self {
+            pattern: PatternType::Plain(PlainPattern::from(color)),
+            ..Default::default()
+        }
+    }
     fn pattern_at(&self, point: Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
