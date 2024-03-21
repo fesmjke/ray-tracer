@@ -13,7 +13,7 @@ pub struct Material {
     pub specular: f64,
     pub shininess: f64,
     // TODO: replace with default Pattern
-    pub pattern: Pattern,
+    pub pattern: Option<Pattern>,
 }
 
 impl Material {
@@ -27,7 +27,7 @@ impl Material {
             diffuse,
             specular,
             shininess,
-            pattern: Default::default(),
+            pattern: None,
         }
     }
 
@@ -40,7 +40,10 @@ impl Material {
         normal_vector: Vector3,
         in_shadow: bool,
     ) -> Color {
-        let color = self.pattern.pattern_at_local(primitive, position);
+        let mut color = self.color;
+        if let Some(pattern) = self.pattern.clone() {
+            color = pattern.pattern_at_local(primitive, position);
+        }
         let effective_color = color * light.intensity;
         let ambient = effective_color * self.ambient;
 
@@ -70,7 +73,7 @@ impl Material {
     }
 
     pub fn apply_pattern(mut self, pattern: Pattern) -> Self {
-        self.pattern = pattern;
+        self.pattern = Some(pattern);
         self
     }
 
@@ -284,7 +287,7 @@ mod material_tests {
             .ambient(1.0)
             .diffuse(0.0)
             .specular(0.0)
-            .apply_pattern(Pattern::new_striped(
+            .apply_pattern(Pattern::new_stripe(
                 Color::new(1.0, 1.0, 1.0),
                 Color::new(0.0, 0.0, 0.0),
             ));
