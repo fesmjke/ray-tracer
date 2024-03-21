@@ -1,6 +1,6 @@
 use crate::color::Color;
 use crate::lights::PointLight;
-use crate::pattern::{Pattern, PatternType};
+use crate::patterns::Pattern;
 use crate::point::Point;
 use crate::primitives::PrimitiveShape;
 use crate::vector::Vector3;
@@ -121,7 +121,7 @@ mod material_tests {
     use crate::color::Color;
     use crate::lights::PointLight;
     use crate::material::Material;
-    use crate::pattern::Pattern;
+    use crate::patterns::Pattern;
     use crate::point::Point;
     use crate::primitives::{PrimitiveShape, Sphere};
     use crate::vector::Vector3;
