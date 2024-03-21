@@ -3,7 +3,6 @@ pub mod canvas;
 pub mod color;
 pub mod float_eq;
 pub mod material;
-pub mod pattern;
 pub mod point;
 pub mod preset;
 pub mod ray;
@@ -11,6 +10,21 @@ pub mod render;
 pub mod utils;
 pub mod vector;
 pub mod world;
+
+pub mod patterns {
+    pub use checker::CheckerPattern;
+    pub use gradient::GradientPattern;
+    pub use pattern::{Pattern, PatternType};
+    pub use plain::PlainPattern;
+    pub use ring::RingPattern;
+    pub use stripe::StripePattern;
+    mod checker;
+    mod gradient;
+    mod pattern;
+    mod plain;
+    mod ring;
+    mod stripe;
+}
 
 pub mod primitives {
     pub use primitive::{Primitive, PrimitiveShape};
