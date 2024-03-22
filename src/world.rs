@@ -1,4 +1,5 @@
 use crate::color::Color;
+use crate::float_eq::ApproxEq;
 use crate::intersections::{IntersectionDetails, Intersections};
 use crate::lights::PointLight;
 use crate::point::Point;
@@ -9,6 +10,7 @@ use crate::vector::Vector3;
 pub struct World {
     objects: Vec<PrimitiveShape>,
     light_sources: Vec<PointLight>,
+    recursive_depth: usize,
 }
 
 impl World {
@@ -16,6 +18,7 @@ impl World {
         Self {
             objects: Vec::with_capacity(8),
             light_sources: Vec::with_capacity(4),
+            recursive_depth: 4,
         }
     }
 
@@ -50,13 +53,13 @@ impl World {
         intersections.sort()
     }
 
-    pub fn shade_hit(&self, details: &IntersectionDetails) -> Color {
+    pub fn shade_hit(&self, details: &IntersectionDetails, recursive_depth: usize) -> Color {
         self.light_sources
             .iter()
             .fold(Color::default(), |acc, light| {
                 let is_shadowed = self.shadow_cast(details.over_point);
 
-                let color = details.object.material().color_reflection(
+                let color = details.object.material().phong_reflection(
                     *light,
                     details.object.clone(),
                     details.over_point,
@@ -65,17 +68,35 @@ impl World {
                     is_shadowed,
                 );
 
-                acc + color
+                let reflected_color = self.reflect_color(details, recursive_depth);
+
+                acc + color + reflected_color
             })
     }
 
+    pub fn reflect_color(&self, details: &IntersectionDetails, recursive_depth: usize) -> Color {
+        if details.object.material().reflective.approx_eq_low(&0.0) || recursive_depth == 0 {
+            Color::black()
+        } else {
+            let reflected_ray = Ray::new(details.over_point, details.reflection_vector);
+
+            let color = self.color_at_recursive(&reflected_ray, recursive_depth - 1);
+
+            color * details.object.material().reflective
+        }
+    }
+
     pub fn color_at(&self, ray: &Ray) -> Color {
+        self.color_at_recursive(ray, self.recursive_depth)
+    }
+
+    fn color_at_recursive(&self, ray: &Ray, recursive_depth: usize) -> Color {
         let intersections = self.intersect_objects(&ray);
 
         match intersections.hit() {
             Some(hit) => {
                 let comps = IntersectionDetails::from(hit, &ray);
-                self.shade_hit(&comps)
+                self.shade_hit(&comps, recursive_depth)
             }
             None => Color::black(),
         }
@@ -114,8 +135,8 @@ mod world_tests {
     use crate::lights::PointLight;
     use crate::material::Material;
     use crate::point::Point;
-    use crate::primitives::PrimitiveShape::SphereShape;
-    use crate::primitives::Sphere;
+    use crate::primitives::PrimitiveShape::{PlaneShape, SphereShape};
+    use crate::primitives::{Plane, Primitive, Sphere};
     use crate::ray::Ray;
     use crate::transformations::Transformable;
     use crate::vector::Vector3;
@@ -212,7 +233,7 @@ mod world_tests {
 
         let expected_color = Color::new(0.38066, 0.47583, 0.2855);
 
-        assert_eq!(expected_color, world.shade_hit(&intersection_details));
+        assert_eq!(expected_color, world.shade_hit(&intersection_details, 0));
     }
 
     #[test]
@@ -229,7 +250,7 @@ mod world_tests {
 
         let expected_color = Color::new(0.90498, 0.90498, 0.90498);
 
-        assert_eq!(expected_color, world.shade_hit(&intersection_details));
+        assert_eq!(expected_color, world.shade_hit(&intersection_details, 0));
     }
 
     #[test]
@@ -238,7 +259,7 @@ mod world_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 1.0, 0.0));
         let expected_color = Color::new(0.0, 0.0, 0.0);
 
-        assert_eq!(expected_color, world.color_at(&ray));
+        assert_eq!(expected_color, world.color_at_recursive(&ray, 0));
     }
 
     #[test]
@@ -247,7 +268,7 @@ mod world_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let expected_color = Color::new(0.38066, 0.47583, 0.2855);
 
-        assert_eq!(expected_color, world.color_at(&ray));
+        assert_eq!(expected_color, world.color_at_recursive(&ray, 0));
     }
 
     #[test]
@@ -264,7 +285,7 @@ mod world_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
         let expected_color = Color::new(1.0, 1.0, 1.0);
 
-        assert_eq!(expected_color, world.color_at(&ray));
+        assert_eq!(expected_color, world.color_at_recursive(&ray, 0));
     }
 
     #[test]
@@ -322,6 +343,101 @@ mod world_tests {
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
         let expected_color = Color::new(0.1, 0.1, 0.1);
 
-        assert_eq!(expected_color, world.shade_hit(&intersection_details));
+        assert_eq!(expected_color, world.shade_hit(&intersection_details, 0));
     }
+
+    #[test]
+    fn world_reflected_color_for_nonreflective() {
+        let world = simulated_world();
+        let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, -1.0));
+
+        let sphere = Sphere::default()
+            .scale(0.5, 0.5, 0.5)
+            .transform()
+            .apply_material(Material::default().ambient(1.0));
+
+        let intersection = Intersection::new(1.0, SphereShape(sphere));
+        let intersection_details = IntersectionDetails::from(&intersection, &ray);
+
+        let expected_color = Color::black();
+
+        assert_eq!(
+            expected_color,
+            world.reflect_color(&intersection_details, 0)
+        );
+    }
+
+    #[test]
+    fn world_reflected_color_for_reflective() {
+        let world = simulated_world();
+        let ray = Ray::new(
+            Point::new(0.0, 0.0, -3.0),
+            Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+        );
+
+        let plane = Plane::default()
+            .translate(0.0, -1.0, 0.0)
+            .transform()
+            .apply_material(Material::default().reflective(0.5));
+
+        let intersection = Intersection::new(f64::sqrt(2.0), PlaneShape(plane));
+        let intersection_details = IntersectionDetails::from(&intersection, &ray);
+
+        let expected_color = Color::new(0.19032, 0.2379, 0.14274);
+
+        assert_eq!(
+            expected_color,
+            world.reflect_color(&intersection_details, 1)
+        );
+    }
+
+    #[test]
+    fn world_reflected_color_for_reflective_shade_hit() {
+        let world = simulated_world();
+        let ray = Ray::new(
+            Point::new(0.0, 0.0, -3.0),
+            Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+        );
+
+        let plane = Plane::default()
+            .translate(0.0, -1.0, 0.0)
+            .transform()
+            .apply_material(Material::default().reflective(0.5));
+
+        let intersection = Intersection::new(f64::sqrt(2.0), PlaneShape(plane));
+        let intersection_details = IntersectionDetails::from(&intersection, &ray);
+
+        let expected_color = Color::new(0.87677, 0.92436, 0.82918);
+
+        assert_eq!(expected_color, world.shade_hit(&intersection_details, 1));
+    }
+
+    // #[test]
+    // fn world_reflected_color_for_reflective_infinite() {
+    //     let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
+    //
+    //     let light = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::default());
+    //
+    //     let lower_plane = PlaneShape(
+    //         Plane::default()
+    //             .translate(0.0, -1.0, 0.0)
+    //             .transform()
+    //             .apply_material(Material::default().reflective(1.0)),
+    //     );
+    //
+    //     let upper_plane = PlaneShape(
+    //         Plane::default()
+    //             .translate(0.0, 1.0, 0.0)
+    //             .transform()
+    //             .apply_material(Material::default().reflective(1.0)),
+    //     );
+    //
+    //     let expected_color = Color::new(0.87677, 0.92436, 0.82918);
+    //
+    //     let world = simulated_world()
+    //         .with_objects(vec![lower_plane, upper_plane])
+    //         .with_light_sources(vec![light]);
+    //
+    //     assert_eq!(expected_color, world.color_at_recursive(&ray, 1));
+    // }
 }
