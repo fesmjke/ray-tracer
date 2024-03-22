@@ -19,6 +19,7 @@ pub struct IntersectionDetails {
     pub inside: bool,
     pub n1: f64,
     pub n2: f64,
+    pub under_point: Point,
 }
 
 impl IntersectionDetails {
@@ -35,6 +36,7 @@ impl IntersectionDetails {
         };
 
         let over_point = point + normal_vector * LOW_EPSILON;
+        let under_point = point - normal_vector * LOW_EPSILON;
         let reflection_vector = ray.direction.reflect(&normal_vector);
 
         Self {
@@ -48,6 +50,7 @@ impl IntersectionDetails {
             inside,
             n1: 1.0, // TEMP
             n2: 1.0, // TEMP
+            under_point,
         }
     }
 
@@ -68,6 +71,7 @@ impl IntersectionDetails {
         };
 
         let over_point = point + normal_vector * LOW_EPSILON;
+        let under_point = point - normal_vector * LOW_EPSILON;
         let reflection_vector = ray.direction.reflect(&normal_vector);
 
         let mut container: VecDeque<PrimitiveShape> = VecDeque::new();
@@ -115,6 +119,7 @@ impl IntersectionDetails {
             inside,
             n1,
             n2,
+            under_point,
         }
     }
 
@@ -141,6 +146,7 @@ mod intersection_details_tests {
     use crate::ray::Ray;
     use crate::transformations::Transformable;
     use crate::vector::Vector3;
+    use std::f64::consts::E;
 
     #[test]
     fn intersection_details_creation() {
@@ -158,6 +164,7 @@ mod intersection_details_tests {
             over_point: Point::new(0.0, 0.0, -1.0001),
             reflection_vector: Vector3::new(0.0, 0.0, -1.0),
             n2: 1.0,
+            under_point: Point::new(0.0, 0.0, -0.9999),
         };
 
         assert_eq!(
@@ -276,5 +283,24 @@ mod intersection_details_tests {
             expected_n1_n2,
             (intersection_details.n1, intersection_details.n2)
         );
+    }
+
+    #[test]
+    fn intersection_details_under_point() {
+        let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere_a = SphereShape(
+            Sphere::default()
+                .translate(0.0, 0.0, 1.0)
+                .transform()
+                .apply_material(Material::default().refractive_index(1.0).transparency(1.0)),
+        );
+        let intersection = Intersection::new(5.0, sphere_a);
+        let intersections = Intersections::new().with(vec![intersection.clone()]);
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection, &intersections, &ray);
+        let expected_under_point = E / 2.0;
+
+        assert!(expected_under_point > intersection_details.under_point.z);
+        assert!(intersection_details.point.z < intersection_details.under_point.z);
     }
 }
