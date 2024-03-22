@@ -13,6 +13,7 @@ pub struct IntersectionDetails {
     pub over_point: Point,
     pub normal_vector: Vector3,
     pub eye_vector: Vector3,
+    pub reflection_vector: Vector3,
     pub inside: bool,
 }
 
@@ -30,6 +31,7 @@ impl IntersectionDetails {
         };
 
         let over_point = point + normal_vector * LOW_EPSILON;
+        let reflection_vector = ray.direction.reflect(&normal_vector);
 
         Self {
             time: intersection.time,
@@ -38,6 +40,7 @@ impl IntersectionDetails {
             object: intersection.object.clone(),
             normal_vector,
             eye_vector,
+            reflection_vector,
             inside,
         }
     }
@@ -59,8 +62,8 @@ mod intersection_details_tests {
     use crate::float_eq::LOW_EPSILON;
     use crate::intersections::{Intersection, IntersectionDetails};
     use crate::point::Point;
-    use crate::primitives::PrimitiveShape::SphereShape;
-    use crate::primitives::Sphere;
+    use crate::primitives::PrimitiveShape::{PlaneShape, SphereShape};
+    use crate::primitives::{Plane, Sphere};
     use crate::ray::Ray;
     use crate::transformations::Transformable;
     use crate::vector::Vector3;
@@ -78,6 +81,7 @@ mod intersection_details_tests {
             normal_vector: Vector3::new(0.0, 0.0, -1.0),
             inside: false,
             over_point: Point::new(0.0, 0.0, -1.0001),
+            reflection_vector: Vector3::new(0.0, 0.0, -1.0),
         };
 
         assert_eq!(
@@ -91,20 +95,14 @@ mod intersection_details_tests {
         let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere = SphereShape(Sphere::default());
         let intersection = Intersection::new(1.0, sphere.clone());
-        let expected_details = IntersectionDetails {
-            time: 1.0,
-            point: Point::new(0.0, 0.0, 1.0),
-            object: sphere.clone(),
-            eye_vector: Vector3::new(0.0, 0.0, -1.0),
-            normal_vector: Vector3::new(0.0, 0.0, -1.0),
-            inside: true,
-            over_point: Point::new(0.0, 0.0, 0.9999),
-        };
+        let expected_eye_vector = Vector3::new(0.0, 0.0, -1.0);
+        let expected_normal_vector = Vector3::new(0.0, 0.0, -1.0);
 
-        assert_eq!(
-            expected_details,
-            IntersectionDetails::from(&intersection, &ray)
-        );
+        let intersection_details = IntersectionDetails::from(&intersection, &ray);
+
+        assert_eq!(expected_eye_vector, intersection_details.eye_vector);
+
+        assert_eq!(expected_normal_vector, intersection_details.normal_vector);
     }
 
     #[test]
@@ -117,5 +115,23 @@ mod intersection_details_tests {
 
         assert!(expected_position_z > intersection_details.over_point.z);
         assert!(intersection_details.point.z > intersection_details.over_point.z);
+    }
+
+    #[test]
+    fn intersection_details_reflection_vector() {
+        let ray = Ray::new(
+            Point::new(0.0, 1.0, -1.0),
+            Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+        );
+        let plane = PlaneShape(Plane::default());
+        let intersection = Intersection::new(f64::sqrt(2.0), plane);
+        let intersection_details = IntersectionDetails::from(&intersection, &ray);
+        let expected_reflection_vector =
+            Vector3::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0);
+
+        assert_eq!(
+            expected_reflection_vector,
+            intersection_details.reflection_vector
+        );
     }
 }
