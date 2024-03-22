@@ -1,0 +1,5 @@
+pub const REFRACTION_VACUUM: f64 = 1.0;
+pub const REFRACTION_AIR: f64 = 1.00029;
+pub const REFRACTION_WATER: f64 = 1.333;
+pub const REFRACTION_GLASS: f64 = 1.52;
+pub const REFRACTION_DIAMOND: f64 = 2.417;
