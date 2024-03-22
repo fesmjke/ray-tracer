@@ -1,6 +1,7 @@
 pub mod camera;
 pub mod canvas;
 pub mod color;
+pub mod constants;
 pub mod float_eq;
 pub mod material;
 pub mod point;
