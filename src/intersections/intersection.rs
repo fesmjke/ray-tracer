@@ -39,7 +39,7 @@ impl Ord for Intersection {
 
 #[derive(Debug, PartialEq)]
 pub struct Intersections {
-    intersections: Vec<Intersection>,
+    pub intersections: Vec<Intersection>,
 }
 
 impl Intersections {
