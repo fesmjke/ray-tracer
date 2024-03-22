@@ -11,13 +11,21 @@ pub struct Material {
     pub ambient: f64,
     pub diffuse: f64,
     pub specular: f64,
+    pub reflective: f64,
     pub shininess: f64,
     // TODO: replace with default Pattern
     pub pattern: Option<Pattern>,
 }
 
 impl Material {
-    pub fn new(color: Color, ambient: f64, diffuse: f64, specular: f64, shininess: f64) -> Self {
+    pub fn new(
+        color: Color,
+        ambient: f64,
+        diffuse: f64,
+        specular: f64,
+        reflective: f64,
+        shininess: f64,
+    ) -> Self {
         Self {
             color,
             // TODO: add restrictions for setting and creation
@@ -26,12 +34,13 @@ impl Material {
             ambient,
             diffuse,
             specular,
+            reflective,
             shininess,
             pattern: None,
         }
     }
 
-    pub fn color_reflection(
+    pub fn phong_reflection(
         &self,
         light: PointLight,
         primitive: PrimitiveShape,
@@ -101,6 +110,11 @@ impl Material {
         self.shininess = shininess;
         self
     }
+
+    pub fn reflective(mut self, reflective: f64) -> Self {
+        self.reflective = reflective;
+        self
+    }
 }
 
 impl Default for Material {
@@ -110,6 +124,7 @@ impl Default for Material {
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
+            reflective: 0.0,
             shininess: 200.0,
             pattern: Default::default(),
         }
@@ -132,12 +147,14 @@ mod material_tests {
         let expected_color = Color::white();
         let expected_ambient = 0.1;
         let expected_diffuse = 0.9;
+        let expected_reflective = 0.0;
         let expected_specular = 0.9;
         let expected_shininess = 200.0;
 
         assert_eq!(expected_color, default_material.color);
         assert_eq!(expected_ambient, default_material.ambient);
         assert_eq!(expected_diffuse, default_material.diffuse);
+        assert_eq!(expected_reflective, default_material.reflective);
         assert_eq!(expected_specular, default_material.specular);
         assert_eq!(expected_shininess, default_material.shininess);
     }
@@ -154,7 +171,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position,
@@ -177,7 +194,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position,
@@ -200,7 +217,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position,
@@ -223,7 +240,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position,
@@ -246,7 +263,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position,
@@ -270,7 +287,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position,
@@ -303,7 +320,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color_white,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position_a,
@@ -315,7 +332,7 @@ mod material_tests {
 
         assert_eq!(
             expected_color_black,
-            material.color_reflection(
+            material.phong_reflection(
                 light,
                 PrimitiveShape::SphereShape(Sphere::default()),
                 position_b,
