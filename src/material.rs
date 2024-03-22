@@ -121,6 +121,16 @@ impl Material {
         self.reflective = reflective;
         self
     }
+
+    pub fn refractive_index(mut self, refractive_index: f64) -> Self {
+        self.refractive_index = refractive_index;
+        self
+    }
+
+    pub fn transparency(mut self, transparency: f64) -> Self {
+        self.transparency = transparency;
+        self
+    }
 }
 
 impl Default for Material {
