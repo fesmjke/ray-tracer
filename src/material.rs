@@ -12,6 +12,8 @@ pub struct Material {
     pub diffuse: f64,
     pub specular: f64,
     pub reflective: f64,
+    pub refractive_index: f64,
+    pub transparency: f64,
     pub shininess: f64,
     // TODO: replace with default Pattern
     pub pattern: Option<Pattern>,
@@ -24,6 +26,8 @@ impl Material {
         diffuse: f64,
         specular: f64,
         reflective: f64,
+        refractive_index: f64,
+        transparency: f64,
         shininess: f64,
     ) -> Self {
         Self {
@@ -35,6 +39,8 @@ impl Material {
             diffuse,
             specular,
             reflective,
+            refractive_index,
+            transparency,
             shininess,
             pattern: None,
         }
@@ -125,6 +131,8 @@ impl Default for Material {
             diffuse: 0.9,
             specular: 0.9,
             reflective: 0.0,
+            refractive_index: 1.0,
+            transparency: 0.0,
             shininess: 200.0,
             pattern: Default::default(),
         }
@@ -148,6 +156,8 @@ mod material_tests {
         let expected_ambient = 0.1;
         let expected_diffuse = 0.9;
         let expected_reflective = 0.0;
+        let expected_refractive_index = 1.0;
+        let expected_transparency = 0.0;
         let expected_specular = 0.9;
         let expected_shininess = 200.0;
 
@@ -155,6 +165,8 @@ mod material_tests {
         assert_eq!(expected_ambient, default_material.ambient);
         assert_eq!(expected_diffuse, default_material.diffuse);
         assert_eq!(expected_reflective, default_material.reflective);
+        assert_eq!(expected_refractive_index, default_material.refractive_index);
+        assert_eq!(expected_transparency, default_material.transparency);
         assert_eq!(expected_specular, default_material.specular);
         assert_eq!(expected_shininess, default_material.shininess);
     }
