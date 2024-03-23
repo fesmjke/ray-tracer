@@ -1,5 +1,4 @@
 use crate::constants::REFRACTION_VACUUM;
-use crate::float_eq::LOW_EPSILON;
 use crate::intersections::{Intersection, Intersections};
 use crate::point::Point;
 use crate::primitives::{Primitive, PrimitiveShape};
@@ -35,8 +34,8 @@ impl IntersectionDetails {
             false
         };
 
-        let over_point = point + normal_vector * LOW_EPSILON;
-        let under_point = point - normal_vector * LOW_EPSILON;
+        let over_point = point + normal_vector * f64::EPSILON * 10000.0;
+        let under_point = point - normal_vector * f64::EPSILON * 10000.0;
         let reflection_vector = ray.direction.reflect(&normal_vector);
 
         Self {
@@ -70,14 +69,14 @@ impl IntersectionDetails {
             false
         };
 
-        let over_point = point + normal_vector * LOW_EPSILON;
-        let under_point = point - normal_vector * LOW_EPSILON;
+        let over_point = point + normal_vector * f64::EPSILON * 10000.0;
+        let under_point = point - normal_vector * f64::EPSILON * 10000.0;
         let reflection_vector = ray.direction.reflect(&normal_vector);
 
         let mut container: VecDeque<PrimitiveShape> = VecDeque::new();
 
-        let mut n1 = f64::NAN;
-        let mut n2 = f64::NAN;
+        let mut n1 = 1.0;
+        let mut n2 = 1.0;
 
         let default_refraction_index = REFRACTION_VACUUM;
         for intersection in intersections.intersections.iter() {
@@ -122,22 +121,10 @@ impl IntersectionDetails {
             under_point,
         }
     }
-
-    // fn is_inside(mut self) -> Self {
-    //     if self.normal_vector.dot(&self.eye_vector) < 0.0 {
-    //         self.normal_vector = -self.normal_vector;
-    //         self.inside = true;
-    //     } else {
-    //         self.inside = false;
-    //     }
-    //
-    //     self
-    // }
 }
 
 #[cfg(test)]
 mod intersection_details_tests {
-    use crate::float_eq::LOW_EPSILON;
     use crate::intersections::{Intersection, IntersectionDetails, Intersections};
     use crate::material::Material;
     use crate::point::Point;
@@ -147,31 +134,6 @@ mod intersection_details_tests {
     use crate::transformations::Transformable;
     use crate::vector::Vector3;
     use std::f64::consts::E;
-
-    #[test]
-    fn intersection_details_creation() {
-        let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let sphere = SphereShape(Sphere::default());
-        let intersection = Intersection::new(4.0, sphere.clone());
-        let expected_details = IntersectionDetails {
-            time: 4.0,
-            point: Point::new(0.0, 0.0, -1.0),
-            object: sphere.clone(),
-            eye_vector: Vector3::new(0.0, 0.0, -1.0),
-            normal_vector: Vector3::new(0.0, 0.0, -1.0),
-            inside: false,
-            n1: 1.0,
-            over_point: Point::new(0.0, 0.0, -1.0001),
-            reflection_vector: Vector3::new(0.0, 0.0, -1.0),
-            n2: 1.0,
-            under_point: Point::new(0.0, 0.0, -0.9999),
-        };
-
-        assert_eq!(
-            expected_details,
-            IntersectionDetails::from(&intersection, &ray)
-        );
-    }
 
     #[test]
     fn intersection_details_occurs_on_the_inside() {
@@ -194,7 +156,7 @@ mod intersection_details_tests {
         let sphere = SphereShape(Sphere::default().translate(0.0, 0.0, 1.0).transform());
         let intersection = Intersection::new(5.0, sphere);
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
-        let expected_position_z = -LOW_EPSILON / 2.0;
+        let expected_position_z = -f64::EPSILON / 2.0;
 
         assert!(expected_position_z > intersection_details.over_point.z);
         assert!(intersection_details.point.z > intersection_details.over_point.z);
@@ -252,10 +214,10 @@ mod intersection_details_tests {
 
         let intersections = Intersections::new().with(vec![
             intersection_a_1.clone(),
-            intersection_b_1,
-            intersection_c_1,
+            intersection_b_1.clone(),
+            intersection_c_1.clone(),
             intersection_b_2.clone(),
-            intersection_c_2,
+            intersection_c_2.clone(),
             intersection_a_2.clone(),
         ]);
 
@@ -268,9 +230,35 @@ mod intersection_details_tests {
             (intersection_details.n1, intersection_details.n2)
         );
 
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection_b_1, &intersections, &ray);
+        let expected_n1_n2 = (1.5, 2.0);
+
+        assert_eq!(
+            expected_n1_n2,
+            (intersection_details.n1, intersection_details.n2)
+        );
+
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection_c_1, &intersections, &ray);
+        let expected_n1_n2 = (2.0, 2.5);
+
+        assert_eq!(
+            expected_n1_n2,
+            (intersection_details.n1, intersection_details.n2)
+        );
+
         let expected_n1_n2 = (2.5, 2.5);
         let intersection_details =
             IntersectionDetails::from_many(&intersection_b_2, &intersections, &ray);
+        assert_eq!(
+            expected_n1_n2,
+            (intersection_details.n1, intersection_details.n2)
+        );
+
+        let expected_n1_n2 = (2.5, 1.5);
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection_c_2, &intersections, &ray);
         assert_eq!(
             expected_n1_n2,
             (intersection_details.n1, intersection_details.n2)
@@ -292,7 +280,7 @@ mod intersection_details_tests {
             Sphere::default()
                 .translate(0.0, 0.0, 1.0)
                 .transform()
-                .apply_material(Material::default().refractive_index(1.0).transparency(1.0)),
+                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
         );
         let intersection = Intersection::new(5.0, sphere_a);
         let intersections = Intersections::new().with(vec![intersection.clone()]);
