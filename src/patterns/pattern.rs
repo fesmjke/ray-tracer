@@ -46,6 +46,13 @@ impl Pattern {
             ..Default::default()
         }
     }
+
+    pub fn new_test() -> Self {
+        Self {
+            pattern: PatternType::Test(TestPattern {}),
+            ..Default::default()
+        }
+    }
     pub(crate) fn pattern_at(&self, point: Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
@@ -53,6 +60,7 @@ impl Pattern {
             PatternType::Gradient(gradient) => gradient.gradient_at(point),
             PatternType::Ring(ring) => ring.ring_at(point),
             PatternType::Checker(checker) => checker.checker_at(point),
+            PatternType::Test(pattern) => pattern.test_at(point),
         }
     }
 
@@ -91,6 +99,7 @@ pub enum PatternType {
     Gradient(GradientPattern),
     Ring(RingPattern),
     Checker(CheckerPattern),
+    Test(TestPattern),
 }
 
 impl PatternType {
@@ -101,7 +110,16 @@ impl PatternType {
             PatternType::Gradient(pattern) => pattern.gradient_at(point),
             PatternType::Ring(pattern) => pattern.ring_at(point),
             PatternType::Checker(pattern) => pattern.checker_at(point),
+            PatternType::Test(pattern) => pattern.test_at(point),
         }
+    }
+}
+#[derive(Debug, PartialEq, Clone)]
+pub struct TestPattern {}
+
+impl TestPattern {
+    pub fn test_at(&self, point: Point) -> Color {
+        Color::new(point.x, point.y, point.z)
     }
 }
 
