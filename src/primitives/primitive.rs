@@ -77,7 +77,7 @@ impl PartialEq for PrimitiveShape {
         match (self, other) {
             (SphereShape(sphere_a), SphereShape(sphere_b)) => sphere_a == sphere_b,
             (PlaneShape(plane_a), PlaneShape(plane_b)) => plane_a == plane_b,
-            _ => panic!("DIFFERENT TYPE OF SHAPES"),
+            _ => false,
         }
     }
 }
