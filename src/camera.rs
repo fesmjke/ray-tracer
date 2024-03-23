@@ -76,7 +76,7 @@ impl Camera {
     }
 
     pub fn parallel_render(&self, world: &World) -> Canvas {
-        const BAND_SIZE: usize = 3;
+        const BAND_SIZE: usize = 12;
         let mut image = Canvas::new(self.horizontal_size, self.vertical_size, Color::default());
 
         image
