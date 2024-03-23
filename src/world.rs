@@ -59,7 +59,7 @@ impl World {
             .fold(Color::default(), |acc, light| {
                 let is_shadowed = self.shadow_cast(details.over_point);
 
-                let color = details.object.material().phong_reflection(
+                let surface_color = details.object.material().phong_reflection(
                     *light,
                     details.object.clone(),
                     details.over_point,
@@ -71,7 +71,17 @@ impl World {
                 let reflected_color = self.reflect_color(details, recursive_depth);
                 let refracted_color = self.refracted_color(details, recursive_depth);
 
-                acc + color + reflected_color + refracted_color
+                if details.object.material().reflective > 0.0
+                    && details.object.material().transparency > 0.0
+                {
+                    let reflectance = details.schlick();
+
+                    acc + surface_color
+                        + reflected_color * reflectance
+                        + refracted_color * (1.0 - reflectance)
+                } else {
+                    acc + surface_color + reflected_color + refracted_color
+                }
             })
     }
 
@@ -568,6 +578,53 @@ mod world_tests {
         let intersection_details =
             IntersectionDetails::from_many(&intersection, &intersections, &ray);
         let expected_color = Color::new(0.93642, 0.68642, 0.68642);
+
+        assert_eq!(expected_color, world.shade_hit(&intersection_details, 5));
+    }
+
+    #[test]
+    fn world_refracted_color_shade_hit_reflective_transparent_material() {
+        let ray = Ray::new(
+            Point::new(0.0, 0.0, -3.0),
+            Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+        );
+
+        let floor = PlaneShape(
+            Plane::default()
+                .translate(0.0, -1.0, 0.0)
+                .transform()
+                .apply_material(
+                    Material::default()
+                        .transparency(0.5)
+                        .refractive_index(1.5)
+                        .reflective(0.5),
+                ),
+        );
+
+        let sphere_a = SphereShape(
+            Sphere::default()
+                .translate(0.0, -3.5, -0.5)
+                .transform()
+                .apply_material(Material::default().ambient(0.5).color(Color::red())),
+        );
+
+        let sphere_b = SphereShape(
+            Sphere::default().apply_material(
+                Material::default()
+                    .color(Color::new(0.8, 1.0, 0.6))
+                    .specular(0.2)
+                    .diffuse(0.7),
+            ),
+        );
+
+        let intersection = Intersection::new(f64::sqrt(2.0), floor.clone());
+
+        let world = simulated_world().with_objects(vec![floor, sphere_a, sphere_b]);
+
+        let intersections = Intersections::new().with(vec![intersection.clone()]);
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection, &intersections, &ray);
+        let expected_color = Color::new(0.93391, 0.69643, 0.69243);
 
         assert_eq!(expected_color, world.shade_hit(&intersection_details, 5));
     }
