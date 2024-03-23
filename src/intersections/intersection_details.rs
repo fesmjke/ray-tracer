@@ -121,10 +121,30 @@ impl IntersectionDetails {
             under_point,
         }
     }
+
+    pub fn schlick(&self) -> f64 {
+        let mut cos = self.eye_vector.dot(&self.normal_vector);
+
+        if self.n1 > self.n2 {
+            let n = self.n1 / self.n2;
+            let sin2_t = n.powi(2) * (1.0 - cos.powi(2));
+
+            if sin2_t > 1.0 {
+                return 1.0;
+            }
+
+            cos = (1.0 - sin2_t).sqrt();
+        }
+
+        let r0 = ((self.n1 - self.n2) / (self.n1 + self.n2)).powi(2);
+
+        r0 + (1.0 - r0) * (1.0 - cos).powi(5)
+    }
 }
 
 #[cfg(test)]
 mod intersection_details_tests {
+    use crate::float_eq::ApproxEq;
     use crate::intersections::{Intersection, IntersectionDetails, Intersections};
     use crate::material::Material;
     use crate::point::Point;
@@ -290,5 +310,61 @@ mod intersection_details_tests {
 
         assert!(expected_under_point > intersection_details.under_point.z);
         assert!(intersection_details.point.z < intersection_details.under_point.z);
+    }
+
+    #[test]
+    fn intersection_details_schlick_approx_under_total_internal_reflection() {
+        let sqrt2 = f64::sqrt(2.0);
+        let ray = Ray::new(
+            Point::new(0.0, 0.0, sqrt2 / 2.0),
+            Vector3::new(0.0, 1.0, 0.0),
+        );
+        let sphere_a = SphereShape(
+            Sphere::default()
+                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
+        );
+        let intersection_a = Intersection::new(-sqrt2 / 2.0, sphere_a.clone());
+        let intersection_b = Intersection::new(sqrt2 / 2.0, sphere_a.clone());
+        let intersections =
+            Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection_b, &intersections, &ray);
+        let expected_reflectance = 1.0;
+
+        assert!(expected_reflectance.approx_eq_low(&intersection_details.schlick()));
+    }
+
+    #[test]
+    fn intersection_details_schlick_approx_perpendicular_viewing_angle() {
+        let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
+        let sphere_a = SphereShape(
+            Sphere::default()
+                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
+        );
+        let intersection_a = Intersection::new(-1.0, sphere_a.clone());
+        let intersection_b = Intersection::new(1.0, sphere_a.clone());
+        let intersections =
+            Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection_b, &intersections, &ray);
+        let expected_reflectance = 0.04;
+
+        assert!(expected_reflectance.approx_eq_low(&intersection_details.schlick()));
+    }
+
+    #[test]
+    fn intersection_details_schlick_approx_with_small_angle() {
+        let ray = Ray::new(Point::new(0.0, 0.99, -2.0), Vector3::new(0.0, 0.0, 1.0));
+        let sphere_a = SphereShape(
+            Sphere::default()
+                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
+        );
+        let intersection_a = Intersection::new(1.8589, sphere_a.clone());
+        let intersections = Intersections::new().with(vec![intersection_a.clone()]);
+        let intersection_details =
+            IntersectionDetails::from_many(&intersection_a, &intersections, &ray);
+        let expected_reflectance = 0.48873;
+
+        assert!(expected_reflectance.approx_eq_low(&intersection_details.schlick()));
     }
 }
