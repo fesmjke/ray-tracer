@@ -1,27 +1,27 @@
 use crate::primitives::PrimitiveShape;
 use std::{cmp::Ordering, fmt::Debug, ops::Index};
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Intersection {
+#[derive(Debug, PartialEq)]
+pub struct Intersection<'a> {
     pub time: f64,
-    pub object: PrimitiveShape,
+    pub object: PrimitiveShape<'a>,
 }
 
-impl Intersection {
-    pub fn new(time: f64, object: PrimitiveShape) -> Intersection {
+impl<'a> Intersection<'a> {
+    pub fn new(time: f64, object: PrimitiveShape<'a>) -> Intersection<'a> {
         Intersection { time, object }
     }
 }
 
-impl Eq for Intersection {}
+impl Eq for Intersection<'_> {}
 
-impl PartialOrd for Intersection {
+impl PartialOrd for Intersection<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Intersection {
+impl Ord for Intersection<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         if self.time.is_nan() {
             Ordering::Greater
@@ -38,18 +38,18 @@ impl Ord for Intersection {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Intersections {
-    pub intersections: Vec<Intersection>,
+pub struct Intersections<'a> {
+    pub intersections: Vec<Intersection<'a>>,
 }
 
-impl Intersections {
+impl<'a> Intersections<'a> {
     pub fn new() -> Self {
         Self {
             intersections: Vec::new(),
         }
     }
 
-    pub fn with(mut self, intersections: Vec<Intersection>) -> Self {
+    pub fn with(mut self, intersections: Vec<Intersection<'a>>) -> Self {
         self.intersections = intersections;
         self
     }
@@ -62,7 +62,7 @@ impl Intersections {
             .min()
     }
 
-    pub fn merge(&mut self, other: Intersections) {
+    pub fn merge(&mut self, other: Intersections<'a>) {
         self.intersections.extend(other.intersections);
     }
 
@@ -76,8 +76,8 @@ impl Intersections {
     }
 }
 
-impl Index<usize> for Intersections {
-    type Output = Intersection;
+impl<'a> Index<usize> for Intersections<'a> {
+    type Output = Intersection<'a>;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.intersections[index]
@@ -93,20 +93,17 @@ mod intersection_tests {
     #[test]
     fn intersection_creation() {
         let sphere = Sphere::default();
-        let intersection_a = Intersection::new(3.5, PrimitiveShape::SphereShape(sphere.clone()));
+        let intersection_a = Intersection::new(3.5, PrimitiveShape::SphereShape(&sphere));
 
         assert_eq!(3.5, intersection_a.time);
-        assert_eq!(
-            PrimitiveShape::SphereShape(sphere.clone()),
-            intersection_a.object
-        );
+        assert_eq!(PrimitiveShape::SphereShape(&sphere), intersection_a.object);
     }
 
     #[test]
     fn intersections_aggregating() {
         let sphere = Sphere::default();
-        let intersection_a = Intersection::new(1.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(sphere.clone()));
+        let intersection_a = Intersection::new(1.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(&sphere));
 
         let intersections = Intersections::new().with(vec![intersection_a, intersection_b]);
 
@@ -119,8 +116,8 @@ mod intersection_tests {
     #[test]
     fn intersections_hit_all_positive() {
         let sphere = Sphere::default();
-        let intersection_a = Intersection::new(1.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(sphere.clone()));
+        let intersection_a = Intersection::new(1.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(&sphere));
         let intersections = Intersections::new().with(vec![intersection_a.clone(), intersection_b]);
         let expected_hit = Some(&intersection_a);
 
@@ -130,8 +127,8 @@ mod intersection_tests {
     #[test]
     fn intersections_hit_some_negative() {
         let sphere = Sphere::default();
-        let intersection_a = Intersection::new(-1.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(sphere.clone()));
+        let intersection_a = Intersection::new(-1.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(&sphere));
         let intersections = Intersections::new().with(vec![intersection_a, intersection_b.clone()]);
         let expected_hit = Some(&intersection_b);
 
@@ -141,8 +138,8 @@ mod intersection_tests {
     #[test]
     fn intersections_hit_all_negative() {
         let sphere = Sphere::default();
-        let intersection_a = Intersection::new(-1.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_b = Intersection::new(-2.0, PrimitiveShape::SphereShape(sphere.clone()));
+        let intersection_a = Intersection::new(-1.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_b = Intersection::new(-2.0, PrimitiveShape::SphereShape(&sphere));
         let intersections = Intersections::new().with(vec![intersection_a, intersection_b]);
         let expected_hit = None;
 
@@ -152,10 +149,10 @@ mod intersection_tests {
     #[test]
     fn intersections_hit_lowest_non_negative() {
         let sphere = Sphere::default();
-        let intersection_a = Intersection::new(5.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_b = Intersection::new(7.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_c = Intersection::new(-1.0, PrimitiveShape::SphereShape(sphere.clone()));
-        let intersection_d = Intersection::new(2.0, PrimitiveShape::SphereShape(sphere.clone()));
+        let intersection_a = Intersection::new(5.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_b = Intersection::new(7.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_c = Intersection::new(-1.0, PrimitiveShape::SphereShape(&sphere));
+        let intersection_d = Intersection::new(2.0, PrimitiveShape::SphereShape(&sphere));
         let intersections = Intersections::new().with(vec![
             intersection_a,
             intersection_b,

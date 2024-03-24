@@ -39,7 +39,7 @@ impl Primitive for Plane {
         } else {
             intersections.with(vec![Intersection::new(
                 -ray.origin.y / ray.direction.y,
-                PlaneShape(self.clone()),
+                PlaneShape(self),
             )])
         }
     }
@@ -126,7 +126,7 @@ mod plane_tests {
 
         let intersections = plane.intersect(&ray);
         let expected_intersections =
-            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(plane.clone()))]);
+            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(&plane))]);
 
         assert_eq!(expected_intersections, intersections);
     }
@@ -138,7 +138,7 @@ mod plane_tests {
 
         let intersections = plane.intersect(&ray);
         let expected_intersections =
-            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(plane.clone()))]);
+            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(&plane))]);
 
         assert_eq!(expected_intersections, intersections);
     }

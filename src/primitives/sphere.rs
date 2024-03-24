@@ -2,8 +2,8 @@ use crate::intersections::{Intersection, Intersections};
 use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
-use crate::primitives::Primitive;
 use crate::primitives::PrimitiveShape::SphereShape;
+use crate::primitives::{Primitive, PrimitiveShape};
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
@@ -48,8 +48,8 @@ impl Primitive for Sphere {
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
             Intersections::new().with(vec![
-                Intersection::new(t1, SphereShape(self.clone())),
-                Intersection::new(t2, SphereShape(self.clone())),
+                Intersection::new(t1, SphereShape(self)),
+                Intersection::new(t2, SphereShape(self)),
             ])
         }
     }
