@@ -48,15 +48,15 @@ impl Material {
 
     pub fn phong_reflection(
         &self,
-        light: PointLight,
-        primitive: PrimitiveShape,
-        position: Point,
-        eye_vector: Vector3,
-        normal_vector: Vector3,
+        light: &PointLight,
+        primitive: &PrimitiveShape,
+        position: &Point,
+        eye_vector: &Vector3,
+        normal_vector: &Vector3,
         in_shadow: bool,
     ) -> Color {
         let mut color = self.color;
-        if let Some(pattern) = self.pattern.clone() {
+        if let Some(pattern) = &self.pattern {
             color = pattern.pattern_at_local(primitive, position);
         }
         let effective_color = color * light.intensity;
@@ -68,7 +68,7 @@ impl Material {
             let mut diffuse = Color::black();
             let mut specular = Color::black();
 
-            let delta = (light.position - position).normalize();
+            let delta = (light.position - *position).normalize();
             let light_vector = Vector3::new(delta.x, delta.y, delta.z);
             let light_dot_normal = light_vector.dot(&normal_vector);
 
@@ -194,11 +194,11 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position,
+                &eye_vector,
+                &normal_vector,
                 false
             )
         );
@@ -217,11 +217,11 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
@@ -240,11 +240,11 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
@@ -263,11 +263,11 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
@@ -286,11 +286,11 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
@@ -310,11 +310,11 @@ mod material_tests {
         assert_eq!(
             expected_color,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
@@ -343,11 +343,11 @@ mod material_tests {
         assert_eq!(
             expected_color_white,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position_a,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position_a,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
@@ -355,11 +355,11 @@ mod material_tests {
         assert_eq!(
             expected_color_black,
             material.phong_reflection(
-                light,
-                PrimitiveShape::SphereShape(Sphere::default()),
-                position_b,
-                eye_vector,
-                normal_vector,
+                &light,
+                &PrimitiveShape::SphereShape(Sphere::default()),
+                &position_b,
+                &eye_vector,
+                &normal_vector,
                 in_shadow
             )
         );
