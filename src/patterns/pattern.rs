@@ -64,9 +64,9 @@ impl Pattern {
         }
     }
 
-    pub fn pattern_at_local(&self, primitive: PrimitiveShape, world_point: Point) -> Color {
+    pub fn pattern_at_local(&self, primitive: &PrimitiveShape, world_point: &Point) -> Color {
         let primitive_transformation_inv = primitive.transformation().invert();
-        let primitive_point = primitive_transformation_inv * world_point;
+        let primitive_point = primitive_transformation_inv * *world_point;
 
         let pattern_point = self.transformation.invert() * primitive_point;
 
