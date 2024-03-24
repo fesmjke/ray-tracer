@@ -16,12 +16,12 @@ pub trait Primitive {
 }
 
 #[derive(Debug, Clone)]
-pub enum PrimitiveShape {
-    SphereShape(Sphere),
-    PlaneShape(Plane),
+pub enum PrimitiveShape<'a> {
+    SphereShape(&'a Sphere),
+    PlaneShape(&'a Plane),
 }
 
-impl Primitive for PrimitiveShape {
+impl Primitive for PrimitiveShape<'_> {
     fn intersect(&self, ray: &Ray) -> Intersections {
         match self {
             SphereShape(sphere) => {
@@ -72,7 +72,7 @@ impl Primitive for PrimitiveShape {
     }
 }
 
-impl PartialEq for PrimitiveShape {
+impl PartialEq for PrimitiveShape<'_> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (SphereShape(sphere_a), SphereShape(sphere_b)) => sphere_a == sphere_b,
