@@ -30,10 +30,10 @@ macro_rules! impl_matrix {
             }
 
             fn identity() -> Self {
-                let mut v = vec![];
+                let mut v = Vec::with_capacity($row);
 
                 for i in 0..$row {
-                    let mut temp = vec![];
+                    let mut temp = Vec::with_capacity($col);
                     for j in 0..$col {
                         if i == j {
                             temp.push(1.0);
