@@ -6,10 +6,10 @@ use crate::ray::Ray;
 use crate::vector::Vector3;
 use std::collections::VecDeque;
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct IntersectionDetails {
+#[derive(Debug, PartialEq)]
+pub struct IntersectionDetails<'a> {
     pub time: f64,
-    pub object: PrimitiveShape,
+    pub object: PrimitiveShape<'a>,
     pub point: Point,
     pub over_point: Point,
     pub normal_vector: Vector3,
@@ -21,8 +21,8 @@ pub struct IntersectionDetails {
     pub under_point: Point,
 }
 
-impl IntersectionDetails {
-    pub fn from(intersection: &Intersection, ray: &Ray) -> Self {
+impl<'a> IntersectionDetails<'a> {
+    pub fn from(intersection: &Intersection<'a>, ray: &Ray) -> Self {
         let point = ray.position(intersection.time);
         let eye_vector = -ray.direction;
         let mut normal_vector = intersection.object.normal(point);
@@ -54,7 +54,7 @@ impl IntersectionDetails {
     }
 
     pub fn from_many(
-        hit_intersection: &Intersection,
+        hit_intersection: &Intersection<'a>,
         intersections: &Intersections,
         ray: &Ray,
     ) -> Self {
