@@ -60,11 +60,11 @@ impl World {
                 let is_shadowed = self.shadow_cast(details.over_point);
 
                 let surface_color = details.object.material().phong_reflection(
-                    *light,
-                    details.object.clone(),
-                    details.over_point,
-                    details.eye_vector,
-                    details.normal_vector,
+                    light,
+                    &details.object,
+                    &details.over_point,
+                    &details.eye_vector,
+                    &details.normal_vector,
                     is_shadowed,
                 );
 
