@@ -111,7 +111,7 @@ mod stripe_pattern_tests {
         );
         let expected_color = Color::white();
 
-        let color = pattern.pattern_at_local(sphere, Point::new(1.5, 0.0, 0.0));
+        let color = pattern.pattern_at_local(&sphere, &Point::new(1.5, 0.0, 0.0));
 
         assert_eq!(expected_color, color);
     }
@@ -126,7 +126,7 @@ mod stripe_pattern_tests {
         );
         let expected_color = Color::white();
 
-        let color = pattern.pattern_at_local(sphere, Point::new(1.5, 0.0, 0.0));
+        let color = pattern.pattern_at_local(&sphere, &Point::new(1.5, 0.0, 0.0));
 
         assert_eq!(expected_color, color);
     }
@@ -144,7 +144,7 @@ mod stripe_pattern_tests {
         );
         let expected_color = Color::white();
 
-        let color = pattern.pattern_at_local(sphere, Point::new(2.5, 0.0, 0.0));
+        let color = pattern.pattern_at_local(&sphere, &Point::new(2.5, 0.0, 0.0));
 
         assert_eq!(expected_color, color);
     }

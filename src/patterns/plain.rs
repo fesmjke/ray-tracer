@@ -39,7 +39,7 @@ mod plain_pattern_tests {
             Plane::default().apply_material(Material::default().apply_pattern(pattern.clone())),
         );
 
-        let color = pattern.pattern_at_local(plane, Point::new(2.5, 0.0, 0.0));
+        let color = pattern.pattern_at_local(&plane, &Point::new(2.5, 0.0, 0.0));
 
         let expected_color = Color::white();
 
