@@ -195,7 +195,7 @@ mod material_tests {
             expected_color,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position,
                 &eye_vector,
                 &normal_vector,
@@ -218,7 +218,7 @@ mod material_tests {
             expected_color,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position,
                 &eye_vector,
                 &normal_vector,
@@ -241,7 +241,7 @@ mod material_tests {
             expected_color,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position,
                 &eye_vector,
                 &normal_vector,
@@ -264,7 +264,7 @@ mod material_tests {
             expected_color,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position,
                 &eye_vector,
                 &normal_vector,
@@ -287,7 +287,7 @@ mod material_tests {
             expected_color,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position,
                 &eye_vector,
                 &normal_vector,
@@ -311,7 +311,7 @@ mod material_tests {
             expected_color,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position,
                 &eye_vector,
                 &normal_vector,
@@ -344,7 +344,7 @@ mod material_tests {
             expected_color_white,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position_a,
                 &eye_vector,
                 &normal_vector,
@@ -356,7 +356,7 @@ mod material_tests {
             expected_color_black,
             material.phong_reflection(
                 &light,
-                &PrimitiveShape::SphereShape(Sphere::default()),
+                &PrimitiveShape::SphereShape(&Sphere::default()),
                 &position_b,
                 &eye_vector,
                 &normal_vector,

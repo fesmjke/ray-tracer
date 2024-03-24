@@ -158,7 +158,8 @@ mod intersection_details_tests {
     #[test]
     fn intersection_details_occurs_on_the_inside() {
         let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
-        let sphere = SphereShape(Sphere::default());
+        let sphere_default = Sphere::default();
+        let sphere = SphereShape(&sphere_default);
         let intersection = Intersection::new(1.0, sphere.clone());
         let expected_eye_vector = Vector3::new(0.0, 0.0, -1.0);
         let expected_normal_vector = Vector3::new(0.0, 0.0, -1.0);
@@ -173,7 +174,8 @@ mod intersection_details_tests {
     #[test]
     fn intersection_details_should_offset_point() {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let sphere = SphereShape(Sphere::default().translate(0.0, 0.0, 1.0).transform());
+        let sphere_default = Sphere::default().translate(0.0, 0.0, 1.0).transform();
+        let sphere = SphereShape(&sphere_default);
         let intersection = Intersection::new(5.0, sphere);
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
         let expected_position_z = -f64::EPSILON / 2.0;
@@ -188,7 +190,8 @@ mod intersection_details_tests {
             Point::new(0.0, 1.0, -1.0),
             Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         );
-        let plane = PlaneShape(Plane::default());
+        let plane_default = Plane::default();
+        let plane = PlaneShape(&plane_default);
         let intersection = Intersection::new(f64::sqrt(2.0), plane);
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
         let expected_reflection_vector =
@@ -202,26 +205,23 @@ mod intersection_details_tests {
 
     #[test]
     fn intersection_details_find_n1_n2() {
-        let sphere_a = SphereShape(
-            Sphere::default()
-                .scale(2.0, 2.0, 2.0)
-                .transform()
-                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
-        );
+        let sphere_a_default = &Sphere::default()
+            .scale(2.0, 2.0, 2.0)
+            .transform()
+            .apply_material(Material::default().refractive_index(1.5).transparency(1.0));
+        let sphere_a = SphereShape(&sphere_a_default);
 
-        let sphere_b = SphereShape(
-            Sphere::default()
-                .translate(0.0, 0.0, -0.25)
-                .transform()
-                .apply_material(Material::default().refractive_index(2.0).transparency(1.0)),
-        );
+        let sphere_b_default = Sphere::default()
+            .translate(0.0, 0.0, -0.25)
+            .transform()
+            .apply_material(Material::default().refractive_index(2.0).transparency(1.0));
+        let sphere_b = SphereShape(&sphere_b_default);
 
-        let sphere_c = SphereShape(
-            Sphere::default()
-                .translate(0.0, 0.0, 0.25)
-                .transform()
-                .apply_material(Material::default().refractive_index(2.5).transparency(1.0)),
-        );
+        let sphere_c_default = Sphere::default()
+            .translate(0.0, 0.0, 0.25)
+            .transform()
+            .apply_material(Material::default().refractive_index(2.5).transparency(1.0));
+        let sphere_c = SphereShape(&sphere_c_default);
 
         let ray = Ray::new(Point::new(0.0, 0.0, -4.0), Vector3::new(0.0, 0.0, 1.0));
 
@@ -296,12 +296,11 @@ mod intersection_details_tests {
     #[test]
     fn intersection_details_under_point() {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let sphere_a = SphereShape(
-            Sphere::default()
-                .translate(0.0, 0.0, 1.0)
-                .transform()
-                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
-        );
+        let sphere_a_default = Sphere::default()
+            .translate(0.0, 0.0, 1.0)
+            .transform()
+            .apply_material(Material::default().refractive_index(1.5).transparency(1.0));
+        let sphere_a = SphereShape(&sphere_a_default);
         let intersection = Intersection::new(5.0, sphere_a);
         let intersections = Intersections::new().with(vec![intersection.clone()]);
         let intersection_details =
@@ -319,10 +318,9 @@ mod intersection_details_tests {
             Point::new(0.0, 0.0, sqrt2 / 2.0),
             Vector3::new(0.0, 1.0, 0.0),
         );
-        let sphere_a = SphereShape(
-            Sphere::default()
-                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
-        );
+        let sphere_a_default = Sphere::default()
+            .apply_material(Material::default().refractive_index(1.5).transparency(1.0));
+        let sphere_a = SphereShape(&sphere_a_default);
         let intersection_a = Intersection::new(-sqrt2 / 2.0, sphere_a.clone());
         let intersection_b = Intersection::new(sqrt2 / 2.0, sphere_a.clone());
         let intersections =
@@ -337,10 +335,9 @@ mod intersection_details_tests {
     #[test]
     fn intersection_details_schlick_approx_perpendicular_viewing_angle() {
         let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
-        let sphere_a = SphereShape(
-            Sphere::default()
-                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
-        );
+        let sphere_a_default = Sphere::default()
+            .apply_material(Material::default().refractive_index(1.5).transparency(1.0));
+        let sphere_a = SphereShape(&sphere_a_default);
         let intersection_a = Intersection::new(-1.0, sphere_a.clone());
         let intersection_b = Intersection::new(1.0, sphere_a.clone());
         let intersections =
@@ -355,10 +352,9 @@ mod intersection_details_tests {
     #[test]
     fn intersection_details_schlick_approx_with_small_angle() {
         let ray = Ray::new(Point::new(0.0, 0.99, -2.0), Vector3::new(0.0, 0.0, 1.0));
-        let sphere_a = SphereShape(
-            Sphere::default()
-                .apply_material(Material::default().refractive_index(1.5).transparency(1.0)),
-        );
+        let sphere_a_default = Sphere::default()
+            .apply_material(Material::default().refractive_index(1.5).transparency(1.0));
+        let sphere_a = SphereShape(&sphere_a_default);
         let intersection_a = Intersection::new(1.8589, sphere_a.clone());
         let intersections = Intersections::new().with(vec![intersection_a.clone()]);
         let intersection_details =

@@ -181,27 +181,6 @@ mod world_tests {
     use crate::vector::Vector3;
     use crate::world::World;
 
-    fn simulated_world() -> World<'static> {
-        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
-
-        let sphere_b = Sphere::default().apply_material(
-            Material::default()
-                .color(Color::new(0.8, 1.0, 0.6))
-                .specular(0.2)
-                .diffuse(0.7),
-        );
-
-        let light_source =
-            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
-
-        let world = World::default()
-            .add_object(SphereShape(&sphere_a))
-            .add_object(SphereShape(&sphere_b))
-            .add_light_source(light_source);
-
-        world
-    }
-
     #[test]
     fn world_creation() {
         let world = World::default();
@@ -212,24 +191,23 @@ mod world_tests {
 
     #[test]
     fn world_with_objects() {
+        let sphere_a_default = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+        let sphere_b_default = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
         let world = World::default()
-            .add_object(SphereShape(
-                Sphere::default().scale(0.5, 0.5, 0.5).transform(),
-            ))
-            .add_object(SphereShape(
-                Sphere::default().apply_material(
-                    Material::default()
-                        .color(Color::new(0.8, 1.0, 0.6))
-                        .specular(0.2)
-                        .diffuse(0.7),
-                ),
-            ))
+            .add_object(SphereShape(&sphere_a_default))
+            .add_object(SphereShape(&sphere_b_default))
             .add_light_source(PointLight::new(
                 Color::new(1.0, 1.0, 1.0),
                 Point::new(-10.0, 10.0, -10.0),
             ));
 
-        let expected_sphere = SphereShape(Sphere::default().scale(0.5, 0.5, 0.5).transform());
+        let expected_sphere_default = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+        let expected_sphere = SphereShape(&expected_sphere_default);
 
         assert_eq!(expected_sphere, world.objects[0]);
 
@@ -248,15 +226,21 @@ mod world_tests {
                 .diffuse(0.7),
         );
 
-        let world = simulated_world();
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
 
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
 
         let expected_intersections = Intersections::new().with(vec![
-            Intersection::new(4.0, SphereShape(sphere_b.clone())),
-            Intersection::new(4.5, SphereShape(sphere_a.clone())),
-            Intersection::new(5.5, SphereShape(sphere_a.clone())),
-            Intersection::new(6.0, SphereShape(sphere_b.clone())),
+            Intersection::new(4.0, SphereShape(&sphere_b)),
+            Intersection::new(4.5, SphereShape(&sphere_a)),
+            Intersection::new(5.5, SphereShape(&sphere_a)),
+            Intersection::new(6.0, SphereShape(&sphere_b)),
         ]);
 
         assert_eq!(expected_intersections, world.intersect_objects(&ray));
@@ -264,7 +248,23 @@ mod world_tests {
 
     #[test]
     fn world_shade_intersection() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
 
         let intersection = Intersection::new(4.0, world.objects[1].clone());
@@ -277,14 +277,26 @@ mod world_tests {
 
     #[test]
     fn world_shade_intersection_from_inside() {
-        let world = simulated_world().with_light_sources(vec![PointLight::new(
-            Color::new(1.0, 1.0, 1.0),
-            Point::new(0.0, 0.25, 0.0),
-        )]);
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.25, 0.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
 
-        let intersection = Intersection::new(0.5, SphereShape(sphere_a));
+        let intersection = Intersection::new(0.5, SphereShape(&sphere_a));
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
 
         let expected_color = Color::new(0.90498, 0.90498, 0.90498);
@@ -294,7 +306,23 @@ mod world_tests {
 
     #[test]
     fn world_color_at_ray_miss() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 1.0, 0.0));
         let expected_color = Color::new(0.0, 0.0, 0.0);
 
@@ -303,7 +331,23 @@ mod world_tests {
 
     #[test]
     fn world_color_at_ray_hits() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let expected_color = Color::new(0.38066, 0.47583, 0.2855);
 
@@ -312,14 +356,20 @@ mod world_tests {
 
     #[test]
     fn world_color_behind_the_ray() {
-        let outer = SphereShape(
-            Sphere::default()
-                .apply_material(Material::default().diffuse(0.7).specular(0.2).ambient(1.0)),
-        );
+        let outer_sphere_default = Sphere::default()
+            .apply_material(Material::default().diffuse(0.7).specular(0.2).ambient(1.0));
+        let outer = SphereShape(&outer_sphere_default);
 
-        let inner = SphereShape(Sphere::default().apply_material(Material::default().ambient(1.0)));
+        let inner_sphere_default =
+            Sphere::default().apply_material(Material::default().ambient(1.0));
+        let inner = SphereShape(&inner_sphere_default);
 
-        let world = simulated_world().with_objects(vec![outer, inner]);
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![outer, inner])
+            .add_light_source(light_source);
 
         let ray = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
         let expected_color = Color::new(1.0, 1.0, 1.0);
@@ -329,7 +379,23 @@ mod world_tests {
 
     #[test]
     fn world_there_are_no_shadow() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let point = Point::new(0.0, 10.0, 0.0);
 
         let expected_shadow = false;
@@ -339,7 +405,23 @@ mod world_tests {
 
     #[test]
     fn world_there_are_shadow_between_sphere_and_light() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let point = Point::new(10.0, -10.0, 10.0);
 
         let expected_shadow = true;
@@ -349,7 +431,23 @@ mod world_tests {
 
     #[test]
     fn world_there_are_no_shadow_point_behind_light() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let point = Point::new(-20.0, 20.0, -20.0);
 
         let expected_shadow = false;
@@ -359,7 +457,23 @@ mod world_tests {
 
     #[test]
     fn world_there_are_no_shadow_between_sphere_and_light() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let point = Point::new(-2.0, 2.0, -2.0);
 
         let expected_shadow = false;
@@ -369,8 +483,10 @@ mod world_tests {
 
     #[test]
     fn world_intersection_in_shadow() {
-        let sphere_a = SphereShape(Sphere::default());
-        let sphere_b = SphereShape(Sphere::default().translate(0.0, 0.0, 10.0).transform());
+        let sphere_a_default = Sphere::default();
+        let sphere_a = SphereShape(&sphere_a_default);
+        let sphere_b_default = Sphere::default().translate(0.0, 0.0, 10.0).transform();
+        let sphere_b = SphereShape(&sphere_b_default);
         let light_point = PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(0.0, 0.0, -10.0));
 
         let world = World::default()
@@ -387,7 +503,23 @@ mod world_tests {
 
     #[test]
     fn world_reflected_color_for_nonreflective() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, -1.0));
 
         let sphere = Sphere::default()
@@ -395,7 +527,7 @@ mod world_tests {
             .transform()
             .apply_material(Material::default().ambient(1.0));
 
-        let intersection = Intersection::new(1.0, SphereShape(sphere));
+        let intersection = Intersection::new(1.0, SphereShape(&sphere));
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
 
         let expected_color = Color::black();
@@ -408,7 +540,23 @@ mod world_tests {
 
     #[test]
     fn world_reflected_color_for_reflective() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(
             Point::new(0.0, 0.0, -3.0),
             Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
@@ -419,7 +567,7 @@ mod world_tests {
             .transform()
             .apply_material(Material::default().reflective(0.5));
 
-        let intersection = Intersection::new(f64::sqrt(2.0), PlaneShape(plane));
+        let intersection = Intersection::new(f64::sqrt(2.0), PlaneShape(&plane));
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
 
         let expected_color = Color::new(0.19032, 0.2379, 0.14274);
@@ -432,7 +580,23 @@ mod world_tests {
 
     #[test]
     fn world_reflected_color_for_reflective_shade_hit() {
-        let world = simulated_world();
+        let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
+
+        let sphere_b = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
+        );
+
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
+            .add_light_source(light_source);
+
         let ray = Ray::new(
             Point::new(0.0, 0.0, -3.0),
             Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
@@ -443,7 +607,7 @@ mod world_tests {
             .transform()
             .apply_material(Material::default().reflective(0.5));
 
-        let intersection = Intersection::new(f64::sqrt(2.0), PlaneShape(plane));
+        let intersection = Intersection::new(f64::sqrt(2.0), PlaneShape(&plane));
         let intersection_details = IntersectionDetails::from(&intersection, &ray);
 
         let expected_color = Color::new(0.87677, 0.92436, 0.82918);
@@ -455,18 +619,23 @@ mod world_tests {
     fn world_refracted_color_with_opaque_surface() {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
 
-        let sphere = SphereShape(
-            Sphere::default()
-                .scale(0.5, 0.5, 0.5)
-                .transform()
-                .apply_material(Material::default()),
-        );
+        let sphere_default = Sphere::default()
+            .scale(0.5, 0.5, 0.5)
+            .transform()
+            .apply_material(Material::default());
+        let sphere = SphereShape(&sphere_default);
 
         let intersection_a = Intersection::new(4.0, sphere.clone());
         let intersection_b = Intersection::new(6.0, sphere.clone());
-        let intersections = Intersections::new().with(vec![intersection_a.clone(), intersection_b]);
+        let intersections =
+            Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
 
-        let world = simulated_world().with_objects(vec![sphere]);
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![sphere])
+            .add_light_source(light_source);
 
         let intersection_details =
             IntersectionDetails::from_many(&intersection_a, &intersections, &ray);
@@ -485,19 +654,23 @@ mod world_tests {
             Vector3::new(0.0, 1.0, 0.0),
         );
 
-        let sphere = SphereShape(
-            Sphere::default()
-                .scale(0.5, 0.5, 0.5)
-                .transform()
-                .apply_material(Material::default().transparency(1.0).refractive_index(1.5)),
-        );
+        let sphere_default = Sphere::default()
+            .scale(0.5, 0.5, 0.5)
+            .transform()
+            .apply_material(Material::default().transparency(1.0).refractive_index(1.5));
+        let sphere = SphereShape(&sphere_default);
 
         let intersection_a = Intersection::new(-f64::sqrt(2.0) / 2.0, sphere.clone());
         let intersection_b = Intersection::new(f64::sqrt(2.0) / 2.0, sphere.clone());
         let intersections =
             Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
 
-        let world = simulated_world().with_objects(vec![sphere]);
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![sphere])
+            .add_light_source(light_source);
 
         let intersection_details =
             IntersectionDetails::from_many(&intersection_b, &intersections, &ray);
@@ -513,18 +686,16 @@ mod world_tests {
     fn world_refracted_color_with_refracted_ray() {
         let ray = Ray::new(Point::new(0.0, 0.0, 0.1), Vector3::new(0.0, 1.0, 0.0));
 
-        let sphere_a = SphereShape(
-            Sphere::default().apply_material(
-                Material::default()
-                    .apply_pattern(Pattern::new_test())
-                    .ambient(1.0),
-            ),
+        let sphere_a_default = &Sphere::default().apply_material(
+            Material::default()
+                .apply_pattern(Pattern::new_test())
+                .ambient(1.0),
         );
+        let sphere_a = SphereShape(&sphere_a_default);
 
-        let sphere_b = SphereShape(
-            Sphere::default()
-                .apply_material(Material::default().transparency(1.0).refractive_index(1.5)),
-        );
+        let sphere_b_default = Sphere::default()
+            .apply_material(Material::default().transparency(1.0).refractive_index(1.5));
+        let sphere_b = SphereShape(&sphere_b_default);
 
         let intersection_a_1 = Intersection::new(-0.9899, sphere_a.clone());
         let intersection_b_1 = Intersection::new(-0.4899, sphere_b.clone());
@@ -537,7 +708,12 @@ mod world_tests {
             intersection_a_2.clone(),
         ]);
 
-        let world = simulated_world().with_objects(vec![sphere_a, sphere_b]);
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![sphere_a, sphere_b])
+            .add_light_source(light_source);
 
         let intersection_details =
             IntersectionDetails::from_many(&intersection_b_2, &intersections, &ray);
@@ -556,22 +732,25 @@ mod world_tests {
             Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         );
 
-        let floor = PlaneShape(
-            Plane::default()
-                .translate(0.0, -1.0, 0.0)
-                .transform()
-                .apply_material(Material::default().transparency(0.5).refractive_index(1.5)),
-        );
+        let floor_default = Plane::default()
+            .translate(0.0, -1.0, 0.0)
+            .transform()
+            .apply_material(Material::default().transparency(0.5).refractive_index(1.5));
+        let floor = PlaneShape(&floor_default);
 
-        let sphere = SphereShape(
-            Sphere::default()
-                .translate(0.0, -3.5, -0.5)
-                .transform()
-                .apply_material(Material::default().ambient(0.5).color(Color::red())),
-        );
+        let sphere_default = Sphere::default()
+            .translate(0.0, -3.5, -0.5)
+            .transform()
+            .apply_material(Material::default().ambient(0.5).color(Color::red()));
+        let sphere = SphereShape(&sphere_default);
         let intersection = Intersection::new(f64::sqrt(2.0), floor.clone());
 
-        let world = simulated_world().with_objects(vec![floor, sphere]);
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![floor, sphere])
+            .add_light_source(light_source);
 
         let intersections = Intersections::new().with(vec![intersection.clone()]);
         let intersection_details =
@@ -588,37 +767,39 @@ mod world_tests {
             Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
         );
 
-        let floor = PlaneShape(
-            Plane::default()
-                .translate(0.0, -1.0, 0.0)
-                .transform()
-                .apply_material(
-                    Material::default()
-                        .transparency(0.5)
-                        .refractive_index(1.5)
-                        .reflective(0.5),
-                ),
-        );
-
-        let sphere_a = SphereShape(
-            Sphere::default()
-                .translate(0.0, -3.5, -0.5)
-                .transform()
-                .apply_material(Material::default().ambient(0.5).color(Color::red())),
-        );
-
-        let sphere_b = SphereShape(
-            Sphere::default().apply_material(
+        let floor_default = Plane::default()
+            .translate(0.0, -1.0, 0.0)
+            .transform()
+            .apply_material(
                 Material::default()
-                    .color(Color::new(0.8, 1.0, 0.6))
-                    .specular(0.2)
-                    .diffuse(0.7),
-            ),
+                    .transparency(0.5)
+                    .refractive_index(1.5)
+                    .reflective(0.5),
+            );
+        let floor = PlaneShape(&floor_default);
+
+        let sphere_a_default = Sphere::default()
+            .translate(0.0, -3.5, -0.5)
+            .transform()
+            .apply_material(Material::default().ambient(0.5).color(Color::red()));
+        let sphere_a = SphereShape(&sphere_a_default);
+
+        let sphere_b_default = Sphere::default().apply_material(
+            Material::default()
+                .color(Color::new(0.8, 1.0, 0.6))
+                .specular(0.2)
+                .diffuse(0.7),
         );
+        let sphere_b = SphereShape(&sphere_b_default);
 
         let intersection = Intersection::new(f64::sqrt(2.0), floor.clone());
 
-        let world = simulated_world().with_objects(vec![floor, sphere_a, sphere_b]);
+        let light_source =
+            PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
+
+        let world = World::default()
+            .with_objects(vec![floor, sphere_a, sphere_b])
+            .add_light_source(light_source);
 
         let intersections = Intersections::new().with(vec![intersection.clone()]);
         let intersection_details =

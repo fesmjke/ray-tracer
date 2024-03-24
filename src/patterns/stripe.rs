@@ -103,12 +103,11 @@ mod stripe_pattern_tests {
     #[test]
     fn stripe_pattern_with_primitive_transformation() {
         let pattern = Pattern::new_stripe(Color::white(), Color::black());
-        let sphere = PrimitiveShape::SphereShape(
-            Sphere::default()
-                .scale(2.0, 2.0, 2.0)
-                .transform()
-                .apply_material(Material::default().apply_pattern(pattern.clone())),
-        );
+        let sphere_default = Sphere::default()
+            .scale(2.0, 2.0, 2.0)
+            .transform()
+            .apply_material(Material::default().apply_pattern(pattern.clone()));
+        let sphere = PrimitiveShape::SphereShape(&sphere_default);
         let expected_color = Color::white();
 
         let color = pattern.pattern_at_local(&sphere, &Point::new(1.5, 0.0, 0.0));
@@ -121,9 +120,9 @@ mod stripe_pattern_tests {
         let pattern = Pattern::new_stripe(Color::white(), Color::black())
             .scale(2.0, 2.0, 2.0)
             .transform();
-        let sphere = PrimitiveShape::SphereShape(
-            Sphere::default().apply_material(Material::default().apply_pattern(pattern.clone())),
-        );
+        let sphere_default =
+            Sphere::default().apply_material(Material::default().apply_pattern(pattern.clone()));
+        let sphere = PrimitiveShape::SphereShape(&sphere_default);
         let expected_color = Color::white();
 
         let color = pattern.pattern_at_local(&sphere, &Point::new(1.5, 0.0, 0.0));
@@ -136,12 +135,11 @@ mod stripe_pattern_tests {
         let pattern = Pattern::new_stripe(Color::white(), Color::black())
             .translate(0.5, 0.0, 0.0)
             .transform();
-        let sphere = PrimitiveShape::SphereShape(
-            Sphere::default()
-                .scale(2.0, 2.0, 2.0)
-                .transform()
-                .apply_material(Material::default().apply_pattern(pattern.clone())),
-        );
+        let sphere_default = Sphere::default()
+            .scale(2.0, 2.0, 2.0)
+            .transform()
+            .apply_material(Material::default().apply_pattern(pattern.clone()));
+        let sphere = PrimitiveShape::SphereShape(&sphere_default);
         let expected_color = Color::white();
 
         let color = pattern.pattern_at_local(&sphere, &Point::new(2.5, 0.0, 0.0));

@@ -1,7 +1,7 @@
 use crate::primitives::PrimitiveShape;
 use std::{cmp::Ordering, fmt::Debug, ops::Index};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Intersection<'a> {
     pub time: f64,
     pub object: PrimitiveShape<'a>,
@@ -118,7 +118,8 @@ mod intersection_tests {
         let sphere = Sphere::default();
         let intersection_a = Intersection::new(1.0, PrimitiveShape::SphereShape(&sphere));
         let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(&sphere));
-        let intersections = Intersections::new().with(vec![intersection_a.clone(), intersection_b]);
+        let intersections =
+            Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
         let expected_hit = Some(&intersection_a);
 
         assert_eq!(expected_hit, intersections.hit());
@@ -129,7 +130,8 @@ mod intersection_tests {
         let sphere = Sphere::default();
         let intersection_a = Intersection::new(-1.0, PrimitiveShape::SphereShape(&sphere));
         let intersection_b = Intersection::new(2.0, PrimitiveShape::SphereShape(&sphere));
-        let intersections = Intersections::new().with(vec![intersection_a, intersection_b.clone()]);
+        let intersections =
+            Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
         let expected_hit = Some(&intersection_b);
 
         assert_eq!(expected_hit, intersections.hit());
@@ -140,7 +142,8 @@ mod intersection_tests {
         let sphere = Sphere::default();
         let intersection_a = Intersection::new(-1.0, PrimitiveShape::SphereShape(&sphere));
         let intersection_b = Intersection::new(-2.0, PrimitiveShape::SphereShape(&sphere));
-        let intersections = Intersections::new().with(vec![intersection_a, intersection_b]);
+        let intersections =
+            Intersections::new().with(vec![intersection_a.clone(), intersection_b.clone()]);
         let expected_hit = None;
 
         assert_eq!(expected_hit, intersections.hit());

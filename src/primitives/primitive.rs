@@ -15,7 +15,7 @@ pub trait Primitive {
     fn transformation(&self) -> &Matrix4;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum PrimitiveShape<'a> {
     SphereShape(&'a Sphere),
     PlaneShape(&'a Plane),
