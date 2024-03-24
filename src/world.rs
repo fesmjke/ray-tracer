@@ -1,19 +1,19 @@
 use crate::color::Color;
 use crate::float_eq::ApproxEq;
-use crate::intersections::{IntersectionDetails, Intersections};
+use crate::intersections::{Intersection, IntersectionDetails, Intersections};
 use crate::lights::PointLight;
 use crate::point::Point;
 use crate::primitives::{Primitive, PrimitiveShape};
 use crate::ray::Ray;
 use crate::vector::Vector3;
 
-pub struct World {
-    objects: Vec<PrimitiveShape>,
+pub struct World<'a> {
+    objects: Vec<PrimitiveShape<'a>>,
     light_sources: Vec<PointLight>,
     recursive_depth: usize,
 }
 
-impl World {
+impl<'a> World<'a> {
     pub fn new() -> Self {
         Self {
             objects: Vec::with_capacity(8),
@@ -22,7 +22,7 @@ impl World {
         }
     }
 
-    pub fn add_object(mut self, object: PrimitiveShape) -> Self {
+    pub fn add_object(mut self, object: PrimitiveShape<'a>) -> Self {
         self.objects.push(object);
         self
     }
@@ -32,7 +32,7 @@ impl World {
         self
     }
 
-    pub fn with_objects(mut self, objects: Vec<PrimitiveShape>) -> Self {
+    pub fn with_objects(mut self, objects: Vec<PrimitiveShape<'a>>) -> Self {
         self.objects = objects;
         self
     }
@@ -49,7 +49,6 @@ impl World {
             .iter()
             .for_each(|object| intersections.merge(object.intersect(ray)));
 
-        // TODO: move sort to intersections
         intersections.sort()
     }
 
@@ -161,7 +160,7 @@ impl World {
     }
 }
 
-impl Default for World {
+impl Default for World<'_> {
     fn default() -> Self {
         Self::new()
     }
@@ -182,7 +181,7 @@ mod world_tests {
     use crate::vector::Vector3;
     use crate::world::World;
 
-    fn simulated_world() -> World {
+    fn simulated_world() -> World<'static> {
         let sphere_a = Sphere::default().scale(0.5, 0.5, 0.5).transform();
 
         let sphere_b = Sphere::default().apply_material(
@@ -196,8 +195,8 @@ mod world_tests {
             PointLight::new(Color::new(1.0, 1.0, 1.0), Point::new(-10.0, 10.0, -10.0));
 
         let world = World::default()
-            .add_object(SphereShape(sphere_a.clone()))
-            .add_object(SphereShape(sphere_b.clone()))
+            .add_object(SphereShape(&sphere_a))
+            .add_object(SphereShape(&sphere_b))
             .add_light_source(light_source);
 
         world
