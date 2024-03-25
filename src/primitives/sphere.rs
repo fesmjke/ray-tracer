@@ -12,7 +12,9 @@ use crate::vector::Vector3;
 pub struct Sphere {
     pub origin: Point,
     pub radius: f64,
-    transformation: Matrix4,
+    pub transformation: Matrix4,
+    pub transformation_inverse: Matrix4,
+    pub transformation_inverse_transpose: Matrix4,
     pub material: Material,
 }
 
@@ -22,6 +24,8 @@ impl Sphere {
             origin,
             radius,
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
             material,
         }
     }
@@ -66,12 +70,20 @@ impl Primitive for Sphere {
     fn transformation(&self) -> &Matrix4 {
         &self.transformation
     }
+
+    fn transformation_invert(&self) -> &Matrix4 {
+        &self.transformation_inverse
+    }
 }
 
 impl Transformable for Sphere {
     fn transform(self, transformation: &Matrix4) -> Sphere {
+        let delta = *transformation * self.transformation;
+        let mut delta_inverse = delta.invert();
         Self {
-            transformation: *transformation * self.transformation,
+            transformation: delta,
+            transformation_inverse: delta_inverse,
+            transformation_inverse_transpose: delta_inverse.transpose(),
             ..self
         }
     }
@@ -83,6 +95,8 @@ impl Default for Sphere {
             origin: Point::default(),
             radius: 1.0,
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
             material: Default::default(),
         }
     }

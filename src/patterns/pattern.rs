@@ -7,8 +7,9 @@ use crate::transformations::Transformable;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Pattern {
-    transformation: Matrix4,
     pub pattern: PatternType,
+    transformation: Matrix4,
+    transformation_inverse: Matrix4,
 }
 
 impl Pattern {
@@ -65,10 +66,10 @@ impl Pattern {
     }
 
     pub fn pattern_at_local(&self, primitive: &PrimitiveShape, world_point: &Point) -> Color {
-        let primitive_transformation_inv = primitive.transformation().invert();
-        let primitive_point = primitive_transformation_inv * *world_point;
+        let primitive_transformation_inv = primitive.transformation_invert();
+        let primitive_point = *primitive_transformation_inv * *world_point;
 
-        let pattern_point = self.transformation.invert() * primitive_point;
+        let pattern_point = self.transformation_inverse * primitive_point;
 
         self.pattern_at(&pattern_point)
     }
@@ -78,6 +79,7 @@ impl Default for Pattern {
     fn default() -> Self {
         Self {
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
             pattern: PatternType::Plain(PlainPattern::default()),
         }
     }
@@ -85,8 +87,10 @@ impl Default for Pattern {
 
 impl Transformable for Pattern {
     fn transform(self, transformation: &Matrix4) -> Self {
+        let delta = *transformation * self.transformation;
         Self {
             transformation: *transformation * self.transformation,
+            transformation_inverse: delta.invert(),
             ..self
         }
     }
@@ -135,6 +139,7 @@ mod pattern_tests {
         let pattern = Pattern::default();
         let expected_pattern = Pattern {
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
             pattern: Plain(PlainPattern::default()),
         };
 

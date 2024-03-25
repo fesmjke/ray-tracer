@@ -13,6 +13,7 @@ pub trait Primitive {
     fn normal(&self, world: &Point) -> Vector3;
     fn material(&self) -> Material;
     fn transformation(&self) -> &Matrix4;
+    fn transformation_invert(&self) -> &Matrix4;
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -25,11 +26,11 @@ impl Primitive for PrimitiveShape<'_> {
     fn intersect(&self, ray: &Ray) -> Intersections {
         match self {
             SphereShape(sphere) => {
-                let ray = &ray.transform(&sphere.transformation().invert());
+                let ray = &ray.transform(&sphere.transformation_inverse);
                 sphere.intersect(ray)
             }
             PlaneShape(plane) => {
-                let ray = &ray.transform(&plane.transformation().invert());
+                let ray = &ray.transform(&plane.transformation_inverse);
                 plane.intersect(ray)
             }
         }
@@ -39,18 +40,18 @@ impl Primitive for PrimitiveShape<'_> {
         match self {
             SphereShape(sphere) => {
                 // all shapes need to first convert to the local/object space
-                let mut transformation_inverted = sphere.transformation().invert();
+                let transformation_inverted = sphere.transformation_inverse;
                 let local_point = transformation_inverted * *world;
                 let local_normal = sphere.normal(&local_point);
-                let world_normal = transformation_inverted.transpose() * local_normal;
+                let world_normal = sphere.transformation_inverse_transpose * local_normal;
 
                 world_normal.normalize()
             }
             PlaneShape(plane) => {
-                let mut transformation_inverted = plane.transformation().invert();
+                let transformation_inverted = plane.transformation_inverse;
                 let local_point = transformation_inverted * *world;
                 let local_normal = plane.normal(&local_point);
-                let world_normal = transformation_inverted.transpose() * local_normal;
+                let world_normal = plane.transformation_inverse_transpose * local_normal;
 
                 world_normal.normalize()
             }
@@ -68,6 +69,13 @@ impl Primitive for PrimitiveShape<'_> {
         match self {
             SphereShape(sphere) => sphere.transformation(),
             PlaneShape(plane) => plane.transformation(),
+        }
+    }
+
+    fn transformation_invert(&self) -> &Matrix4 {
+        match self {
+            SphereShape(sphere) => sphere.transformation_invert(),
+            PlaneShape(plane) => plane.transformation_invert(),
         }
     }
 }

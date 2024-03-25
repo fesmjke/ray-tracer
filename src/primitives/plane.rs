@@ -12,7 +12,9 @@ use std::default::Default;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Plane {
-    transformation: Matrix4,
+    pub transformation: Matrix4,
+    pub transformation_inverse: Matrix4,
+    pub transformation_inverse_transpose: Matrix4,
     pub material: Material,
 }
 
@@ -20,6 +22,8 @@ impl Plane {
     pub fn new(material: Material) -> Self {
         Self {
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
             material,
         }
     }
@@ -55,6 +59,10 @@ impl Primitive for Plane {
     fn transformation(&self) -> &Matrix4 {
         &self.transformation
     }
+
+    fn transformation_invert(&self) -> &Matrix4 {
+        &self.transformation_inverse
+    }
 }
 
 impl Default for Plane {
@@ -62,14 +70,20 @@ impl Default for Plane {
         Self {
             material: Material::default(),
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
         }
     }
 }
 
 impl Transformable for Plane {
     fn transform(self, transformation: &Matrix4) -> Plane {
+        let delta = *transformation * self.transformation;
+        let mut delta_inverse = delta.invert();
         Self {
-            transformation: *transformation * self.transformation,
+            transformation: delta,
+            transformation_inverse: delta_inverse,
+            transformation_inverse_transpose: delta_inverse.transpose(),
             ..self
         }
     }
@@ -92,6 +106,8 @@ mod plane_tests {
         let expected_plane = Plane {
             material: Material::default(),
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
         };
 
         assert_eq!(expected_plane, plane);

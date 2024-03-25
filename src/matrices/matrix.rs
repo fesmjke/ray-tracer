@@ -13,8 +13,6 @@ pub trait Matrix {
     fn transpose(&mut self) -> Self;
 }
 
-// TODO: replace Vec with slice, because cannot implement Copy trait
-
 macro_rules! impl_matrix {
     ($ty: ty,$col:expr, $row:expr) => {
         impl Matrix for $ty {
