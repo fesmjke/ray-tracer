@@ -107,7 +107,7 @@ impl Camera {
 impl Transformable for Camera {
     fn transform(self, transformation: &Matrix4) -> Self {
         Self {
-            transformation: transformation.clone() * self.transformation,
+            transformation: *transformation * self.transformation,
             ..self
         }
     }

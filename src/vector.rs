@@ -71,7 +71,7 @@ impl Vector3 {
 
 impl Transformable for Vector3 {
     fn transform(self, transformation: &Matrix4) -> Self {
-        transformation.clone() * self
+        *transformation * self
     }
 }
 

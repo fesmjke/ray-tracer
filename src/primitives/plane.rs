@@ -69,7 +69,7 @@ impl Default for Plane {
 impl Transformable for Plane {
     fn transform(self, transformation: &Matrix4) -> Plane {
         Self {
-            transformation: transformation.clone() * self.transformation,
+            transformation: *transformation * self.transformation,
             ..self
         }
     }

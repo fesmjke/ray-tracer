@@ -24,8 +24,8 @@ impl Transformable for Ray {
     fn transform(self, transformation: &Matrix4) -> Ray {
         Ray {
             // TODO: Replace with {*transformation} when matrix is slice and has Copy trait, instead of vector
-            origin: transformation.clone() * self.origin,
-            direction: transformation.clone() * self.direction,
+            origin: *transformation * self.origin,
+            direction: *transformation * self.direction,
         }
     }
 }

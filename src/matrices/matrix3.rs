@@ -1,8 +1,10 @@
 use crate::matrices::{Matrix, Matrix2};
 
-#[derive(Clone)]
+const MATRIX_SIZE: usize = 3;
+
+#[derive(Copy, Clone, Debug)]
 pub struct Matrix3 {
-    pub data: Vec<Vec<f64>>,
+    pub data: [[f64; MATRIX_SIZE]; MATRIX_SIZE],
 }
 
 impl Matrix3 {
@@ -46,6 +48,20 @@ impl Matrix3 {
         } else {
             -minor
         }
+    }
+}
+
+impl std::ops::Index<usize> for Matrix3 {
+    type Output = [f64; 3];
+
+    fn index(&self, row: usize) -> &[f64; 3] {
+        &self.data[row]
+    }
+}
+
+impl std::ops::IndexMut<usize> for Matrix3 {
+    fn index_mut(&mut self, row: usize) -> &mut [f64; 3] {
+        &mut self.data[row]
     }
 }
 

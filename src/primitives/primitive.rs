@@ -40,7 +40,7 @@ impl Primitive for PrimitiveShape<'_> {
             SphereShape(sphere) => {
                 // all shapes need to first convert to the local/object space
                 let mut transformation_inverted = sphere.transformation().invert();
-                let local_point = transformation_inverted.clone() * *world;
+                let local_point = transformation_inverted * *world;
                 let local_normal = sphere.normal(&local_point);
                 let world_normal = transformation_inverted.transpose() * local_normal;
 
@@ -48,7 +48,7 @@ impl Primitive for PrimitiveShape<'_> {
             }
             PlaneShape(plane) => {
                 let mut transformation_inverted = plane.transformation().invert();
-                let local_point = transformation_inverted.clone() * *world;
+                let local_point = transformation_inverted * *world;
                 let local_normal = plane.normal(&local_point);
                 let world_normal = transformation_inverted.transpose() * local_normal;
 

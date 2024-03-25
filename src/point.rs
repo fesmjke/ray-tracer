@@ -55,7 +55,7 @@ impl ApproxEq for Point {
 
 impl Transformable for Point {
     fn transform(self, transformation: &Matrix4) -> Self {
-        transformation.clone() * self
+        *transformation * self
     }
 }
 

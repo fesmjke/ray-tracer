@@ -71,7 +71,7 @@ impl Primitive for Sphere {
 impl Transformable for Sphere {
     fn transform(self, transformation: &Matrix4) -> Sphere {
         Self {
-            transformation: transformation.clone() * self.transformation,
+            transformation: *transformation * self.transformation,
             ..self
         }
     }

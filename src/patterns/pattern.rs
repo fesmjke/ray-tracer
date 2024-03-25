@@ -86,7 +86,7 @@ impl Default for Pattern {
 impl Transformable for Pattern {
     fn transform(self, transformation: &Matrix4) -> Self {
         Self {
-            transformation: transformation.clone() * self.transformation,
+            transformation: *transformation * self.transformation,
             ..self
         }
     }
