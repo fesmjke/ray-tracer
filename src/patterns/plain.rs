@@ -18,7 +18,7 @@ impl PlainPattern {
     pub fn from(color: Color) -> Self {
         Self { color }
     }
-    pub(crate) fn plain_at(&self, _point: Point) -> Color {
+    pub(crate) fn plain_at(&self, _point: &Point) -> Color {
         self.color
     }
 }

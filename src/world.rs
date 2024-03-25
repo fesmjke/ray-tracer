@@ -56,7 +56,7 @@ impl<'a> World<'a> {
         self.light_sources
             .iter()
             .fold(Color::default(), |acc, light| {
-                let is_shadowed = self.shadow_cast(details.over_point);
+                let is_shadowed = self.shadow_cast(&details.over_point);
 
                 let surface_color = details.object.material().phong_reflection(
                     light,
@@ -140,13 +140,13 @@ impl<'a> World<'a> {
         }
     }
 
-    pub fn shadow_cast(&self, point: Point) -> bool {
+    pub fn shadow_cast(&self, point: &Point) -> bool {
         for light in &self.light_sources {
-            let v = light.position - point;
+            let v = light.position - *point;
             let distance = v.magnitude();
             let direction = v.normalize();
 
-            let ray = Ray::new(point, Vector3::new(direction.x, direction.y, direction.z));
+            let ray = Ray::new(*point, Vector3::new(direction.x, direction.y, direction.z));
             let intersections = self.intersect_objects(&ray);
 
             if let Some(hit) = intersections.hit() {
@@ -400,7 +400,7 @@ mod world_tests {
 
         let expected_shadow = false;
 
-        assert_eq!(expected_shadow, world.shadow_cast(point));
+        assert_eq!(expected_shadow, world.shadow_cast(&point));
     }
 
     #[test]
@@ -426,7 +426,7 @@ mod world_tests {
 
         let expected_shadow = true;
 
-        assert_eq!(expected_shadow, world.shadow_cast(point));
+        assert_eq!(expected_shadow, world.shadow_cast(&point));
     }
 
     #[test]
@@ -452,7 +452,7 @@ mod world_tests {
 
         let expected_shadow = false;
 
-        assert_eq!(expected_shadow, world.shadow_cast(point));
+        assert_eq!(expected_shadow, world.shadow_cast(&point));
     }
 
     #[test]
@@ -478,7 +478,7 @@ mod world_tests {
 
         let expected_shadow = false;
 
-        assert_eq!(expected_shadow, world.shadow_cast(point));
+        assert_eq!(expected_shadow, world.shadow_cast(&point));
     }
 
     #[test]

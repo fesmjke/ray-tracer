@@ -54,8 +54,8 @@ impl Primitive for Sphere {
         }
     }
 
-    fn normal(&self, local: Point) -> Vector3 {
-        let delta_local = local - Point::default();
+    fn normal(&self, local: &Point) -> Vector3 {
+        let delta_local = *local - Point::default();
         Vector3::new(delta_local.x, delta_local.y, delta_local.z)
     }
 
@@ -217,7 +217,7 @@ mod sphere_tests {
     #[test]
     fn sphere_normal_on_x() {
         let sphere = Sphere::default();
-        let normal_vector = sphere.normal(Point::new(1.0, 0.0, 0.0));
+        let normal_vector = sphere.normal(&Point::new(1.0, 0.0, 0.0));
         let expected_vector = Vector3::new(1.0, 0.0, 0.0);
 
         assert_eq!(expected_vector, normal_vector);
@@ -226,7 +226,7 @@ mod sphere_tests {
     #[test]
     fn sphere_normal_on_y() {
         let sphere = Sphere::default();
-        let normal_vector = sphere.normal(Point::new(0.0, 1.0, 0.0));
+        let normal_vector = sphere.normal(&Point::new(0.0, 1.0, 0.0));
         let expected_vector = Vector3::new(0.0, 1.0, 0.0);
 
         assert_eq!(expected_vector, normal_vector);
@@ -235,7 +235,7 @@ mod sphere_tests {
     #[test]
     fn sphere_normal_on_z() {
         let sphere = Sphere::default();
-        let normal_vector = sphere.normal(Point::new(0.0, 0.0, 1.0));
+        let normal_vector = sphere.normal(&Point::new(0.0, 0.0, 1.0));
         let expected_vector = Vector3::new(0.0, 0.0, 1.0);
 
         assert_eq!(expected_vector, normal_vector);
@@ -244,7 +244,7 @@ mod sphere_tests {
     #[test]
     fn sphere_normal_nonaxial() {
         let sphere = Sphere::default();
-        let normal_vector = sphere.normal(Point::new(
+        let normal_vector = sphere.normal(&Point::new(
             f64::sqrt(3.0) / 3.0,
             f64::sqrt(3.0) / 3.0,
             f64::sqrt(3.0) / 3.0,
@@ -261,7 +261,7 @@ mod sphere_tests {
     #[test]
     fn sphere_normal_is_normalized() {
         let sphere = Sphere::default();
-        let normal_vector = sphere.normal(Point::new(
+        let normal_vector = sphere.normal(&Point::new(
             f64::sqrt(3.0) / 3.0,
             f64::sqrt(3.0) / 3.0,
             f64::sqrt(3.0) / 3.0,
@@ -279,7 +279,7 @@ mod sphere_tests {
     fn sphere_translated_normal() {
         let sphere_default = Sphere::default().translate(0.0, 1.0, 0.0).transform();
         let sphere = SphereShape(&sphere_default);
-        let normal_vector = sphere.normal(Point::new(0.0, 1.70711, -0.70711));
+        let normal_vector = sphere.normal(&Point::new(0.0, 1.70711, -0.70711));
         let expected_vector = Vector3::new(0.0, 0.70711, -0.70711);
 
         assert_eq!(expected_vector, normal_vector);
@@ -292,8 +292,11 @@ mod sphere_tests {
             .scale(1.0, 0.5, 1.0)
             .transform();
         let sphere = SphereShape(&sphere_default);
-        let normal_vector =
-            sphere.normal(Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0));
+        let normal_vector = sphere.normal(&Point::new(
+            0.0,
+            f64::sqrt(2.0) / 2.0,
+            -f64::sqrt(2.0) / 2.0,
+        ));
         let expected_vector = Vector3::new(0.0, 0.97014, -0.24254);
 
         assert_eq!(expected_vector, normal_vector);

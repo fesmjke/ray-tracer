@@ -10,7 +10,7 @@ use crate::vector::Vector3;
 
 pub trait Primitive {
     fn intersect(&self, ray: &Ray) -> Intersections;
-    fn normal(&self, world: Point) -> Vector3;
+    fn normal(&self, world: &Point) -> Vector3;
     fn material(&self) -> Material;
     fn transformation(&self) -> &Matrix4;
 }
@@ -35,21 +35,21 @@ impl Primitive for PrimitiveShape<'_> {
         }
     }
 
-    fn normal(&self, world: Point) -> Vector3 {
+    fn normal(&self, world: &Point) -> Vector3 {
         match self {
             SphereShape(sphere) => {
                 // all shapes need to first convert to the local/object space
                 let mut transformation_inverted = sphere.transformation().invert();
-                let local_point = transformation_inverted.clone() * world;
-                let local_normal = sphere.normal(local_point);
+                let local_point = transformation_inverted.clone() * *world;
+                let local_normal = sphere.normal(&local_point);
                 let world_normal = transformation_inverted.transpose() * local_normal;
 
                 world_normal.normalize()
             }
             PlaneShape(plane) => {
                 let mut transformation_inverted = plane.transformation().invert();
-                let local_point = transformation_inverted.clone() * world;
-                let local_normal = plane.normal(local_point);
+                let local_point = transformation_inverted.clone() * *world;
+                let local_normal = plane.normal(&local_point);
                 let world_normal = transformation_inverted.transpose() * local_normal;
 
                 world_normal.normalize()

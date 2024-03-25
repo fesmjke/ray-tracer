@@ -25,7 +25,7 @@ impl<'a> IntersectionDetails<'a> {
     pub fn from(intersection: &Intersection<'a>, ray: &Ray) -> Self {
         let point = ray.position(intersection.time);
         let eye_vector = -ray.direction;
-        let mut normal_vector = intersection.object.normal(point);
+        let mut normal_vector = intersection.object.normal(&point);
 
         let inside = if normal_vector.dot(&eye_vector) < 0.0 {
             normal_vector = -normal_vector;
@@ -60,7 +60,7 @@ impl<'a> IntersectionDetails<'a> {
     ) -> Self {
         let point = ray.position(hit_intersection.time);
         let eye_vector = -ray.direction;
-        let mut normal_vector = hit_intersection.object.normal(point);
+        let mut normal_vector = hit_intersection.object.normal(&point);
 
         let inside = if normal_vector.dot(&eye_vector) < 0.0 {
             normal_vector = -normal_vector;

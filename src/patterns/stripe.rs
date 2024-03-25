@@ -12,7 +12,7 @@ impl StripePattern {
         Self { color_a, color_b }
     }
 
-    pub fn stripe_at(&self, point: Point) -> Color {
+    pub fn stripe_at(&self, point: &Point) -> Color {
         if point.x.floor() as i32 % 2 == 0 {
             self.color_a
         } else {
@@ -37,15 +37,15 @@ mod stripe_pattern_tests {
 
         assert_eq!(
             expected_color,
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             expected_color,
-            pattern.pattern_at(Point::new(0.0, 1.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 1.0, 0.0))
         );
         assert_eq!(
             expected_color,
-            pattern.pattern_at(Point::new(0.0, 2.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 2.0, 0.0))
         );
     }
 
@@ -56,15 +56,15 @@ mod stripe_pattern_tests {
 
         assert_eq!(
             expected_color,
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             expected_color,
-            pattern.pattern_at(Point::new(0.0, 0.0, 1.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 1.0))
         );
         assert_eq!(
             expected_color,
-            pattern.pattern_at(Point::new(0.0, 0.0, 2.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 2.0))
         );
     }
 
@@ -76,27 +76,27 @@ mod stripe_pattern_tests {
 
         assert_eq!(
             expected_color_white,
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             expected_color_white,
-            pattern.pattern_at(Point::new(0.9, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.9, 0.0, 0.0))
         );
         assert_eq!(
             expected_color_black,
-            pattern.pattern_at(Point::new(1.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(1.0, 0.0, 0.0))
         );
         assert_eq!(
             expected_color_black,
-            pattern.pattern_at(Point::new(-0.1, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(-0.1, 0.0, 0.0))
         );
         assert_eq!(
             expected_color_black,
-            pattern.pattern_at(Point::new(-1.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(-1.0, 0.0, 0.0))
         );
         assert_eq!(
             expected_color_white,
-            pattern.pattern_at(Point::new(-1.1, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(-1.1, 0.0, 0.0))
         );
     }
 

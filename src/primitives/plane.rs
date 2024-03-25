@@ -44,7 +44,7 @@ impl Primitive for Plane {
         }
     }
 
-    fn normal(&self, world: Point) -> Vector3 {
+    fn normal(&self, world: &Point) -> Vector3 {
         Vector3::new(0.0, 1.0, 0.0)
     }
 

@@ -53,7 +53,7 @@ impl Pattern {
             ..Default::default()
         }
     }
-    pub(crate) fn pattern_at(&self, point: Point) -> Color {
+    pub(crate) fn pattern_at(&self, point: &Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
             PatternType::Stripe(stripe) => stripe.stripe_at(point),
@@ -70,7 +70,7 @@ impl Pattern {
 
         let pattern_point = self.transformation.invert() * primitive_point;
 
-        self.pattern_at(pattern_point)
+        self.pattern_at(&pattern_point)
     }
 }
 
@@ -103,7 +103,7 @@ pub enum PatternType {
 }
 
 impl PatternType {
-    pub fn pattern_at(&self, point: Point) -> Color {
+    pub fn pattern_at(&self, point: &Point) -> Color {
         match self {
             PatternType::Plain(pattern) => pattern.plain_at(point),
             PatternType::Stripe(pattern) => pattern.stripe_at(point),
@@ -118,7 +118,7 @@ impl PatternType {
 pub struct TestPattern {}
 
 impl TestPattern {
-    pub fn test_at(&self, point: Point) -> Color {
+    pub fn test_at(&self, point: &Point) -> Color {
         Color::new(point.x, point.y, point.z)
     }
 }
