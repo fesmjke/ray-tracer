@@ -11,7 +11,7 @@ impl RingPattern {
     pub fn from(color_a: Color, color_b: Color) -> Self {
         Self { color_a, color_b }
     }
-    pub fn ring_at(&self, point: Point) -> Color {
+    pub fn ring_at(&self, point: &Point) -> Color {
         let distance = (point.x.powf(2.0) + point.z.powf(2.0)).sqrt();
 
         if distance.floor() as i64 % 2 == 0 {
@@ -34,19 +34,19 @@ mod ring_pattern_tests {
 
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             Color::black(),
-            pattern.pattern_at(Point::new(1.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(1.0, 0.0, 0.0))
         );
         assert_eq!(
             Color::black(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 1.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 1.0))
         );
         assert_eq!(
             Color::black(),
-            pattern.pattern_at(Point::new(0.708, 0.0, 0.708)),
+            pattern.pattern_at(&Point::new(0.708, 0.0, 0.708)),
         );
     }
 }

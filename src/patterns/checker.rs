@@ -13,7 +13,7 @@ impl CheckerPattern {
         Self { color_a, color_b }
     }
 
-    pub(crate) fn checker_at(&self, point: Point) -> Color {
+    pub(crate) fn checker_at(&self, point: &Point) -> Color {
         let sum = point.x.floor() + point.y.floor() + point.z.floor();
         if (sum % 2.0).approx_eq_low(&0.0) {
             self.color_a
@@ -35,15 +35,15 @@ mod checker_pattern_tests {
 
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.99, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.99, 0.0, 0.0))
         );
         assert_eq!(
             Color::black(),
-            pattern.pattern_at(Point::new(1.01, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(1.01, 0.0, 0.0))
         );
     }
 
@@ -53,15 +53,15 @@ mod checker_pattern_tests {
 
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.0, 0.99, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.99, 0.0))
         );
         assert_eq!(
             Color::black(),
-            pattern.pattern_at(Point::new(0.0, 1.01, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 1.01, 0.0))
         );
     }
 
@@ -71,15 +71,15 @@ mod checker_pattern_tests {
 
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.0))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             Color::white(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 0.9))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 0.9))
         );
         assert_eq!(
             Color::black(),
-            pattern.pattern_at(Point::new(0.0, 0.0, 1.01))
+            pattern.pattern_at(&Point::new(0.0, 0.0, 1.01))
         );
     }
 }

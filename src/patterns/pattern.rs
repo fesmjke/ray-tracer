@@ -7,8 +7,9 @@ use crate::transformations::Transformable;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Pattern {
-    transformation: Matrix4,
     pub pattern: PatternType,
+    transformation: Matrix4,
+    transformation_inverse: Matrix4,
 }
 
 impl Pattern {
@@ -53,7 +54,7 @@ impl Pattern {
             ..Default::default()
         }
     }
-    pub(crate) fn pattern_at(&self, point: Point) -> Color {
+    pub(crate) fn pattern_at(&self, point: &Point) -> Color {
         match &self.pattern {
             PatternType::Plain(plain) => plain.plain_at(point),
             PatternType::Stripe(stripe) => stripe.stripe_at(point),
@@ -64,13 +65,13 @@ impl Pattern {
         }
     }
 
-    pub fn pattern_at_local(&self, primitive: PrimitiveShape, world_point: Point) -> Color {
-        let primitive_transformation_inv = primitive.transformation().invert();
-        let primitive_point = primitive_transformation_inv * world_point;
+    pub fn pattern_at_local(&self, primitive: &PrimitiveShape, world_point: &Point) -> Color {
+        let primitive_transformation_inv = primitive.transformation_invert();
+        let primitive_point = *primitive_transformation_inv * *world_point;
 
-        let pattern_point = self.transformation.invert() * primitive_point;
+        let pattern_point = self.transformation_inverse * primitive_point;
 
-        self.pattern_at(pattern_point)
+        self.pattern_at(&pattern_point)
     }
 }
 
@@ -78,6 +79,7 @@ impl Default for Pattern {
     fn default() -> Self {
         Self {
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
             pattern: PatternType::Plain(PlainPattern::default()),
         }
     }
@@ -85,8 +87,10 @@ impl Default for Pattern {
 
 impl Transformable for Pattern {
     fn transform(self, transformation: &Matrix4) -> Self {
+        let delta = *transformation * self.transformation;
         Self {
-            transformation: transformation.clone() * self.transformation,
+            transformation: *transformation * self.transformation,
+            transformation_inverse: delta.invert(),
             ..self
         }
     }
@@ -103,7 +107,7 @@ pub enum PatternType {
 }
 
 impl PatternType {
-    pub fn pattern_at(&self, point: Point) -> Color {
+    pub fn pattern_at(&self, point: &Point) -> Color {
         match self {
             PatternType::Plain(pattern) => pattern.plain_at(point),
             PatternType::Stripe(pattern) => pattern.stripe_at(point),
@@ -118,7 +122,7 @@ impl PatternType {
 pub struct TestPattern {}
 
 impl TestPattern {
-    pub fn test_at(&self, point: Point) -> Color {
+    pub fn test_at(&self, point: &Point) -> Color {
         Color::new(point.x, point.y, point.z)
     }
 }
@@ -135,6 +139,7 @@ mod pattern_tests {
         let pattern = Pattern::default();
         let expected_pattern = Pattern {
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
             pattern: Plain(PlainPattern::default()),
         };
 

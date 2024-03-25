@@ -4,17 +4,39 @@ use crate::point::Point;
 use crate::vector::Vector3;
 use std::ops::Mul;
 
-#[derive(Clone)]
+const MATRIX_SIZE: usize = 4;
+
+#[derive(Copy, Clone, Debug)]
 pub struct Matrix4 {
-    pub data: Vec<Vec<f64>>,
+    pub data: [f64; MATRIX_SIZE * MATRIX_SIZE],
 }
 
 impl Matrix4 {
+    pub fn new() -> Self {
+        Self {
+            data: [0.0; MATRIX_SIZE * MATRIX_SIZE],
+        }
+    }
+
+    pub fn from(vec: Vec<Vec<f64>>) -> Self {
+        let mut temp = Self::new();
+
+        for row in 0..MATRIX_SIZE {
+            for col in 0..MATRIX_SIZE {
+                temp[(row, col)] = vec[row][col];
+            }
+        }
+
+        Self { data: temp.data }
+    }
+
     pub fn determinant(&self) -> f64 {
-        self.data[0]
-            .iter()
-            .enumerate()
-            .fold(0.0, |acc, (i, x)| acc + (x * self.cofactor(0, i)))
+        let mut res = 0.0;
+        for col in 0..MATRIX_SIZE {
+            res += self[(0, col)] * self.cofactor(0, col);
+        }
+
+        res
     }
 
     pub fn submatrix(&self, row: usize, column: usize) -> Matrix3 {
@@ -25,7 +47,7 @@ impl Matrix4 {
                 if i == row || j == column {
                     continue;
                 } else {
-                    sb.push(self.data[i][j]);
+                    sb.push(self[(i, j)]);
                 }
             }
         }
@@ -53,7 +75,7 @@ impl Matrix4 {
     }
 
     pub fn set(mut self, row: usize, column: usize, value: f64) -> Self {
-        self.data[row][column] = value;
+        self[(row, column)] = value;
         self
     }
 
@@ -61,19 +83,16 @@ impl Matrix4 {
         if self.is_invertible() {
             let dt = self.determinant();
 
-            let temp = self
-                .data
-                .iter()
-                .enumerate()
-                .map(|(i, s)| {
-                    s.iter()
-                        .enumerate()
-                        .map(|(j, _)| self.cofactor(j, i) / dt)
-                        .collect::<Vec<f64>>()
-                })
-                .collect::<Vec<Vec<f64>>>();
+            let mut res = Self::new();
 
-            return Matrix4::from(temp);
+            for row in 0..MATRIX_SIZE {
+                for col in 0..MATRIX_SIZE {
+                    let c = self.cofactor(row, col);
+                    res[(col, row)] = c / dt;
+                }
+            }
+
+            res
         } else {
             panic!("Matrix {:?} is not invertible!", &self);
         }
@@ -84,15 +103,104 @@ impl Matrix4 {
     }
 }
 
+impl Matrix for Matrix4 {
+    const COLUMNS: usize = MATRIX_SIZE;
+    const ROWS: usize = MATRIX_SIZE;
+
+    fn columns(&self) -> usize {
+        MATRIX_SIZE
+    }
+
+    fn rows(&self) -> usize {
+        MATRIX_SIZE
+    }
+
+    fn identity() -> Self {
+        Self {
+            data: [
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+            ],
+        }
+    }
+
+    fn transpose(&mut self) -> Self {
+        let mut res = Self::new();
+
+        for i in 0..MATRIX_SIZE {
+            for j in 0..MATRIX_SIZE {
+                res[(j, i)] = self[(i, j)];
+            }
+        }
+
+        res
+    }
+}
+
+impl std::ops::Index<(usize, usize)> for Matrix4 {
+    type Output = f64;
+
+    fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
+        debug_assert!(row < MATRIX_SIZE);
+        debug_assert!(col < MATRIX_SIZE);
+        unsafe { self.data.get_unchecked(row * MATRIX_SIZE + col) }
+    }
+}
+
+impl std::ops::IndexMut<(usize, usize)> for Matrix4 {
+    fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut f64 {
+        debug_assert!(row < MATRIX_SIZE);
+        debug_assert!(col < MATRIX_SIZE);
+        unsafe { self.data.get_unchecked_mut(row * MATRIX_SIZE + col) }
+    }
+}
+
+impl Default for Matrix4 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl PartialEq for Matrix4 {
+    fn eq(&self, other: &Matrix4) -> bool {
+        for i in 0..MATRIX_SIZE {
+            for j in 0..MATRIX_SIZE {
+                if !self[(i, j)].approx_eq_low(&other[(i, j)]) {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+}
+
+impl Mul for Matrix4 {
+    type Output = Matrix4;
+
+    fn mul(self, rhs: Matrix4) -> Self::Output {
+        let mut res = Self::new();
+
+        for row in 0..MATRIX_SIZE {
+            for col in 0..MATRIX_SIZE {
+                res[(row, col)] = self[(row, 0)] * rhs[(0, col)]
+                    + self[(row, 1)] * rhs[(1, col)]
+                    + self[(row, 2)] * rhs[(2, col)]
+                    + self[(row, 3)] * rhs[(3, col)];
+            }
+        }
+
+        res
+    }
+}
+
 impl Mul<Vector3> for Matrix4 {
     type Output = Vector3;
 
     fn mul(self, other: Vector3) -> Self::Output {
         // horrible solution
         Self::Output::new(
-            self.data[0][0] * other.x + self.data[0][1] * other.y + self.data[0][2] * other.z,
-            self.data[1][0] * other.x + self.data[1][1] * other.y + self.data[1][2] * other.z,
-            self.data[2][0] * other.x + self.data[2][1] * other.y + self.data[2][2] * other.z,
+            self[(0, 0)] * other.x + self[(0, 1)] * other.y + self[(0, 2)] * other.z,
+            self[(1, 0)] * other.x + self[(1, 1)] * other.y + self[(1, 2)] * other.z,
+            self[(2, 0)] * other.x + self[(2, 1)] * other.y + self[(2, 2)] * other.z,
         )
     }
 }
@@ -103,18 +211,9 @@ impl Mul<Point> for Matrix4 {
     fn mul(self, other: Point) -> Self::Output {
         // horrible solution
         Self::Output::new(
-            self.data[0][0] * other.x
-                + self.data[0][1] * other.y
-                + self.data[0][2] * other.z
-                + self.data[0][3],
-            self.data[1][0] * other.x
-                + self.data[1][1] * other.y
-                + self.data[1][2] * other.z
-                + self.data[1][3],
-            self.data[2][0] * other.x
-                + self.data[2][1] * other.y
-                + self.data[2][2] * other.z
-                + self.data[2][3],
+            self[(0, 0)] * other.x + self[(0, 1)] * other.y + self[(0, 2)] * other.z + self[(0, 3)],
+            self[(1, 0)] * other.x + self[(1, 1)] * other.y + self[(1, 2)] * other.z + self[(1, 3)],
+            self[(2, 0)] * other.x + self[(2, 1)] * other.y + self[(2, 2)] * other.z + self[(2, 3)],
         )
     }
 }
@@ -132,13 +231,13 @@ mod matrix4_tests {
             vec![2.0, -4.0, 4.0, -1.0],
         ]);
 
-        assert_eq!(matrix.data[0][0], -3.0);
-        assert_eq!(matrix.data[0][2], 1.0);
-        assert_eq!(matrix.data[0][3], 3.0);
-        assert_eq!(matrix.data[1][1], -2.0);
-        assert_eq!(matrix.data[2][2], 1.0);
-        assert_eq!(matrix.data[3][0], 2.0);
-        assert_eq!(matrix.data[3][3], -1.0);
+        assert_eq!(matrix[(0, 0)], -3.0);
+        assert_eq!(matrix[(0, 2)], 1.0);
+        assert_eq!(matrix[(0, 3)], 3.0);
+        assert_eq!(matrix[(1, 1)], -2.0);
+        assert_eq!(matrix[(2, 2)], 1.0);
+        assert_eq!(matrix[(3, 0)], 2.0);
+        assert_eq!(matrix[(3, 3)], -1.0);
     }
 
     #[test]
@@ -198,10 +297,10 @@ mod matrix4_tests {
 
         let dt = matrix.determinant();
         let expected_result_explicit = -4071.0;
-        let expected_result = matrix.data[0][0] * cofactor_a // -4071.0
-            + matrix.data[0][1] * cofactor_b
-            + matrix.data[0][2] * cofactor_c
-            + matrix.data[0][3] * cofactor_d;
+        let expected_result = matrix[(0,0)] * cofactor_a // -4071.0
+            + matrix[(0,1)] * cofactor_b
+            + matrix[(0,2)] * cofactor_c
+            + matrix[(0,3)] * cofactor_d;
 
         assert_eq!(expected_result, dt);
         assert_eq!(expected_result_explicit, dt);
@@ -301,8 +400,7 @@ mod matrix4_tests {
             vec![6.0, -2.0, 0.0, 5.0],
         ]);
 
-        // TODO: remove clone when matrix vec will be replaced with slice
-        let matrix_c = matrix_a.clone() * matrix_b.clone();
+        let matrix_c = matrix_a * matrix_b;
         let initial_matrix = matrix_c * matrix_b.invert();
         assert_eq!(initial_matrix, matrix_a)
     }

@@ -13,8 +13,6 @@ pub trait Matrix {
     fn transpose(&mut self) -> Self;
 }
 
-// TODO: replace Vec with slice, because cannot implement Copy trait
-
 macro_rules! impl_matrix {
     ($ty: ty,$col:expr, $row:expr) => {
         impl Matrix for $ty {
@@ -30,18 +28,14 @@ macro_rules! impl_matrix {
             }
 
             fn identity() -> Self {
-                let mut v = vec![];
+                let mut v = Self::new().data;
 
                 for i in 0..$row {
-                    let mut temp = vec![];
                     for j in 0..$col {
                         if i == j {
-                            temp.push(1.0);
-                        } else {
-                            temp.push(0.0);
+                            v[i][j] = 1.0;
                         }
                     }
-                    v.push(temp);
                 }
 
                 Self { data: v }
@@ -63,12 +57,20 @@ macro_rules! impl_matrix {
         impl $ty {
             pub fn new() -> Self {
                 Self {
-                    data: vec![vec![0.0; $row]; $col],
+                    data: [[0.0; $col]; $row],
                 }
             }
 
             pub fn from(data: Vec<Vec<f64>>) -> Self {
-                Self { data }
+                let mut temp = Self::new().data;
+
+                for row in 0..$row {
+                    for col in 0..$col {
+                        temp[row][col] = data[row][col];
+                    }
+                }
+
+                Self { data: temp }
             }
         }
 
@@ -89,12 +91,6 @@ macro_rules! impl_matrix {
                 }
 
                 true
-            }
-        }
-
-        impl Debug for $ty {
-            fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-                write!(f, "Matrix: {:?}", self.data)
             }
         }
 
@@ -122,7 +118,6 @@ macro_rules! impl_matrix {
 
 impl_matrix!(Matrix2, 2, 2);
 impl_matrix!(Matrix3, 3, 3);
-impl_matrix!(Matrix4, 4, 4);
 
 #[cfg(test)]
 mod matrix_tests {
@@ -134,40 +129,40 @@ mod matrix_tests {
     fn matrix_creation() {
         let mut matrix = Matrix4::default();
 
-        matrix.data[0][0] = 1.0;
-        matrix.data[0][1] = 2.0;
-        matrix.data[0][2] = 3.0;
-        matrix.data[0][3] = 4.0;
+        matrix[(0, 0)] = 1.0;
+        matrix[(0, 1)] = 2.0;
+        matrix[(0, 2)] = 3.0;
+        matrix[(0, 3)] = 4.0;
 
-        matrix.data[1][0] = 5.5;
-        matrix.data[1][1] = 6.5;
-        matrix.data[1][2] = 7.5;
-        matrix.data[1][3] = 8.5;
+        matrix[(1, 0)] = 5.5;
+        matrix[(1, 1)] = 6.5;
+        matrix[(1, 2)] = 7.5;
+        matrix[(1, 3)] = 8.5;
 
-        matrix.data[2][0] = 9.0;
-        matrix.data[2][1] = 10.0;
-        matrix.data[2][2] = 11.0;
-        matrix.data[2][3] = 12.0;
+        matrix[(2, 0)] = 9.0;
+        matrix[(2, 1)] = 10.0;
+        matrix[(2, 2)] = 11.0;
+        matrix[(2, 3)] = 12.0;
 
-        matrix.data[3][0] = 13.5;
-        matrix.data[3][1] = 14.5;
-        matrix.data[3][2] = 15.5;
-        matrix.data[3][3] = 16.5;
+        matrix[(3, 0)] = 13.5;
+        matrix[(3, 1)] = 14.5;
+        matrix[(3, 2)] = 15.5;
+        matrix[(3, 3)] = 16.5;
 
-        assert_eq!(matrix.data[3][0], 13.5);
-        assert_eq!(matrix.data[1][2], 7.5);
+        assert_eq!(matrix[(3, 0)], 13.5);
+        assert_eq!(matrix[(1, 2)], 7.5);
     }
 
     #[test]
     fn matrix_identity() {
         let matrix = Matrix4::identity();
 
-        assert_eq!(matrix.data[0][0], 1.0);
-        assert_eq!(matrix.data[1][1], 1.0);
-        assert_eq!(matrix.data[2][2], 1.0);
-        assert_eq!(matrix.data[3][3], 1.0);
+        assert_eq!(matrix[(0, 0)], 1.0);
+        assert_eq!(matrix[(1, 1)], 1.0);
+        assert_eq!(matrix[(2, 2)], 1.0);
+        assert_eq!(matrix[(3, 3)], 1.0);
 
-        assert_eq!(matrix.data[0][1], 0.0);
+        assert_eq!(matrix[(0, 1)], 0.0);
     }
 
     #[test]
@@ -227,6 +222,11 @@ mod matrix_tests {
 
     #[test]
     fn matrix_transpose() {
+        let identity = Matrix4::identity().transpose();
+        let expected_identity = Matrix4::identity();
+
+        assert_eq!(expected_identity, identity);
+
         let mut matrix_a = Matrix2::from(vec![vec![2.0, 1.0], vec![3.0, 1.0]]);
         let expected_matrix = Matrix2::from(vec![vec![2.0, 3.0], vec![1.0, 1.0]]);
 
@@ -239,7 +239,8 @@ mod matrix_tests {
             vec![4.0, 2.0, 3.0, 4.0],
             vec![6.0, 2.0, 3.0, 4.0],
             vec![8.0, 2.0, 3.0, 4.0],
-        ]);
+        ])
+        .transpose();
 
         let expected_matrix = Matrix4::from(vec![
             vec![1.0, 4.0, 6.0, 8.0],
@@ -247,8 +248,6 @@ mod matrix_tests {
             vec![3.0, 3.0, 3.0, 3.0],
             vec![4.0, 4.0, 4.0, 4.0],
         ]);
-
-        matrix_b.transpose();
 
         assert_eq!(expected_matrix, matrix_b);
     }

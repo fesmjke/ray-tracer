@@ -15,6 +15,7 @@ pub struct Camera {
     vertical_size: usize,
     fov: f64,
     transformation: Matrix4,
+    transformation_inverse: Matrix4,
     pixel_size: f64,
     half_width: f64,
     half_height: f64,
@@ -38,6 +39,7 @@ impl Camera {
             vertical_size: vsize,
             fov,
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
             pixel_size,
             half_width,
             half_height,
@@ -51,8 +53,8 @@ impl Camera {
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
 
-        let transformation_inv = self.transformation.invert();
-        let pixel = transformation_inv.clone() * Point::new(world_x, world_y, -1.0);
+        let transformation_inv = self.transformation_inverse;
+        let pixel = transformation_inv * Point::new(world_x, world_y, -1.0);
 
         let origin = transformation_inv * Point::default();
         let direction = (pixel - origin).normalize();
@@ -106,8 +108,10 @@ impl Camera {
 
 impl Transformable for Camera {
     fn transform(self, transformation: &Matrix4) -> Self {
+        let delta = *transformation * self.transformation;
         Self {
-            transformation: transformation.clone() * self.transformation,
+            transformation: delta,
+            transformation_inverse: delta.invert(),
             ..self
         }
     }
@@ -131,6 +135,7 @@ mod camera_tests {
             vertical_size: 120,
             fov: PI / 2.0,
             transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
             pixel_size: 0.012499999999999999,
             half_width: 0.9999999999999999,
             half_height: 0.75,
