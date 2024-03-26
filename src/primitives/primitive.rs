@@ -2,8 +2,8 @@ use crate::intersections::Intersections;
 use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
-use crate::primitives::PrimitiveShape::{PlaneShape, SphereShape};
-use crate::primitives::{Plane, Sphere};
+use crate::primitives::PrimitiveShape::{CubeShape, PlaneShape, SphereShape};
+use crate::primitives::{Cube, Plane, Sphere};
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
@@ -20,6 +20,7 @@ pub trait Primitive {
 pub enum PrimitiveShape<'a> {
     SphereShape(&'a Sphere),
     PlaneShape(&'a Plane),
+    CubeShape(&'a Cube),
 }
 
 impl Primitive for PrimitiveShape<'_> {
@@ -32,6 +33,9 @@ impl Primitive for PrimitiveShape<'_> {
             PlaneShape(plane) => {
                 let ray = &ray.transform(&plane.transformation_inverse);
                 plane.intersect(ray)
+            }
+            CubeShape(cube) => {
+                todo!()
             }
         }
     }
@@ -55,6 +59,9 @@ impl Primitive for PrimitiveShape<'_> {
 
                 world_normal.normalize()
             }
+            CubeShape(cube) => {
+                todo!()
+            }
         }
     }
 
@@ -62,6 +69,7 @@ impl Primitive for PrimitiveShape<'_> {
         match self {
             SphereShape(sphere) => sphere.material.clone(),
             PlaneShape(plane) => plane.material.clone(),
+            CubeShape(cube) => cube.material.clone(),
         }
     }
 
@@ -69,6 +77,7 @@ impl Primitive for PrimitiveShape<'_> {
         match self {
             SphereShape(sphere) => sphere.transformation(),
             PlaneShape(plane) => plane.transformation(),
+            CubeShape(cube) => cube.transformation(),
         }
     }
 
@@ -76,6 +85,7 @@ impl Primitive for PrimitiveShape<'_> {
         match self {
             SphereShape(sphere) => sphere.transformation_invert(),
             PlaneShape(plane) => plane.transformation_invert(),
+            CubeShape(cube) => cube.transformation_invert(),
         }
     }
 }
@@ -85,6 +95,7 @@ impl PartialEq for PrimitiveShape<'_> {
         match (self, other) {
             (SphereShape(sphere_a), SphereShape(sphere_b)) => sphere_a == sphere_b,
             (PlaneShape(plane_a), PlaneShape(plane_b)) => plane_a == plane_b,
+            (CubeShape(cube_a), CubeShape(cube_b)) => cube_a == cube_b,
             _ => false,
         }
     }
