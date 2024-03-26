@@ -6,6 +6,7 @@ use crate::point::Point;
 use crate::primitives::Primitive;
 use crate::primitives::PrimitiveShape::CubeShape;
 use crate::ray::Ray;
+use crate::transformations::Transformable;
 use crate::vector::Vector3;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -96,6 +97,19 @@ impl Primitive for Cube {
 
     fn transformation_invert(&self) -> &Matrix4 {
         &self.transformation_inverse
+    }
+}
+
+impl Transformable for Cube {
+    fn transform(self, transformation: &Matrix4) -> Self {
+        let delta = *transformation * self.transformation;
+        let mut delta_inverse = delta.invert();
+        Self {
+            transformation: delta,
+            transformation_inverse: delta_inverse,
+            transformation_inverse_transpose: delta_inverse.transpose(),
+            ..self
+        }
     }
 }
 
