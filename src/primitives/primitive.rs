@@ -35,7 +35,8 @@ impl Primitive for PrimitiveShape<'_> {
                 plane.intersect(ray)
             }
             CubeShape(cube) => {
-                todo!()
+                let ray = &ray.transform(&cube.transformation_inverse);
+                cube.intersect(ray)
             }
         }
     }
@@ -60,7 +61,12 @@ impl Primitive for PrimitiveShape<'_> {
                 world_normal.normalize()
             }
             CubeShape(cube) => {
-                todo!()
+                let transformation_inverted = cube.transformation_inverse;
+                let local_point = transformation_inverted * *world;
+                let local_normal = cube.normal(&local_point);
+                let world_normal = cube.transformation_inverse_transpose * local_normal;
+
+                world_normal.normalize()
             }
         }
     }
