@@ -1,3 +1,4 @@
+use crate::float_eq::ApproxEq;
 use crate::intersections::{Intersection, Intersections};
 use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
@@ -71,7 +72,18 @@ impl Primitive for Cube {
         ])
     }
     fn normal(&self, world: &Point) -> Vector3 {
-        todo!()
+        let maxc = vec![world.x.abs(), world.y.abs(), world.z.abs()]
+            .into_iter()
+            .reduce(f64::max)
+            .unwrap_or_default();
+
+        return if maxc.approx_eq_low(&world.x.abs()) {
+            Vector3::new(world.x, 0.0, 0.0)
+        } else if maxc.approx_eq_low(&world.y.abs()) {
+            Vector3::new(0.0, world.y, 0.0)
+        } else {
+            Vector3::new(0.0, 0.0, world.z)
+        };
     }
 
     fn material(&self) -> Material {
@@ -243,5 +255,57 @@ mod cube_tests {
         let intersections = cube.intersect(&ray);
         let expected_intersections = Intersections::new();
         assert_eq!(expected_intersections, intersections);
+    }
+
+    #[test]
+    fn cube_normal_on_surface() {
+        let cube = Cube::default();
+        let point = Point::new(1.0, 0.5, -0.8);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(1.0, 0.0, 0.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(-1.0, -0.2, 0.9);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(-1.0, 0.0, 0.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(-0.4, 1.0, -0.1);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(0.0, 1.0, 0.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(0.3, -1.0, -0.7);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(0.0, -1.0, 0.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(-0.6, 0.3, 1.0);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(0.0, 0.0, 1.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(0.4, 0.4, -1.0);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(0.0, 0.0, -1.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(1.0, 1.0, 1.0);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(1.0, 0.0, 0.0);
+
+        assert_eq!(expected_vector, vector);
+
+        let point = Point::new(-1.0, -1.0, -1.0);
+        let vector = cube.normal(&point);
+        let expected_vector = Vector3::new(-1.0, 0.0, 0.0);
+
+        assert_eq!(expected_vector, vector);
     }
 }
