@@ -32,9 +32,9 @@ pub mod patterns {
 pub mod primitives {
     pub use primitive::{Primitive, PrimitiveShape};
 
+    pub use cube::Cube;
     pub use plane::Plane;
     pub use sphere::Sphere;
-    pub use cube::Cube;
     mod primitive;
 
     mod cube;
@@ -69,4 +69,8 @@ pub mod transformations {
     pub use transformation::{Over, Transform};
     mod builder;
     mod transformation;
+}
+
+pub mod builder {
+    mod terraform;
 }
