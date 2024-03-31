@@ -32,6 +32,17 @@ impl Color {
     pub fn blue() -> Color {
         Color::new(0.0, 0.0, 1.0)
     }
+
+    pub fn with_red(&mut self, red: f64) {
+        self.r = red;
+    }
+
+    pub fn with_green(&mut self, green: f64) {
+        self.g = green;
+    }
+    pub fn with_blue(&mut self, blue: f64) {
+        self.b = blue;
+    }
 }
 
 impl Default for Color {
