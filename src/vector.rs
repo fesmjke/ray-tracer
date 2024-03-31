@@ -67,6 +67,18 @@ impl Vector3 {
     pub fn reflect(&self, normal: &Vector3) -> Vector3 {
         *self - *normal * 2.0 * self.dot(normal)
     }
+
+    pub fn with_x(&mut self, x: f64) {
+        self.x = x;
+    }
+
+    pub fn with_y(&mut self, y: f64) {
+        self.y = y;
+    }
+
+    pub fn with_z(&mut self, z: f64) {
+        self.z = z;
+    }
 }
 
 impl Transformable for Vector3 {

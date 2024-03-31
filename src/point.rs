@@ -37,6 +37,18 @@ impl Point {
     pub fn normalize(&self) -> Self {
         *self / self.magnitude()
     }
+
+    pub fn with_x(&mut self, x: f64) {
+        self.x = x;
+    }
+
+    pub fn with_y(&mut self, y: f64) {
+        self.y = y;
+    }
+
+    pub fn with_z(&mut self, z: f64) {
+        self.z = z;
+    }
 }
 
 impl PartialEq for Point {
