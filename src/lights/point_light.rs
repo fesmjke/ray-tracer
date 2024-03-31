@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::point::Point;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PointLight {
     pub intensity: Color,
     pub position: Point,
@@ -13,6 +13,14 @@ impl PointLight {
             intensity,
             position,
         }
+    }
+
+    pub fn with_color(&mut self, color: Color) {
+        self.intensity = color;
+    }
+
+    pub fn with_position(&mut self, position: Point) {
+        self.position = position;
     }
 }
 
