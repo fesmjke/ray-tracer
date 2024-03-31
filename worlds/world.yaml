@@ -1,0 +1,174 @@
+Primitive:
+  primitive_type: plane
+  Material:
+    Color:
+      r: 0.0
+      g: 0.0
+      b: 0.0
+    ambient: 0.1
+    diffuse: 0.9
+    specular: 0.9
+    reflective: 0.0
+    refractive_index: 1.0
+    transparency: 0.0
+    shininess: 200.0
+    Pattern:
+      pattern_type: checker
+      Color_a:
+        r: 1.0
+        g: 1.0
+        b: 1.0
+      Color_b:
+        r: 0.0
+        g: 0.0
+        b: 0.0
+      Transform:
+        Rotate:
+          over: x
+          angle: 0
+        Scale:
+          x: 1.0
+          y: 1.0
+          z: 1.0
+        Translate:
+          x: 0.0
+          y: 0.0
+          z: 0.0
+  Transform:
+    Rotate:
+      over: x
+      angle: 1
+    Scale:
+      x: 1.0
+      y: 1.0
+      z: 1.0
+    Translate:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+
+Primitive:
+  primitive_type: sphere
+  Material:
+    Color:
+      r: 0.9
+      g: 0.0
+      b: 0.0
+    ambient: 0.1
+    diffuse: 0.9
+    specular: 0.9
+    reflective: 0.0
+    refractive_index: 1.0
+    transparency: 0.0
+    shininess: 200.0
+    Pattern:
+      pattern_type: gradient
+      Color_a:
+        r: 1.0
+        g: 0.0
+        b: 0.0
+      Color_b:
+        r: 0.0
+        g: 0.0
+        b: 1.0
+      Transform:
+        Rotate:
+          over: x
+          angle: 0
+        Scale:
+          x: 2.0
+          y: 2.0
+          z: 2.0
+        Translate:
+          x: 1.0
+          y: 0.0
+          z: 0.0
+  Transform:
+    Rotate:
+      over: x
+      angle: 1
+    Scale:
+      x: 1.0
+      y: 1.0
+      z: 1.0
+    Translate:
+      x: 0.0
+      y: 1.0
+      z: 3.0
+
+Primitive:
+  primitive_type: cube
+  Material:
+    Color:
+      r: 0.9
+      g: 0.0
+      b: 0.0
+    ambient: 0.1
+    diffuse: 0.9
+    specular: 0.9
+    reflective: 0.0
+    refractive_index: 1.0
+    transparency: 0.0
+    shininess: 200.0
+    Pattern:
+      pattern_type: gradient
+      Color_a:
+        r: 1.0
+        g: 0.0
+        b: 0.0
+      Color_b:
+        r: 0.0
+        g: 0.0
+        b: 1.0
+      Transform:
+        Rotate:
+          over: x
+          angle: 0
+        Scale:
+          x: 2.0
+          y: 2.0
+          z: 2.0
+        Translate:
+          x: 1.0
+          y: 0.0
+          z: 0.0
+  Transform:
+    Rotate:
+      over: y
+      angle: 30
+    Scale:
+      x: 0.5
+      y: 0.5
+      z: 0.5
+    Translate:
+      x: -2.0
+      y: 0.5
+      z: 3.0
+
+PointLight:
+  OriginPoint:
+    x: -10.0
+    y: 10.0
+    z: -10.0
+  Color:
+    r: 1
+    g: 1
+    b: 1
+
+Camera:
+  factor: 16
+  horizontal_base: 64
+  vertical_base: 48
+  fov: 30.0
+  VectorFrom:
+    x: 0.0
+    y: 1.5
+    z: -10.0
+  VectorTo:
+    x: 0.0
+    y: 1.0
+    z: 0.0
+  VectorUp:
+    x: 0.0
+    y: 1.0
+    z: 0.0
