@@ -2,13 +2,13 @@ use crate::intersections::{Intersection, Intersections};
 use crate::material::Material;
 use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
+use crate::primitives::Primitive;
 use crate::primitives::PrimitiveShape::SphereShape;
-use crate::primitives::{Primitive, PrimitiveShape};
 use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Sphere {
     pub origin: Point,
     pub radius: f64,
@@ -52,8 +52,8 @@ impl Primitive for Sphere {
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
             Intersections::new().with(vec![
-                Intersection::new(t1, SphereShape(self)),
-                Intersection::new(t2, SphereShape(self)),
+                Intersection::new(t1, SphereShape(self.clone())),
+                Intersection::new(t2, SphereShape(self.clone())),
             ])
         }
     }
@@ -143,8 +143,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(4.0, SphereShape(&sphere)),
-            Intersection::new(6.0, SphereShape(&sphere)),
+            Intersection::new(4.0, SphereShape(sphere)),
+            Intersection::new(6.0, SphereShape(sphere)),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -156,8 +156,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(5.0, SphereShape(&sphere)),
-            Intersection::new(5.0, SphereShape(&sphere)),
+            Intersection::new(5.0, SphereShape(sphere)),
+            Intersection::new(5.0, SphereShape(sphere)),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -169,8 +169,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(-1.0, SphereShape(&sphere)),
-            Intersection::new(1.0, SphereShape(&sphere)),
+            Intersection::new(-1.0, SphereShape(sphere)),
+            Intersection::new(1.0, SphereShape(sphere)),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -182,8 +182,8 @@ mod sphere_tests {
         let sphere = Sphere::default();
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
-            Intersection::new(-6.0, SphereShape(&sphere)),
-            Intersection::new(-4.0, SphereShape(&sphere)),
+            Intersection::new(-6.0, SphereShape(sphere)),
+            Intersection::new(-4.0, SphereShape(sphere)),
         ]);
 
         assert_eq!(expected_intersects, intersects);
@@ -207,7 +207,7 @@ mod sphere_tests {
     fn ray_intersect_scaled_sphere() {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere_default = Sphere::default().scale(2.0, 2.0, 2.0).transform();
-        let sphere = SphereShape(&sphere_default);
+        let sphere = SphereShape(sphere_default);
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![
             Intersection::new(3.0, sphere),
@@ -221,7 +221,7 @@ mod sphere_tests {
     fn ray_intersect_translated_sphere() {
         let ray = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let sphere_default = Sphere::default().translate(5.0, 0.0, 0.0).transform();
-        let sphere = SphereShape(&sphere_default);
+        let sphere = SphereShape(sphere_default);
         let intersects = sphere.intersect(&ray);
         let expected_intersects = Intersections::new().with(vec![]);
 
@@ -292,7 +292,7 @@ mod sphere_tests {
     #[test]
     fn sphere_translated_normal() {
         let sphere_default = Sphere::default().translate(0.0, 1.0, 0.0).transform();
-        let sphere = SphereShape(&sphere_default);
+        let sphere = SphereShape(sphere_default);
         let normal_vector = sphere.normal(&Point::new(0.0, 1.70711, -0.70711));
         let expected_vector = Vector3::new(0.0, 0.70711, -0.70711);
 
@@ -305,7 +305,7 @@ mod sphere_tests {
             .rotate(Over::Z, PI / 2.0)
             .scale(1.0, 0.5, 1.0)
             .transform();
-        let sphere = SphereShape(&sphere_default);
+        let sphere = SphereShape(sphere_default);
         let normal_vector = sphere.normal(&Point::new(
             0.0,
             f64::sqrt(2.0) / 2.0,

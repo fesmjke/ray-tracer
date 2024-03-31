@@ -10,7 +10,7 @@ use crate::transformations::Transformable;
 use crate::vector::Vector3;
 use std::default::Default;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Plane {
     pub transformation: Matrix4,
     pub transformation_inverse: Matrix4,
@@ -43,12 +43,12 @@ impl Primitive for Plane {
         } else {
             intersections.with(vec![Intersection::new(
                 -ray.origin.y / ray.direction.y,
-                PlaneShape(self),
+                PlaneShape(self.clone()),
             )])
         }
     }
 
-    fn normal(&self, world: &Point) -> Vector3 {
+    fn normal(&self, _world: &Point) -> Vector3 {
         Vector3::new(0.0, 1.0, 0.0)
     }
 
@@ -142,7 +142,7 @@ mod plane_tests {
 
         let intersections = plane.intersect(&ray);
         let expected_intersections =
-            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(&plane))]);
+            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(plane))]);
 
         assert_eq!(expected_intersections, intersections);
     }
@@ -154,7 +154,7 @@ mod plane_tests {
 
         let intersections = plane.intersect(&ray);
         let expected_intersections =
-            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(&plane))]);
+            Intersections::new().with(vec![Intersection::new(1.0, PlaneShape(plane))]);
 
         assert_eq!(expected_intersections, intersections);
     }

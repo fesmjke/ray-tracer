@@ -1,6 +1,6 @@
 use crate::intersections::Intersections;
 use crate::material::Material;
-use crate::matrices::{Matrix, Matrix4};
+use crate::matrices::Matrix4;
 use crate::point::Point;
 use crate::primitives::PrimitiveShape::{CubeShape, PlaneShape, SphereShape};
 use crate::primitives::{Cube, Plane, Sphere};
@@ -17,13 +17,13 @@ pub trait Primitive {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum PrimitiveShape<'a> {
-    SphereShape(&'a Sphere),
-    PlaneShape(&'a Plane),
-    CubeShape(&'a Cube),
+pub enum PrimitiveShape {
+    SphereShape(Sphere),
+    PlaneShape(Plane),
+    CubeShape(Cube),
 }
 
-impl Primitive for PrimitiveShape<'_> {
+impl Primitive for PrimitiveShape {
     fn intersect(&self, ray: &Ray) -> Intersections {
         match self {
             SphereShape(sphere) => {
@@ -96,7 +96,7 @@ impl Primitive for PrimitiveShape<'_> {
     }
 }
 
-impl PartialEq for PrimitiveShape<'_> {
+impl PartialEq for PrimitiveShape {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (SphereShape(sphere_a), SphereShape(sphere_b)) => sphere_a == sphere_b,

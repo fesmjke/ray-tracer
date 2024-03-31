@@ -9,7 +9,7 @@ use crate::ray::Ray;
 use crate::transformations::Transformable;
 use crate::vector::Vector3;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Cube {
     pub transformation: Matrix4,
     pub transformation_inverse: Matrix4,
@@ -68,8 +68,8 @@ impl Primitive for Cube {
         }
 
         intersections.with(vec![
-            Intersection::new(tmin, CubeShape(self)),
-            Intersection::new(tmax, CubeShape(self)),
+            Intersection::new(tmin, CubeShape(self.clone())),
+            Intersection::new(tmax, CubeShape(self.clone())),
         ])
     }
     fn normal(&self, world: &Point) -> Vector3 {
