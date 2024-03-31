@@ -5,7 +5,7 @@ use crate::point::Point;
 use crate::primitives::{Primitive, PrimitiveShape};
 use crate::transformations::Transformable;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Pattern {
     pub pattern: PatternType,
     transformation: Matrix4,
@@ -96,7 +96,7 @@ impl Transformable for Pattern {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Copy, PartialEq, Clone)]
 pub enum PatternType {
     Plain(PlainPattern),
     Stripe(StripePattern),
@@ -118,7 +118,7 @@ impl PatternType {
         }
     }
 }
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct TestPattern {}
 
 impl TestPattern {

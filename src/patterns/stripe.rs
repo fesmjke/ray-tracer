@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::point::Point;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub struct StripePattern {
     color_a: Color,
     color_b: Color,
@@ -107,7 +107,7 @@ mod stripe_pattern_tests {
             .scale(2.0, 2.0, 2.0)
             .transform()
             .apply_material(Material::default().apply_pattern(pattern.clone()));
-        let sphere = PrimitiveShape::SphereShape(&sphere_default);
+        let sphere = PrimitiveShape::SphereShape(sphere_default);
         let expected_color = Color::white();
 
         let color = pattern.pattern_at_local(&sphere, &Point::new(1.5, 0.0, 0.0));
@@ -122,7 +122,7 @@ mod stripe_pattern_tests {
             .transform();
         let sphere_default =
             Sphere::default().apply_material(Material::default().apply_pattern(pattern.clone()));
-        let sphere = PrimitiveShape::SphereShape(&sphere_default);
+        let sphere = PrimitiveShape::SphereShape(sphere_default);
         let expected_color = Color::white();
 
         let color = pattern.pattern_at_local(&sphere, &Point::new(1.5, 0.0, 0.0));
@@ -139,7 +139,7 @@ mod stripe_pattern_tests {
             .scale(2.0, 2.0, 2.0)
             .transform()
             .apply_material(Material::default().apply_pattern(pattern.clone()));
-        let sphere = PrimitiveShape::SphereShape(&sphere_default);
+        let sphere = PrimitiveShape::SphereShape(sphere_default);
         let expected_color = Color::white();
 
         let color = pattern.pattern_at_local(&sphere, &Point::new(2.5, 0.0, 0.0));

@@ -1,7 +1,7 @@
 use crate::color::Color;
 use crate::point::Point;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Copy)]
 pub struct RingPattern {
     color_a: Color,
     color_b: Color,

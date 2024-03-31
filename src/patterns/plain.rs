@@ -37,7 +37,7 @@ mod plain_pattern_tests {
         let pattern = Pattern::new_plain(Color::white());
         let plane_default =
             Plane::default().apply_material(Material::default().apply_pattern(pattern.clone()));
-        let plane = PlaneShape(&plane_default);
+        let plane = PlaneShape(plane_default);
 
         let color = pattern.pattern_at_local(&plane, &Point::new(2.5, 0.0, 0.0));
 
