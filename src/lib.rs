@@ -72,5 +72,6 @@ pub mod transformations {
 }
 
 pub mod builder {
-    mod terraform;
+    pub use terraform::Terraform;
+    pub mod terraform;
 }
