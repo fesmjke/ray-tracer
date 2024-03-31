@@ -1,6 +1,5 @@
 use crate::float_eq::ApproxEq;
-use crate::matrices::{Matrix2, Matrix3, Matrix4};
-use std::fmt::{Debug, Formatter, Result};
+use crate::matrices::{Matrix2, Matrix3};
 use std::ops::Mul;
 
 pub trait Matrix {
@@ -122,6 +121,7 @@ impl_matrix!(Matrix3, 3, 3);
 #[cfg(test)]
 mod matrix_tests {
     use super::*;
+    use crate::matrices::Matrix4;
     use crate::point::Point;
     use crate::vector::Vector3;
 
@@ -234,7 +234,7 @@ mod matrix_tests {
 
         assert_eq!(expected_matrix, matrix_a);
 
-        let mut matrix_b = Matrix4::from(vec![
+        let matrix_b = Matrix4::from(vec![
             vec![1.0, 2.0, 3.0, 4.0],
             vec![4.0, 2.0, 3.0, 4.0],
             vec![6.0, 2.0, 3.0, 4.0],
