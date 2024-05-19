@@ -174,6 +174,12 @@ impl Sub<Vector3> for Point {
     }
 }
 
+impl Into<Vector3> for Point {
+    fn into(self) -> Vector3 {
+        Vector3::new(self.x, self.y, self.z)
+    }
+}
+
 #[cfg(test)]
 mod point_tests {
     use super::*;
