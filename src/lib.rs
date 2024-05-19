@@ -35,11 +35,13 @@ pub mod primitives {
     pub use cube::Cube;
     pub use plane::Plane;
     pub use sphere::Sphere;
+    pub use triangle::Triangle;
     mod primitive;
 
     mod cube;
     mod plane;
     mod sphere;
+    mod triangle;
 }
 
 pub mod lights {
