@@ -58,6 +58,22 @@ impl Primitive for Triangle {
             return Intersections::new();
         }
 
+        let f = 1.0 / determinant;
+
+        let point_a_to_origin: Vector3 = (ray.origin - self.point_a).into();
+
+        let u = f * point_a_to_origin.dot(&dir_cross_b_hit);
+
+        if u < 0.0 || u > 1.0 {
+            return Intersections::new();
+        }
+
+        let origin_cross_hit_a = point_a_to_origin.cross(&self.e_hit_a);
+        let v = f * ray.direction.dot(&origin_cross_hit_a);
+        if v < 0.0 || (u + v) > 1.0 {
+            return Intersections::new();
+        }
+
         return Intersections::new()
             .with(vec![Intersection::new(1.0, TriangleShape(self.clone()))]);
     }
@@ -67,15 +83,15 @@ impl Primitive for Triangle {
     }
 
     fn material(&self) -> Material {
-        todo!()
+        self.material.clone()
     }
 
     fn transformation(&self) -> &Matrix4 {
-        todo!()
+        &self.transformation
     }
 
     fn transformation_invert(&self) -> &Matrix4 {
-        todo!()
+        &self.transformation_inverse
     }
 }
 
@@ -162,6 +178,54 @@ mod triangle_tests {
         );
 
         let ray = Ray::new(Point::new(0.0, -1.0, -2.0), Vector3::new(0.0, 1.0, 0.0));
+        let expected_intersections = Intersections::new();
+
+        let intersections = triangle.intersect(&ray);
+
+        assert_eq!(expected_intersections, intersections);
+    }
+
+    #[test]
+    fn triangle_intersection_ray_miss_edge_a() {
+        let triangle = Triangle::from(
+            Point::new(0.0, 1.0, 0.0),
+            Point::new(-1.0, 0.0, 0.0),
+            Point::new(1.0, 0.0, 0.0),
+        );
+
+        let ray = Ray::new(Point::new(1.0, 1.0, -2.0), Vector3::new(0.0, 0.0, 1.0));
+        let expected_intersections = Intersections::new();
+
+        let intersections = triangle.intersect(&ray);
+
+        assert_eq!(expected_intersections, intersections);
+    }
+
+    #[test]
+    fn triangle_intersection_ray_miss_edge_b() {
+        let triangle = Triangle::from(
+            Point::new(0.0, 1.0, 0.0),
+            Point::new(-1.0, 0.0, 0.0),
+            Point::new(1.0, 0.0, 0.0),
+        );
+
+        let ray = Ray::new(Point::new(-1.0, 1.0, -2.0), Vector3::new(0.0, 0.0, 1.0));
+        let expected_intersections = Intersections::new();
+
+        let intersections = triangle.intersect(&ray);
+
+        assert_eq!(expected_intersections, intersections);
+    }
+
+    #[test]
+    fn triangle_intersection_ray_miss_edge_c() {
+        let triangle = Triangle::from(
+            Point::new(0.0, 1.0, 0.0),
+            Point::new(-1.0, 0.0, 0.0),
+            Point::new(1.0, 0.0, 0.0),
+        );
+
+        let ray = Ray::new(Point::new(0.0, -1.0, -2.0), Vector3::new(0.0, 0.0, 1.0));
         let expected_intersections = Intersections::new();
 
         let intersections = triangle.intersect(&ray);
