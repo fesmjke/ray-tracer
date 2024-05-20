@@ -74,8 +74,10 @@ impl Primitive for Triangle {
             return Intersections::new();
         }
 
+        let time = f * self.e_hit_b.dot(&origin_cross_hit_a);
+
         return Intersections::new()
-            .with(vec![Intersection::new(1.0, TriangleShape(self.clone()))]);
+            .with(vec![Intersection::new(time, TriangleShape(self.clone()))]);
     }
 
     fn normal(&self, _world: &Point) -> Vector3 {
@@ -114,10 +116,11 @@ impl Default for Triangle {
 
 #[cfg(test)]
 mod triangle_tests {
-    use crate::intersections::Intersections;
+    use crate::intersections::{Intersection, Intersections};
     use crate::point::Point;
     use crate::primitives::triangle::Triangle;
     use crate::primitives::Primitive;
+    use crate::primitives::PrimitiveShape::TriangleShape;
     use crate::ray::Ray;
     use crate::vector::Vector3;
 
@@ -227,6 +230,25 @@ mod triangle_tests {
 
         let ray = Ray::new(Point::new(0.0, -1.0, -2.0), Vector3::new(0.0, 0.0, 1.0));
         let expected_intersections = Intersections::new();
+
+        let intersections = triangle.intersect(&ray);
+
+        assert_eq!(expected_intersections, intersections);
+    }
+
+    #[test]
+    fn triangle_ray_intersection_hit() {
+        let triangle = Triangle::from(
+            Point::new(0.0, 1.0, 0.0),
+            Point::new(-1.0, 0.0, 0.0),
+            Point::new(1.0, 0.0, 0.0),
+        );
+
+        let ray = Ray::new(Point::new(0.0, 0.5, -2.0), Vector3::new(0.0, 0.0, 1.0));
+        let expected_intersections = Intersections::new().with(vec![Intersection::new(
+            2.0,
+            TriangleShape(triangle.clone()),
+        )]);
 
         let intersections = triangle.intersect(&ray);
 
