@@ -1,8 +1,10 @@
-use crate::intersections::Intersections;
+use crate::float_eq::EPSILON;
+use crate::intersections::{Intersection, Intersections};
 use crate::material::Material;
-use crate::matrices::Matrix4;
+use crate::matrices::{Matrix, Matrix4};
 use crate::point::Point;
 use crate::primitives::Primitive;
+use crate::primitives::PrimitiveShape::TriangleShape;
 use crate::ray::Ray;
 use crate::vector::Vector3;
 
@@ -14,6 +16,10 @@ pub struct Triangle {
     pub e_hit_a: Vector3,
     pub e_hit_b: Vector3,
     pub normal: Vector3,
+    pub transformation: Matrix4,
+    pub transformation_inverse: Matrix4,
+    pub transformation_inverse_transpose: Matrix4,
+    pub material: Material,
 }
 
 impl Triangle {
@@ -35,13 +41,25 @@ impl Triangle {
             e_hit_a: e1,
             e_hit_b: e2,
             normal,
+            transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
+            material: Default::default(),
         }
     }
 }
 
 impl Primitive for Triangle {
     fn intersect(&self, ray: &Ray) -> Intersections {
-        todo!()
+        let dir_cross_b_hit = ray.direction.cross(&self.e_hit_b);
+        let determinant = self.e_hit_a.dot(&dir_cross_b_hit);
+
+        if determinant.abs() < EPSILON {
+            return Intersections::new();
+        }
+
+        return Intersections::new()
+            .with(vec![Intersection::new(1.0, TriangleShape(self.clone()))]);
     }
 
     fn normal(&self, _world: &Point) -> Vector3 {
@@ -70,15 +88,21 @@ impl Default for Triangle {
             e_hit_a: Default::default(),
             e_hit_b: Default::default(),
             normal: Default::default(),
+            transformation: Matrix4::identity(),
+            transformation_inverse: Matrix4::identity(),
+            transformation_inverse_transpose: Matrix4::identity(),
+            material: Default::default(),
         }
     }
 }
 
 #[cfg(test)]
 mod triangle_tests {
+    use crate::intersections::Intersections;
     use crate::point::Point;
     use crate::primitives::triangle::Triangle;
     use crate::primitives::Primitive;
+    use crate::ray::Ray;
     use crate::vector::Vector3;
 
     #[test]
@@ -127,5 +151,21 @@ mod triangle_tests {
             expected_normal,
             triangle.normal(&Point::new(0.5, 0.25, 0.0))
         );
+    }
+
+    #[test]
+    fn triangle_intersect_ray_parallel() {
+        let triangle = Triangle::from(
+            Point::new(0.0, 1.0, 0.0),
+            Point::new(-1.0, 0.0, 0.0),
+            Point::new(1.0, 0.0, 0.0),
+        );
+
+        let ray = Ray::new(Point::new(0.0, -1.0, -2.0), Vector3::new(0.0, 1.0, 0.0));
+        let expected_intersections = Intersections::new();
+
+        let intersections = triangle.intersect(&ray);
+
+        assert_eq!(expected_intersections, intersections);
     }
 }
